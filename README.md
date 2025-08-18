@@ -1,8 +1,8 @@
 # HairWashTracker
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue)](https://flutter.dev/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Flutter Version](https://img.shields.io/badge/Flutter-3.x-02569B)](https://flutter.dev/)
 
 A simple and elegant Flutter application to help you track your hair washing schedule.
 
