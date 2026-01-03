@@ -9,53 +9,107 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Text(
-              'Hair Wash Tracker',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(top: 60, bottom: 30, left: 24, right: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [colorScheme.primary, colorScheme.primaryContainer],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  child: const Icon(Icons.waves_rounded, color: Colors.white, size: 30),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Hair Wash Tracker',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Text(
+                  'Cuidando tu cabello',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                ),
+              ],
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Inicio'),
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.bar_chart),
-            title: const Text('Estadísticas'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const StatsPage()),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.file_upload),
-            title: const Text('Importar Datos'),
-            onTap: () => _handleImport(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.file_download),
-            title: const Text('Exportar Datos'),
-            onTap: () => _handleExport(context),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text('Borrar Todos los Datos', style: TextStyle(color: Colors.red)),
-            onTap: () => _handleClearData(context),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                _DrawerItem(
+                  icon: Icons.home_rounded,
+                  label: 'Inicio',
+                  onTap: () => Navigator.pop(context),
+                  isSelected: true,
+                ),
+                _DrawerItem(
+                  icon: Icons.bar_chart_rounded,
+                  label: 'Estadísticas',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsPage()));
+                  },
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Divider(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, bottom: 8),
+                  child: Text(
+                    'Gestión de Datos',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.primary,
+                        ),
+                  ),
+                ),
+                _DrawerItem(
+                  icon: Icons.upload_file_rounded,
+                  label: 'Importar Datos (CSV)',
+                  onTap: () => _handleImport(context),
+                ),
+                _DrawerItem(
+                  icon: Icons.download_for_offline_rounded,
+                  label: 'Exportar Datos (CSV)',
+                  onTap: () => _handleExport(context),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Divider(),
+                ),
+                _DrawerItem(
+                  icon: Icons.delete_forever_rounded,
+                  label: 'Borrar Datos',
+                  iconColor: colorScheme.error,
+                  textColor: colorScheme.error,
+                  onTap: () => _handleClearData(context),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -63,37 +117,29 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _handleImport(BuildContext context) async {
-    Navigator.of(context).pop();
+    Navigator.pop(context);
     try {
       await Provider.of<AppController>(context, listen: false).importData();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Datos importados exitosamente')),
-        );
+        _showSnackBar(context, 'Datos importados exitosamente', isError: false);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al importar: $e')),
-        );
+        _showSnackBar(context, 'Error al importar: $e', isError: true);
       }
     }
   }
 
   void _handleExport(BuildContext context) async {
-    Navigator.of(context).pop();
+    Navigator.pop(context);
     try {
       await Provider.of<AppController>(context, listen: false).exportData();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Datos exportados exitosamente')),
-        );
+        _showSnackBar(context, 'Datos exportados exitosamente', isError: false);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al exportar: $e')),
-        );
+        _showSnackBar(context, 'Error al exportar: $e', isError: true);
       }
     }
   }
@@ -101,29 +147,72 @@ class AppDrawer extends StatelessWidget {
   void _handleClearData(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return ConfirmationDialog(
-          title: 'Confirmar',
-          content: '¿Estás seguro de que quieres borrar todos los datos?',
-          onConfirm: () async {
-            Navigator.of(context).pop();
-            try {
-              await Provider.of<AppController>(context, listen: false).clearAllData();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Todos los datos han sido borrados')),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error al borrar datos: $e')),
-                );
-              }
+      builder: (context) => ConfirmationDialog(
+        title: '¿Borrar todo?',
+        content: 'Esta acción no se puede deshacer.',
+        onConfirm: () async {
+          Navigator.pop(context);
+          try {
+            await Provider.of<AppController>(context, listen: false).clearAllData();
+            if (context.mounted) {
+              _showSnackBar(context, 'Todos los datos han sido borrados', isError: false);
             }
-          },
-        );
-      },
+          } catch (e) {
+            if (context.mounted) {
+              _showSnackBar(context, 'Error al borrar datos: $e', isError: true);
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: isError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+}
+
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isSelected;
+  final Color? iconColor;
+  final Color? textColor;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isSelected = false,
+    this.iconColor,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? (isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant)),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: textColor ?? (isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      selected: isSelected,
+      selectedTileColor: colorScheme.primary.withOpacity(0.1),
     );
   }
 }

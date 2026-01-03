@@ -3,7 +3,8 @@ import 'package:table_calendar/table_calendar.dart';
 class WashEvent {
   final DateTime date;
 
-  WashEvent({required this.date});
+  WashEvent({required DateTime date})
+      : date = DateTime(date.year, date.month, date.day, 12, 0, 0);
 
   Map<String, dynamic> toJson() {
     return {'date': date.toIso8601String()};

@@ -102,6 +102,34 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  Future<void> exportDataJson() async {
+    try {
+      final jsonContent = await _fileOperations.exportToJson(_selectedEvents);
+      final filename = 'hair_wash_data_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.json';
+      await _fileOperations.shareFile(jsonContent, filename);
+    } catch (e) {
+      throw Exception('Error exporting JSON data: $e');
+    }
+  }
+
+  Future<void> importDataJson() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final events = await _fileOperations.importFromJson(result.files.single.path!);
+        _selectedEvents = events;
+        await _saveEvents();
+        notifyListeners();
+      }
+    } catch (e) {
+      throw Exception('Error importing JSON data: $e');
+    }
+  }
+
   Future<void> clearAllData() async {
     try {
       _selectedEvents.clear();

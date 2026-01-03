@@ -21,9 +21,26 @@ class MyApp extends StatelessWidget {
       ),
       child: MaterialApp(
         title: 'Hair Wash Tracker',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          useMaterial3: true,
+          colorSchemeSeed: Colors.deepPurple,
+          brightness: Brightness.light,
           visualDensity: VisualDensity.adaptivePlatformDensity,
+          cardTheme: CardThemeData(
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          ),
+        ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.deepPurple,
+          brightness: Brightness.dark,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          cardTheme: CardThemeData(
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          ),
         ),
         home: const HomePage(),
       ),

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -7,6 +8,8 @@ import '../models/wash_event.dart';
 abstract class IFileOperations {
   Future<String> exportToCSV(List<WashEvent> events);
   Future<List<WashEvent>> importFromCSV(String filePath);
+  Future<String> exportToJson(List<WashEvent> events);
+  Future<List<WashEvent>> importFromJson(String filePath);
   Future<void> shareFile(String content, String filename);
 }
 
@@ -38,7 +41,10 @@ class FileOperationsService implements IFileOperations {
         if (line.isEmpty) continue;
 
         try {
-          final date = DateTime.parse(line);
+          // Parse date and force it to be treated as a local date at noon to avoid timezone shifting
+          // when converting back and forth or crossing DST boundaries.
+          final tempDate = DateTime.parse(line);
+          final date = DateTime(tempDate.year, tempDate.month, tempDate.day, 12, 0, 0);
           events.add(WashEvent(date: date));
         } catch (e) {
           debugPrint('Error parsing date: $line - $e');
@@ -49,6 +55,25 @@ class FileOperationsService implements IFileOperations {
     } catch (e) {
       debugPrint('Error reading CSV file: $e');
       throw Exception('Error importing CSV: $e');
+    }
+  }
+
+  @override
+  Future<String> exportToJson(List<WashEvent> events) async {
+    final jsonList = events.map((e) => e.toJson()).toList();
+    return jsonEncode(jsonList);
+  }
+
+  @override
+  Future<List<WashEvent>> importFromJson(String filePath) async {
+    try {
+      final file = File(filePath);
+      final content = await file.readAsString();
+      final List<dynamic> jsonList = jsonDecode(content);
+      return jsonList.map((j) => WashEvent.fromJson(j)).toList();
+    } catch (e) {
+      debugPrint('Error reading JSON file: $e');
+      throw Exception('Error importing JSON: $e');
     }
   }
 

@@ -9,6 +9,8 @@ class CalendarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<AppController>(
       builder: (context, controller, child) {
         return TableCalendar<WashEvent>(
@@ -17,6 +19,16 @@ class CalendarWidget extends StatelessWidget {
           focusedDay: controller.focusedDay,
           eventLoader: controller.getEventsForDay,
           calendarFormat: CalendarFormat.month,
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            leftChevronIcon: Icon(Icons.chevron_left, color: colorScheme.primary),
+            rightChevronIcon: Icon(Icons.chevron_right, color: colorScheme.primary),
+          ),
           onDaySelected: (selectedDay, focusedDay) {
             controller.toggleWashDay(selectedDay);
             controller.setFocusedDay(focusedDay);
@@ -24,43 +36,74 @@ class CalendarWidget extends StatelessWidget {
           onPageChanged: (focusedDay) {
             controller.setFocusedDay(focusedDay);
           },
-          calendarStyle: const CalendarStyle(
+          calendarStyle: CalendarStyle(
             outsideDaysVisible: false,
-            markersMaxCount: 1,
+            markersMaxCount: 0,
+            todayDecoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            todayTextStyle: TextStyle(color: colorScheme.primary),
+            defaultTextStyle: TextStyle(color: colorScheme.onSurface),
+            weekendTextStyle: TextStyle(color: colorScheme.error.withOpacity(0.7)),
           ),
           calendarBuilders: CalendarBuilders(
-            selectedBuilder: (context, day, focusedDay) {
-              return Container(
-                margin: const EdgeInsets.all(4.0),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: controller.isWashDay(day) ? Colors.blue : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Text(
-                  '${day.day}',
-                  style: TextStyle(
-                    color: controller.isWashDay(day) ? Colors.white : Colors.black87,
-                  ),
-                ),
-              );
-            },
             defaultBuilder: (context, day, focusedDay) {
               if (controller.isWashDay(day)) {
-                return Container(
-                  margin: const EdgeInsets.all(4.0),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Text(
-                    '${day.day}',
-                    style: const TextStyle(color: Colors.white),
+                return Center(
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${day.day}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 );
               }
               return null;
+            },
+            selectedBuilder: (context, day, focusedDay) {
+              final isWash = controller.isWashDay(day);
+              return Center(
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isWash ? colorScheme.primary : colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        color: isWash ? Colors.white : colorScheme.onSecondaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
             },
           ),
         );
