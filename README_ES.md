@@ -2,7 +2,7 @@
 
 Una aplicación Flutter hermosa y moderna diseñada para ayudarte a realizar un seguimiento de tu rutina de lavado de cabello con facilidad. Construida con la estética de **Material You** y elementos de **Glassmorphism**.
 
-![Captura de Pantalla Hair Wash Tracker](https://raw.githubusercontent.com/marodriguezd/HairWashTracker/HairWashTracker/assets/demo.png)
+<img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/demo.png" width="400" alt="Captura de Pantalla Hair Wash Tracker">
 
 ## ✨ Características
 
