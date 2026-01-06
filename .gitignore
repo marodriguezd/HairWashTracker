@@ -6,6 +6,7 @@
 *.swp
 .buildlog/
 .history
+AGENTS.md
 release.md
 assets/github-release-template.md
 

@@ -26,8 +26,10 @@ class CalendarWidget extends StatelessWidget {
             titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
-            leftChevronIcon: Icon(Icons.chevron_left, color: colorScheme.primary),
-            rightChevronIcon: Icon(Icons.chevron_right, color: colorScheme.primary),
+            leftChevronIcon:
+                Icon(Icons.chevron_left, color: colorScheme.primary),
+            rightChevronIcon:
+                Icon(Icons.chevron_right, color: colorScheme.primary),
           ),
           onDaySelected: (selectedDay, focusedDay) {
             controller.toggleWashDay(selectedDay);
@@ -45,7 +47,8 @@ class CalendarWidget extends StatelessWidget {
             ),
             todayTextStyle: TextStyle(color: colorScheme.primary),
             defaultTextStyle: TextStyle(color: colorScheme.onSurface),
-            weekendTextStyle: TextStyle(color: colorScheme.error.withOpacity(0.7)),
+            weekendTextStyle:
+                TextStyle(color: colorScheme.error.withOpacity(0.7)),
           ),
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, focusedDay) {
@@ -68,8 +71,8 @@ class CalendarWidget extends StatelessWidget {
                     child: Center(
                       child: Text(
                         '${day.day}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -86,7 +89,9 @@ class CalendarWidget extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: isWash ? colorScheme.primary : colorScheme.secondaryContainer,
+                    color: isWash
+                        ? colorScheme.primary
+                        : colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: colorScheme.primary,
@@ -97,7 +102,9 @@ class CalendarWidget extends StatelessWidget {
                     child: Text(
                       '${day.day}',
                       style: TextStyle(
-                        color: isWash ? Colors.white : colorScheme.onSecondaryContainer,
+                        color: isWash
+                            ? Colors.white
+                            : colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

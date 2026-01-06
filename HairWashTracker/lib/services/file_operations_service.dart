@@ -44,7 +44,8 @@ class FileOperationsService implements IFileOperations {
           // Parse date and force it to be treated as a local date at noon to avoid timezone shifting
           // when converting back and forth or crossing DST boundaries.
           final tempDate = DateTime.parse(line);
-          final date = DateTime(tempDate.year, tempDate.month, tempDate.day, 12, 0, 0);
+          final date =
+              DateTime(tempDate.year, tempDate.month, tempDate.day, 12, 0, 0);
           events.add(WashEvent(date: date));
         } catch (e) {
           debugPrint('Error parsing date: $line - $e');

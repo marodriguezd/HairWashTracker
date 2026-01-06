@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/app_controller.dart';
 import '../pages/stats_page.dart';
 import 'confirmation_dialog.dart';
+import 'theme_switch.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -23,7 +24,8 @@ class AppDrawer extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(top: 60, bottom: 30, left: 24, right: 24),
+            padding:
+                const EdgeInsets.only(top: 60, bottom: 30, left: 24, right: 24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [colorScheme.primary, colorScheme.primaryContainer],
@@ -37,7 +39,8 @@ class AppDrawer extends StatelessWidget {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white.withOpacity(0.2),
-                  child: const Icon(Icons.waves_rounded, color: Colors.white, size: 30),
+                  child: const Icon(Icons.waves_rounded,
+                      color: Colors.white, size: 30),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -48,7 +51,7 @@ class AppDrawer extends StatelessWidget {
                       ),
                 ),
                 Text(
-                  'Cuidando tu cabello',
+                  'Taking care of your hair',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.white.withOpacity(0.8),
                       ),
@@ -62,16 +65,17 @@ class AppDrawer extends StatelessWidget {
               children: [
                 _DrawerItem(
                   icon: Icons.home_rounded,
-                  label: 'Inicio',
+                  label: 'Home',
                   onTap: () => Navigator.pop(context),
                   isSelected: true,
                 ),
                 _DrawerItem(
                   icon: Icons.bar_chart_rounded,
-                  label: 'Estadísticas',
+                  label: 'Statistics',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsPage()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const StatsPage()));
                   },
                 ),
                 const Padding(
@@ -81,7 +85,24 @@ class AppDrawer extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 12, bottom: 8),
                   child: Text(
-                    'Gestión de Datos',
+                    'Appearance',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.primary,
+                        ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: const ThemeSwitch(),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Divider(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, bottom: 8),
+                  child: Text(
+                    'Data Management',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: colorScheme.primary,
                         ),
@@ -89,12 +110,12 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.upload_file_rounded,
-                  label: 'Importar Datos (CSV)',
+                  label: 'Import Data (CSV)',
                   onTap: () => _handleImport(context),
                 ),
                 _DrawerItem(
                   icon: Icons.download_for_offline_rounded,
-                  label: 'Exportar Datos (CSV)',
+                  label: 'Export Data (CSV)',
                   onTap: () => _handleExport(context),
                 ),
                 const Padding(
@@ -103,7 +124,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.delete_forever_rounded,
-                  label: 'Borrar Datos',
+                  label: 'Clear Data',
                   iconColor: colorScheme.error,
                   textColor: colorScheme.error,
                   onTap: () => _handleClearData(context),
@@ -121,11 +142,11 @@ class AppDrawer extends StatelessWidget {
     try {
       await Provider.of<AppController>(context, listen: false).importData();
       if (context.mounted) {
-        _showSnackBar(context, 'Datos importados exitosamente', isError: false);
+        _showSnackBar(context, 'Data imported successfully', isError: false);
       }
     } catch (e) {
       if (context.mounted) {
-        _showSnackBar(context, 'Error al importar: $e', isError: true);
+        _showSnackBar(context, 'Error importing data: $e', isError: true);
       }
     }
   }
@@ -135,11 +156,11 @@ class AppDrawer extends StatelessWidget {
     try {
       await Provider.of<AppController>(context, listen: false).exportData();
       if (context.mounted) {
-        _showSnackBar(context, 'Datos exportados exitosamente', isError: false);
+        _showSnackBar(context, 'Data exported successfully', isError: false);
       }
     } catch (e) {
       if (context.mounted) {
-        _showSnackBar(context, 'Error al exportar: $e', isError: true);
+        _showSnackBar(context, 'Error exporting data: $e', isError: true);
       }
     }
   }
@@ -148,18 +169,20 @@ class AppDrawer extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: '¿Borrar todo?',
-        content: 'Esta acción no se puede deshacer.',
+        title: 'Clear all data?',
+        content: 'This action cannot be undone.',
         onConfirm: () async {
           Navigator.pop(context);
           try {
-            await Provider.of<AppController>(context, listen: false).clearAllData();
+            await Provider.of<AppController>(context, listen: false)
+                .clearAllData();
             if (context.mounted) {
-              _showSnackBar(context, 'Todos los datos han sido borrados', isError: false);
+              _showSnackBar(context, 'All data has been cleared',
+                  isError: false);
             }
           } catch (e) {
             if (context.mounted) {
-              _showSnackBar(context, 'Error al borrar datos: $e', isError: true);
+              _showSnackBar(context, 'Error clearing data: $e', isError: true);
             }
           }
         },
@@ -167,13 +190,16 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  void _showSnackBar(BuildContext context, String message, {required bool isError}) {
+  void _showSnackBar(BuildContext context, String message,
+      {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: isError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
+        backgroundColor: isError
+            ? Theme.of(context).colorScheme.error
+            : Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -201,11 +227,16 @@ class _DrawerItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? (isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant)),
+      leading: Icon(icon,
+          color: iconColor ??
+              (isSelected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant)),
       title: Text(
         label,
         style: TextStyle(
-          color: textColor ?? (isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          color: textColor ??
+              (isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

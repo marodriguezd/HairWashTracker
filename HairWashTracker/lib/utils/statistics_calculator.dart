@@ -9,16 +9,18 @@ class StatisticsCalculator {
     final startOfWeek = _getStartOfWeek(date);
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
 
-    return events.where((event) =>
-    event.date.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
-        event.date.isBefore(endOfWeek.add(const Duration(days: 1)))
-    ).length;
+    return events
+        .where((event) =>
+            event.date.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
+            event.date.isBefore(endOfWeek.add(const Duration(days: 1))))
+        .length;
   }
 
   static int getWashesForMonth(List<WashEvent> events, DateTime date) {
-    return events.where((event) =>
-    event.date.year == date.year && event.date.month == date.month
-    ).length;
+    return events
+        .where((event) =>
+            event.date.year == date.year && event.date.month == date.month)
+        .length;
   }
 
   static DateTime _getStartOfWeek(DateTime date) {

@@ -19,11 +19,11 @@ class ConfirmationDialog extends StatelessWidget {
       content: Text(content),
       actions: [
         TextButton(
-          child: const Text('Cancelar'),
+          child: const Text('Cancel'),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: const Text('Borrar', style: TextStyle(color: Colors.red)),
+          child: const Text('Delete', style: TextStyle(color: Colors.red)),
           onPressed: () {
             Navigator.of(context).pop();
             onConfirm();

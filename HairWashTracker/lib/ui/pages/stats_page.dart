@@ -13,7 +13,8 @@ class StatsPage extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Estadísticas', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Statistics',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -41,7 +42,7 @@ class StatsPage extends StatelessWidget {
                   children: [
                     _buildGlassStatCard(
                       context,
-                      'Total de Lavados',
+                      'Total Washes',
                       controller.totalWashes.toString(),
                       Icons.waves_rounded,
                       colorScheme.primary,
@@ -49,7 +50,7 @@ class StatsPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildGlassStatCard(
                       context,
-                      'Lavados esta Semana',
+                      'Washes This Week',
                       controller.currentWeekWashes.toString(),
                       Icons.view_week_rounded,
                       colorScheme.secondary,
@@ -57,7 +58,7 @@ class StatsPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildGlassStatCard(
                       context,
-                      'Lavados este Mes',
+                      'Washes This Month',
                       controller.currentMonthWashes.toString(),
                       Icons.calendar_month_rounded,
                       colorScheme.tertiary,
@@ -72,7 +73,8 @@ class StatsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGlassStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildGlassStatCard(BuildContext context, String title, String value,
+      IconData icon, Color color) {
     return GlassContainer(
       padding: const EdgeInsets.all(24.0),
       blur: 20,
