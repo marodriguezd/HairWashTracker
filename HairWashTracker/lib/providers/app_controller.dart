@@ -16,6 +16,8 @@ class AppController extends ChangeNotifier {
   List<WashEvent> _selectedEvents = [];
   DateTime _focusedDay = DateTime.now();
   AppThemeMode _themeMode = AppThemeMode.system;
+  bool _useComplexAnimations = true;
+  bool _disposed = false;
 
   AppController({
     required IDataRepository repository,
@@ -30,6 +32,7 @@ class AppController extends ChangeNotifier {
   List<WashEvent> get selectedEvents => List.unmodifiable(_selectedEvents);
   DateTime get focusedDay => _focusedDay;
   AppThemeMode get themeMode => _themeMode;
+  bool get useComplexAnimations => _useComplexAnimations;
 
   int get totalWashes => StatisticsCalculator.getTotalWashes(_selectedEvents);
   int get currentWeekWashes =>
@@ -69,6 +72,11 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setUseComplexAnimations(bool value) {
+    _useComplexAnimations = value;
+    notifyListeners();
+  }
+
   void previousMonth() {
     _focusedDay =
         DateTime(_focusedDay.year, _focusedDay.month - 1, _focusedDay.day);
@@ -83,8 +91,10 @@ class AppController extends ChangeNotifier {
 
   // Data persistence
   Future<void> _loadEvents() async {
+    if (_disposed) return;
     try {
       _selectedEvents = await _repository.loadWashEvents();
+      if (_disposed) return;
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading events: $e');
@@ -92,12 +102,15 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> _loadThemeMode() async {
+    if (_disposed) return;
     try {
       _themeMode = await ThemePreference.getThemeMode();
+      if (_disposed) return;
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading theme: $e');
       _themeMode = AppThemeMode.system;
+      if (_disposed) return;
       notifyListeners();
     }
   }
@@ -123,6 +136,7 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> importData() async {
+    if (_disposed) return;
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -132,8 +146,10 @@ class AppController extends ChangeNotifier {
       if (result != null && result.files.single.path != null) {
         final events =
             await _fileOperations.importFromCSV(result.files.single.path!);
+        if (_disposed) return;
         _selectedEvents = events;
         await _saveEvents();
+        if (_disposed) return;
         notifyListeners();
       }
     } catch (e) {
@@ -153,6 +169,7 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> importDataJson() async {
+    if (_disposed) return;
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -162,8 +179,10 @@ class AppController extends ChangeNotifier {
       if (result != null && result.files.single.path != null) {
         final events =
             await _fileOperations.importFromJson(result.files.single.path!);
+        if (_disposed) return;
         _selectedEvents = events;
         await _saveEvents();
+        if (_disposed) return;
         notifyListeners();
       }
     } catch (e) {
@@ -175,9 +194,16 @@ class AppController extends ChangeNotifier {
     try {
       _selectedEvents.clear();
       await _repository.clearWashEvents();
+      if (_disposed) return;
       notifyListeners();
     } catch (e) {
       throw Exception('Error clearing data: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }
