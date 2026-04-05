@@ -70,7 +70,7 @@ class EmptyState extends StatelessWidget {
           children: [
             _SoftIllustration(
               icon: effectiveIcon,
-              color: colorScheme.primary,
+              color: AppTheme.warmCoral,
               isDark: isDark,
             ),
             const SizedBox(height: 32),

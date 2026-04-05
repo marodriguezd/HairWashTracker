@@ -28,9 +28,9 @@ class AppDrawer extends StatelessWidget {
             width: double.infinity,
             padding:
                 const EdgeInsets.only(top: 60, bottom: 30, left: 24, right: 24),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [colorScheme.primary, colorScheme.primaryContainer],
+                colors: [AppTheme.warmCoral, AppTheme.peachBlush],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

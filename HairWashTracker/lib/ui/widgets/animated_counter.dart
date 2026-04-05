@@ -166,7 +166,7 @@ class AnimatedStatValue extends StatelessWidget {
           duration: duration,
           style: valueStyle ??
               Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: color,
+                    color: AppTheme.warmCoral,
                     fontWeight: FontWeight.w700,
                     height: 1.0,
                     letterSpacing: -1,

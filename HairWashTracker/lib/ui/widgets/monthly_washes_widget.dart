@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_controller.dart';
-import '../../utils/app_theme.dart';
 import 'neumorphic_container.dart';
 
 class MonthlyWashesWidget extends StatelessWidget {
@@ -28,37 +27,34 @@ class MonthlyWashesWidget extends StatelessWidget {
                   children: [
                     Text(
                       'Washes This Month',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
-                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.25,
                           ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       '${controller.currentMonthWashes}',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).colorScheme.primary,
-                            letterSpacing: 0.5,
+                            letterSpacing: -0.5,
+                            height: 1.0,
                           ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
-                ),
+              NeumorphicContainer(
+                padding: const EdgeInsets.all(16),
+                borderRadius: 70,
+                depth: 8,
                 child: Icon(
                   Icons.waves_rounded,
                   color: Theme.of(context).colorScheme.primary,
-                  size: 32,
+                  size: 28,
                 ),
               ),
             ],

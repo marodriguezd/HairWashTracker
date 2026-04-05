@@ -29,14 +29,14 @@ class CalendarWidget extends StatelessWidget {
               ),
             ]
           : [
-              BoxShadow(
-                color: const Color.fromRGBO(0, 0, 0, 0.5),
-                offset: const Offset(-4, -4),
+              const BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.5),
+                offset: Offset(-4, -4),
                 blurRadius: 8,
               ),
-              BoxShadow(
-                color: const Color.fromRGBO(255, 255, 255, 0.08),
-                offset: const Offset(4, 4),
+              const BoxShadow(
+                color: Color.fromRGBO(255, 255, 255, 0.08),
+                offset: Offset(4, 4),
                 blurRadius: 8,
               ),
             ];
@@ -55,14 +55,14 @@ class CalendarWidget extends StatelessWidget {
               ),
             ]
           : [
-              BoxShadow(
-                color: const Color.fromRGBO(255, 255, 255, 0.9),
-                offset: const Offset(-4, -4),
+              const BoxShadow(
+                color: Color.fromRGBO(255, 255, 255, 0.9),
+                offset: Offset(-4, -4),
                 blurRadius: 8,
               ),
-              BoxShadow(
-                color: const Color.fromRGBO(0, 0, 0, 0.2),
-                offset: const Offset(4, 4),
+              const BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.2),
+                offset: Offset(4, 4),
                 blurRadius: 8,
               ),
             ];

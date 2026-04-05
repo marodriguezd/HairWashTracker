@@ -13,7 +13,7 @@ double radians(double degrees) => degrees * (math.pi / 180.0);
 /// - Smooth gradient progress indication
 /// - Background track with subtle styling
 /// - Optional center content
-/// - Spa color palette integration
+/// - Warm coral color palette integration
 class CircularProgressPainter extends CustomPainter {
   final double progress;
   final Color color;
@@ -75,11 +75,11 @@ class CircularProgressPainter extends CustomPainter {
         startAngle: radians(startAngle.toDouble()),
         endAngle: radians(startAngle + sweepAngle.toDouble()),
         colors: [
-          color.withValues(alpha: 0.8),
+          color.withValues(alpha: 0.7),
           color,
-          color.withValues(alpha: 0.9),
+          AppTheme.peachBlush,
         ],
-        stops: const [0.0, 0.5, 1.0],
+        stops: const [0.0, 0.6, 1.0],
         transform: GradientRotation(radians(startAngle.toDouble())),
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.stroke

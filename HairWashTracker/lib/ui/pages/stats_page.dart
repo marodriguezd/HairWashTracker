@@ -28,8 +28,8 @@ class StatsPage extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  colorScheme.primaryContainer.withValues(alpha: 0.4),
-                  colorScheme.secondaryContainer.withValues(alpha: 0.4),
+                  AppTheme.warmCoral.withValues(alpha: 0.15),
+                  AppTheme.softSand.withValues(alpha: 0.1),
                   Theme.of(context).colorScheme.surface,
                 ],
               ),

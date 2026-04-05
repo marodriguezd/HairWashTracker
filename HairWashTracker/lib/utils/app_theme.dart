@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 /// AppTheme - Design system for Hair Wash Tracker
 ///
-/// Color Palette (Spa-themed):
-/// - sageGreen: Primary accent color - calming, nature-inspired
-/// - softTeal: Secondary accent - water/spa feeling
-/// - mistyBlue: Tertiary - soft, relaxing
+/// Color Palette (Salon Luxury):
+/// - warmCoral: Primary accent color - warm, inviting, salon feel
+/// - softSand: Secondary accent - warm neutrals, luxury tones
+/// - sageMist: Tertiary - muted green for freshness hints
 /// - warmCream: Light background - warm, inviting
-/// - softCharcoal: Dark background - modern, sophisticated
-/// - eucalyptus: Alternative green - fresh, natural
+/// - deepCharcoal: Dark background - sophisticated, modern
+/// - peachBlush: Alternative accent - soft highlights, glows
 ///
 /// Border Radius Standards:
 /// - Cards/Containers: 24.0 (large elements)
@@ -27,17 +27,17 @@ import 'package:flutter/material.dart';
 /// - Large text: ≥ 3:1
 /// - Interactive elements: ≥ 3:1
 class AppTheme {
-  static const Color sageGreen = Color(0xFF6B8E6B);
-  static const Color softTeal = Color(0xFF5F9EA0);
-  static const Color mistyBlue = Color(0xFF7B9BA6);
-  static const Color warmCream = Color(0xFFFAF8F5);
-  static const Color softCharcoal = Color(0xFF2C3333);
-  static const Color eucalyptus = Color(0xFF5B8C5A);
+  static const Color warmCoral = Color(0xFFE07A5F);
+  static const Color softSand = Color(0xFFF2CC8F);
+  static const Color sageMist = Color(0xFF81B29A);
+  static const Color warmCream = Color(0xFFF4F1DE);
+  static const Color deepCharcoal = Color(0xFF3D405B);
+  static const Color peachBlush = Color(0xFFF4A261);
 
-  static const Color lightGradientStart = Color(0xFFFAF8F5);
-  static const Color lightGradientEnd = Color(0xFFE8F0E8);
-  static const Color darkGradientStart = Color(0xFF2C3333);
-  static const Color darkGradientEnd = Color(0xFF1A3A3A);
+  static const Color lightGradientStart = Color(0xFFF4F1DE);
+  static const Color lightGradientEnd = Color(0xFFFDF6E3);
+  static const Color darkGradientStart = Color(0xFF3D405B);
+  static const Color darkGradientEnd = Color(0xFF2D3040);
 
   /// Standard border radius values
   static const double radiusCard = 24.0;
@@ -240,11 +240,11 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: sageGreen,
+      seedColor: warmCoral,
       brightness: Brightness.light,
-      primary: sageGreen,
-      secondary: softTeal,
-      tertiary: mistyBlue,
+      primary: warmCoral,
+      secondary: softSand,
+      tertiary: sageMist,
       surface: warmCream,
       surfaceContainerHighest: warmCream,
     ),
@@ -269,13 +269,13 @@ class AppTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: sageGreen,
+      seedColor: warmCoral,
       brightness: Brightness.dark,
-      primary: sageGreen,
-      secondary: softTeal,
-      tertiary: mistyBlue,
-      surface: softCharcoal,
-      surfaceContainerHighest: softCharcoal,
+      primary: warmCoral,
+      secondary: softSand,
+      tertiary: sageMist,
+      surface: deepCharcoal,
+      surfaceContainerHighest: deepCharcoal,
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     cardTheme: CardThemeData(
