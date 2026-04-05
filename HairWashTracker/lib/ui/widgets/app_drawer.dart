@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_controller.dart';
 import '../pages/stats_page.dart';
 import 'confirmation_dialog.dart';
 import 'theme_switch.dart';
+import '../../utils/app_theme.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -13,11 +15,11 @@ class AppDrawer extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Drawer(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          topRight: Radius.circular(AppTheme.radiusCard),
+          bottomRight: Radius.circular(AppTheme.radiusCard),
         ),
       ),
       child: Column(
@@ -36,9 +38,12 @@ class AppDrawer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white.withOpacity(0.2),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
+                  ),
                   child: const Icon(Icons.waves_rounded,
                       color: Colors.white, size: 30),
                 ),
@@ -47,13 +52,16 @@ class AppDrawer extends StatelessWidget {
                   'Hair Wash Tracker',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0,
                       ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   'Taking care of your hair',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        letterSpacing: 0.25,
                       ),
                 ),
               ],
@@ -66,13 +74,17 @@ class AppDrawer extends StatelessWidget {
                 _DrawerItem(
                   icon: Icons.home_rounded,
                   label: 'Home',
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
                   isSelected: true,
                 ),
                 _DrawerItem(
                   icon: Icons.bar_chart_rounded,
                   label: 'Statistics',
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context,
                         MaterialPageRoute(builder: (_) => const StatsPage()));
@@ -88,12 +100,14 @@ class AppDrawer extends StatelessWidget {
                     'Appearance',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: colorScheme.primary,
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: 0.75,
                         ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: const ThemeSwitch(),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: ThemeSwitch(),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -105,6 +119,8 @@ class AppDrawer extends StatelessWidget {
                     'Data Management',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: colorScheme.primary,
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: 0.75,
                         ),
                   ),
                 ),
@@ -234,16 +250,20 @@ class _DrawerItem extends StatelessWidget {
                   : colorScheme.onSurfaceVariant)),
       title: Text(
         label,
-        style: TextStyle(
-          color: textColor ??
-              (isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant),
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: textColor ??
+                  (isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant),
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              letterSpacing: 0.5,
+            ),
       ),
       onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
       selected: isSelected,
-      selectedTileColor: colorScheme.primary.withOpacity(0.1),
+      selectedTileColor: colorScheme.primary.withValues(alpha: 0.1),
     );
   }
 }

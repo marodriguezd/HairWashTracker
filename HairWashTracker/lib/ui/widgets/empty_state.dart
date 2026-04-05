@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../utils/haptics.dart';
-import 'soft_container.dart';
+import '../../utils/app_theme.dart';
+import 'neumorphic_container.dart';
 
 /// Empty state widget for when no data exists
-/// 
+///
 /// Features:
 /// - Soft, calming illustration
 /// - Gentle encouraging message
 /// - Animated entrance
 /// - Optional action button
 /// - Haptic feedback on interaction
+/// - Neumorphic styling
 class EmptyState extends StatelessWidget {
   final String? title;
   final String? message;
@@ -35,7 +37,8 @@ class EmptyState extends StatelessWidget {
   }) {
     return EmptyState(
       title: 'No Washes Yet',
-      message: 'Start tracking your hair wash routine to see your progress here.',
+      message:
+          'Start tracking your hair wash routine to see your progress here.',
       icon: Icons.water_drop_outlined,
       actionLabel: onAddWash != null ? 'Add First Wash' : null,
       onAction: onAddWash,
@@ -56,6 +59,7 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveIcon = icon ?? Icons.inbox_outlined;
 
     return Center(
@@ -64,13 +68,12 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Soft illustration container
             _SoftIllustration(
               icon: effectiveIcon,
               color: colorScheme.primary,
+              isDark: isDark,
             ),
             const SizedBox(height: 32),
-            // Title
             if (title != null)
               Text(
                 title!,
@@ -84,7 +87,6 @@ class EmptyState extends StatelessWidget {
                   .fadeIn(duration: 400.ms, delay: 200.ms)
                   .slideY(begin: 0.2, end: 0, duration: 400.ms),
             if (title != null && message != null) const SizedBox(height: 12),
-            // Message
             if (message != null)
               Text(
                 message!,
@@ -98,41 +100,43 @@ class EmptyState extends StatelessWidget {
                   .fadeIn(duration: 400.ms, delay: 300.ms)
                   .slideY(begin: 0.2, end: 0, duration: 400.ms),
             const SizedBox(height: 32),
-            // Custom widget
             if (customWidget != null)
               customWidget!
                   .animate()
                   .fadeIn(duration: 400.ms, delay: 400.ms)
                   .slideY(begin: 0.2, end: 0, duration: 400.ms),
-            // Action button
             if (actionLabel != null && onAction != null)
-              SoftCard(
-                onTap: () {
-                  Haptics.mediumHaptic();
-                  onAction!();
-                },
+              NeumorphicContainer(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
                 ),
-                glowColor: colorScheme.primary.withOpacity(0.2),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.add_rounded,
-                      color: colorScheme.onPrimaryContainer,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      actionLabel!,
-                      style: TextStyle(
-                        color: colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
+                borderRadius: AppTheme.radiusCard,
+                depth: 10,
+                child: InkWell(
+                  onTap: () {
+                    Haptics.mediumHaptic();
+                    onAction!();
+                  },
+                  borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.add_rounded,
+                        color: colorScheme.primary,
+                        size: 20,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Text(
+                        actionLabel!,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
               )
                   .animate()
@@ -152,14 +156,16 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Animated soft illustration with floating animation
+/// Animated soft illustration with floating animation and neumorphic styling
 class _SoftIllustration extends StatefulWidget {
   final IconData icon;
   final Color color;
+  final bool isDark;
 
   const _SoftIllustration({
     required this.icon,
     required this.color,
+    required this.isDark,
   });
 
   @override
@@ -203,6 +209,8 @@ class _SoftIllustrationState extends State<_SoftIllustration>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -210,51 +218,30 @@ class _SoftIllustrationState extends State<_SoftIllustration>
           offset: Offset(0, _floatAnimation.value),
           child: Transform.scale(
             scale: _scaleAnimation.value,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    widget.color.withOpacity(0.15),
-                    widget.color.withOpacity(0.05),
-                  ],
+            child: NeumorphicContainer(
+              borderRadius: AppTheme.radiusCircle,
+              depth: widget.isDark ? 12 : 15,
+              padding: const EdgeInsets.all(28),
+              color: widget.isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : colorScheme.surface,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      widget.color.withValues(alpha: 0.25),
+                      widget.color.withValues(alpha: 0.08),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
                 ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.color.withOpacity(0.1),
-                    blurRadius: 40,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        widget.color.withOpacity(0.2),
-                        widget.color.withOpacity(0.1),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: 48,
-                    color: widget.color.withOpacity(0.8),
-                  ),
+                child: Icon(
+                  widget.icon,
+                  size: 48,
+                  color: widget.color.withValues(alpha: 0.9),
                 ),
               ),
-            )
-                .animate()
-                .fadeIn(duration: 600.ms)
-                .scale(
+            ).animate().fadeIn(duration: 600.ms).scale(
                   begin: const Offset(0.5, 0.5),
                   end: const Offset(1, 1),
                   duration: 600.ms,
@@ -319,7 +306,7 @@ class EmptyStatsState extends StatelessWidget {
         Icon(
           icon,
           size: 18,
-          color: colorScheme.primary.withOpacity(0.7),
+          color: colorScheme.primary.withValues(alpha: 0.7),
         ),
         const SizedBox(width: 8),
         Text(

@@ -1,111 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:hair_wash_tracker/providers/app_controller.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/monthly_washes_widget.dart';
-import '../widgets/glass_container.dart';
-import '../../utils/animations.dart';
+import '../widgets/neumorphic_container.dart';
+import '../../utils/app_theme.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+  static const LinearGradient _lightGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [AppTheme.lightGradientStart, AppTheme.lightGradientEnd],
+  );
+
+  static const LinearGradient _darkGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [AppTheme.darkGradientStart, AppTheme.darkGradientEnd],
+  );
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth < 360 ? 12.0 : 16.0;
+    final bottomPadding = screenWidth < 360 ? 12.0 : 16.0;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
           'Hair Wash Tracker',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       drawer: const AppDrawer(),
-      body: Consumer<AppController>(
-        builder: (context, controller, child) {
-          return Stack(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: isDark ? _darkGradient : _lightGradient,
+        ),
+        child: SafeArea(
+          child: Column(
             children: [
-              _buildAnimatedMeshGradientWrapper(context, colorScheme, controller),
-              SafeArea(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: GestureDetector(
-                          onHorizontalDragEnd: (DragEndDetails details) {
-                            if (details.primaryVelocity! > 0) {
-                              context.read<AppController>().previousMonth();
-                            } else if (details.primaryVelocity! < 0) {
-                              context.read<AppController>().nextMonth();
-                            }
-                          },
-                          child: GlassContainer(
-                            blur: 20,
-                            opacity: 0.1,
-                            child: const CalendarWidget(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: MonthlyWashesWidget(),
-                    ),
-                  ],
+              SizedBox(height: horizontalPadding),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: const _CalendarGestureDetector(),
                 ),
               ),
+              Padding(
+                padding: EdgeInsets.all(bottomPadding),
+                child: const MonthlyWashesWidget(),
+              ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildAnimatedMeshGradientWrapper(
-    BuildContext context,
-    ColorScheme colorScheme,
-    AppController controller,
-  ) {
-    if (!controller.useComplexAnimations) {
-      return Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primaryContainer.withOpacity(0.3),
-              colorScheme.surface,
-            ],
-          ),
-        ),
-      );
-    }
+class _CalendarGestureDetector extends StatelessWidget {
+  const _CalendarGestureDetector();
 
-    try {
-      return AnimatedMeshGradient(
-        child: Container(),
-      );
-    } catch (e) {
-      debugPrint('AnimatedMeshGradient error: $e');
-      return Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primaryContainer.withOpacity(0.3),
-              colorScheme.surface,
-            ],
-          ),
-        ),
-      );
-    }
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onHorizontalDragEnd: (DragEndDetails details) {
+        HapticFeedback.lightImpact();
+        if (details.primaryVelocity! > 0) {
+          context.read<AppController>().previousMonth();
+        } else if (details.primaryVelocity! < 0) {
+          context.read<AppController>().nextMonth();
+        }
+      },
+      child: const NeumorphicContainer(
+        child: CalendarWidget(),
+      ),
+    );
   }
 }

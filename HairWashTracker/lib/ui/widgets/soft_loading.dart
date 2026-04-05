@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 /// Soft shimmer/loading widget with soft aesthetic
-/// 
+///
 /// Features:
 /// - Gentle pulse animation (not harsh flashing)
 /// - Customizable colors to match theme
@@ -108,9 +108,9 @@ class _SoftShimmerState extends State<SoftShimmer>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final baseColor = widget.baseColor ??
-        colorScheme.surfaceContainerHighest.withOpacity(0.5);
+        colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     final highlightColor = widget.highlightColor ??
-        colorScheme.surfaceContainerHighest.withOpacity(0.8);
+        colorScheme.surfaceContainerHighest.withValues(alpha: 0.8);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -216,11 +216,11 @@ class _SoftLoadingIndicatorState extends State<SoftLoadingIndicator>
                 shape: BoxShape.circle,
                 gradient: SweepGradient(
                   colors: [
-                    color.withOpacity(0.1),
-                    color.withOpacity(0.3),
-                    color.withOpacity(0.6),
-                    color.withOpacity(0.3),
-                    color.withOpacity(0.1),
+                    color.withValues(alpha: 0.1),
+                    color.withValues(alpha: 0.3),
+                    color.withValues(alpha: 0.6),
+                    color.withValues(alpha: 0.3),
+                    color.withValues(alpha: 0.1),
                   ],
                 ),
               ),
@@ -230,7 +230,7 @@ class _SoftLoadingIndicatorState extends State<SoftLoadingIndicator>
                   height: widget.size * 0.7,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colorScheme.surface.withOpacity(0.9),
+                    color: colorScheme.surface.withValues(alpha: 0.9),
                   ),
                   child: Center(
                     child: Icon(
@@ -297,7 +297,7 @@ class SoftLoadingOverlay extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      color: colorScheme.surface.withOpacity(0.8),
+      color: colorScheme.surface.withValues(alpha: 0.8),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

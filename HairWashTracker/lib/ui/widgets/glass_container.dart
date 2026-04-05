@@ -1,6 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
+@Deprecated(
+    'Use NeumorphicContainer instead. This class is kept for backward compatibility only.')
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double blur;
@@ -25,38 +26,27 @@ class GlassContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
+      padding: padding,
       decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: opacity),
         borderRadius: BorderRadius.circular(borderRadius),
+        border: border ??
+            Border.all(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.1),
+              width: 0.5,
+            ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             spreadRadius: 2,
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withOpacity(opacity),
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: border ??
-                  Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.1),
-                    width: 0.5,
-                  ),
-            ),
-            child: child,
-          ),
-        ),
-      ),
+      child: child,
     );
   }
 }

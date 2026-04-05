@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../utils/app_theme.dart';
+import 'neumorphic_container.dart';
 
 /// AnimatedCounter - A reusable widget that animates from 0 to target value
-/// 
+///
 /// Features:
 /// - Smooth counting animation with flutter_animate
 /// - Customizable duration, curve, and text style
 /// - Optional suffix/prefix
 /// - Integer or decimal counting support
+/// - Neumorphic design integration
 class AnimatedCounter extends StatefulWidget {
   final int value;
   final Duration duration;
@@ -81,7 +84,6 @@ class _AnimatedCounterState extends State<AnimatedCounter>
 
   @override
   Widget build(BuildContext context) {
-    // Use only AnimatedBuilder to avoid conflicting with flutter_animate
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -95,9 +97,9 @@ class _AnimatedCounterState extends State<AnimatedCounter>
 }
 
 /// AnimatedStatValue - Enhanced counter with icon and label
-/// 
+///
 /// A complete stat display with animated counting number,
-/// icon, and label in a vertical layout.
+/// icon, and label in a vertical layout with neumorphic styling.
 class AnimatedStatValue extends StatelessWidget {
   final int value;
   final String label;
@@ -125,29 +127,30 @@ class AnimatedStatValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        NeumorphicContainer(
+          borderRadius: AppTheme.radiusCircle - 30,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              colors: [
-                color.withOpacity(0.2),
-                color.withOpacity(0.05),
-              ],
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.2),
-                blurRadius: 12,
-                spreadRadius: -4,
+          depth: isDark ? 8 : 12,
+          color: isDark
+              ? colorScheme.surfaceContainerHighest
+              : colorScheme.surface,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  color.withValues(alpha: 0.3),
+                  color.withValues(alpha: 0.1),
+                ],
               ),
-            ],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: iconSize),
           ),
-          child: Icon(icon, color: color, size: iconSize),
         )
             .animate(delay: delay)
             .scale(
@@ -164,13 +167,12 @@ class AnimatedStatValue extends StatelessWidget {
           style: valueStyle ??
               Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: color,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                     height: 1.0,
+                    letterSpacing: -1,
                   ),
-        )
-            .animate(delay: delay + 100.ms)
-            .fadeIn(duration: 400.ms)
-            .slideY(begin: 0.3, end: 0, duration: 500.ms, curve: Curves.easeOutQuart),
+        ).animate(delay: delay + 100.ms).fadeIn(duration: 400.ms).slideY(
+            begin: 0.3, end: 0, duration: 500.ms, curve: Curves.easeOutQuart),
         const SizedBox(height: 8),
         Text(
           label,

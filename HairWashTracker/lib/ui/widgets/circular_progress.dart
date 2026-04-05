@@ -1,17 +1,19 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../utils/app_theme.dart';
+import 'neumorphic_container.dart';
 
-/// Converts degrees to radians
 double radians(double degrees) => degrees * (math.pi / 180.0);
 
 /// CircularProgressPainter - Custom painter for smooth circular progress
-/// 
+///
 /// Features:
 /// - Soft glow effect around the progress arc
 /// - Smooth gradient progress indication
 /// - Background track with subtle styling
 /// - Optional center content
+/// - Spa color palette integration
 class CircularProgressPainter extends CustomPainter {
   final double progress;
   final Color color;
@@ -36,7 +38,6 @@ class CircularProgressPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    // Draw background track
     final backgroundPaint = Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.stroke
@@ -51,9 +52,8 @@ class CircularProgressPainter extends CustomPainter {
       backgroundPaint,
     );
 
-    // Draw glow effect
     final glowPaint = Paint()
-      ..color = color.withOpacity(0.3)
+      ..color = color.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth + glowWidth * 2
       ..strokeCap = StrokeCap.round
@@ -70,15 +70,14 @@ class CircularProgressPainter extends CustomPainter {
       );
     }
 
-    // Draw progress arc with gradient
     final progressPaint = Paint()
       ..shader = SweepGradient(
         startAngle: radians(startAngle.toDouble()),
         endAngle: radians(startAngle + sweepAngle.toDouble()),
         colors: [
-          color.withOpacity(0.8),
+          color.withValues(alpha: 0.8),
           color,
-          color.withOpacity(0.9),
+          color.withValues(alpha: 0.9),
         ],
         stops: const [0.0, 0.5, 1.0],
         transform: GradientRotation(radians(startAngle.toDouble())),
@@ -97,12 +96,10 @@ class CircularProgressPainter extends CustomPainter {
       );
     }
 
-    // Draw decorative dots at start and end
     final dotPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
-    // Start dot
     final startRadians = radians(startAngle.toDouble());
     final startDot = Offset(
       center.dx + radius * math.cos(startRadians),
@@ -110,7 +107,6 @@ class CircularProgressPainter extends CustomPainter {
     );
     canvas.drawCircle(startDot, strokeWidth / 3, dotPaint);
 
-    // End dot (if progress > 0)
     if (progress > 0) {
       final endRadians = radians(startAngle + progressSweep);
       final endDot = Offset(
@@ -118,10 +114,9 @@ class CircularProgressPainter extends CustomPainter {
         center.dy + radius * math.sin(endRadians),
       );
       canvas.drawCircle(endDot, strokeWidth / 2.5, dotPaint);
-      
-      // Glow dot at end
+
       final glowDotPaint = Paint()
-        ..color = color.withOpacity(0.4)
+        ..color = color.withValues(alpha: 0.4)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
       canvas.drawCircle(endDot, strokeWidth / 1.5, glowDotPaint);
     }
@@ -137,14 +132,15 @@ class CircularProgressPainter extends CustomPainter {
 }
 
 /// AnimatedCircularProgress - A circular progress indicator with animations
-/// 
+///
 /// Features:
 /// - Animated progress value transition
 /// - Soft glow effects
 /// - Customizable size, colors, and stroke width
 /// - Optional center label/value display
+/// - Spa color integration
 class AnimatedCircularProgress extends StatefulWidget {
-  final double progress; // 0.0 to 1.0
+  final double progress;
   final double size;
   final Color color;
   final Color? backgroundColor;
@@ -255,8 +251,7 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
                 width: widget.size,
                 height: widget.size,
                 child: Center(
-                  child: widget.centerChild ??
-                      _buildDefaultCenter(colorScheme),
+                  child: widget.centerChild ?? _buildDefaultCenter(colorScheme),
                 ),
               ),
             ),
@@ -284,7 +279,7 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
           '${_valueAnimation.value.toInt()}',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: widget.color,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
         ),
         Text(
@@ -298,10 +293,10 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
   }
 }
 
-/// CircularProgressCard - Soft card with embedded circular progress
-/// 
-/// A complete widget combining SoftCard styling with animated
-/// circular progress for monthly goal tracking.
+/// CircularProgressCard - Neumorphic card with embedded circular progress
+///
+/// A complete widget combining NeumorphicContainer styling with animated
+/// circular progress for monthly goal tracking using spa color palette.
 class CircularProgressCard extends StatelessWidget {
   final int currentValue;
   final int targetValue;
@@ -324,32 +319,11 @@ class CircularProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final progress = (currentValue / targetValue).clamp(0.0, 1.0);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
+    return NeumorphicContainer(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.surface.withOpacity(0.95),
-            colorScheme.surface.withOpacity(0.8),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.12),
-            blurRadius: 20,
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      depth: isDark ? 10 : 12,
       child: Row(
         children: [
           Expanded(
@@ -377,8 +351,12 @@ class CircularProgressCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                    border: Border.all(
+                      color: color.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Text(
                     '${(progress * 100).toInt()}% Complete',
@@ -405,7 +383,8 @@ class CircularProgressCard extends StatelessWidget {
     )
         .animate(delay: delay)
         .fadeIn(duration: 600.ms)
-        .slideX(begin: 0.2, end: 0, duration: 600.ms, curve: Curves.easeOutQuart)
+        .slideX(
+            begin: 0.2, end: 0, duration: 600.ms, curve: Curves.easeOutQuart)
         .scale(
           begin: const Offset(0.95, 0.95),
           end: const Offset(1, 1),

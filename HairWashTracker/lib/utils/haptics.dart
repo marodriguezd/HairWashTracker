@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Haptic feedback utilities for the Hair Wash Tracker app
-/// 
+///
 /// Provides soft, pleasant haptic patterns that enhance the user experience
 /// without being jarring or distracting.
 class Haptics {
   Haptics._();
 
   /// Light haptic feedback for subtle touches and hover states
-  /// 
+  ///
   /// Use for: Hover effects, light touches, subtle UI interactions
   static Future<void> lightHaptic() async {
     try {
@@ -20,7 +20,7 @@ class Haptics {
   }
 
   /// Medium haptic feedback for standard interactions
-  /// 
+  ///
   /// Use for: Button presses, toggles, standard user actions
   static Future<void> mediumHaptic() async {
     try {
@@ -31,7 +31,7 @@ class Haptics {
   }
 
   /// Heavy haptic feedback for important actions
-  /// 
+  ///
   /// Use for: Deletions, confirmations, significant state changes
   static Future<void> heavyHaptic() async {
     try {
@@ -42,7 +42,7 @@ class Haptics {
   }
 
   /// Selection haptic feedback for selection changes
-  /// 
+  ///
   /// Use for: Date picking, value selection, picker changes
   static Future<void> selectionHaptic() async {
     try {
@@ -53,18 +53,18 @@ class Haptics {
   }
 
   /// Success haptic pattern - two light pulses followed by medium confirmation
-  /// 
+  ///
   /// Use for: Successful operations, completions, achievements
   static Future<void> successHaptic() async {
     try {
       // First pulse - light
       await HapticFeedback.lightImpact();
       await Future.delayed(const Duration(milliseconds: 50));
-      
+
       // Second pulse - light
       await HapticFeedback.lightImpact();
       await Future.delayed(const Duration(milliseconds: 50));
-      
+
       // Final confirmation - medium
       await HapticFeedback.mediumImpact();
     } catch (e) {
@@ -73,7 +73,7 @@ class Haptics {
   }
 
   /// Error haptic pattern - short double pulse
-  /// 
+  ///
   /// Use for: Errors, validation failures, unsuccessful operations
   static Future<void> errorHaptic() async {
     try {
@@ -87,7 +87,7 @@ class Haptics {
   }
 
   /// Warning haptic pattern - single medium pulse
-  /// 
+  ///
   /// Use for: Warnings, important notifications, attention needed
   static Future<void> warningHaptic() async {
     try {
@@ -98,7 +98,7 @@ class Haptics {
   }
 
   /// Long press haptic feedback
-  /// 
+  ///
   /// Use for: Context menus, secondary actions on long press
   static Future<void> longPressHaptic() async {
     try {
@@ -117,7 +117,7 @@ extension HapticWidgetExtensions on Widget {
     bool enabled = true,
   }) {
     if (!enabled) return this;
-    
+
     return GestureDetector(
       onTap: () {
         Haptics.lightHaptic();
@@ -133,7 +133,7 @@ extension HapticWidgetExtensions on Widget {
     bool enabled = true,
   }) {
     if (!enabled) return this;
-    
+
     return GestureDetector(
       onTap: () {
         Haptics.mediumHaptic();
@@ -149,7 +149,7 @@ extension HapticWidgetExtensions on Widget {
     bool enabled = true,
   }) {
     if (!enabled) return this;
-    
+
     return GestureDetector(
       onTap: () {
         Haptics.selectionHaptic();
