@@ -15,8 +15,11 @@ class StatsPage extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Statistics',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Statistics',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            )),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -94,6 +97,7 @@ class StatsPage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return NeumorphicContainer(
+      clipContent: false,
       padding: const EdgeInsets.all(24),
       depth: 4,
       child: Row(
