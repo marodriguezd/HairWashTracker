@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'soft_container.dart';
+import 'neumorphic_container.dart';
 import '../../utils/app_theme.dart';
 
 class ConfirmationDialog extends StatelessWidget {
@@ -27,55 +27,72 @@ class ConfirmationDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      child: SoftDialog(
-        title: title,
-        glowColor: colorScheme.error.withValues(alpha: 0.1),
-        actions: [
-          TextButton(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-              ),
-            ),
-            child: Text(
-              cancelText,
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          NeumorphicButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              Navigator.of(context).pop();
-              onConfirm();
-            },
-            isDestructive: true,
-            child: Text(
-              confirmText,
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.onError,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+      child: NeumorphicContainer(
+        padding: const EdgeInsets.all(24),
+        depth: 5,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title
+            Text(
+              title,
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Content
             Text(
               content,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
+            ),
+            const SizedBox(height: 24),
+            // Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(context).pop();
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.radiusButton),
+                    ),
+                  ),
+                  child: Text(
+                    cancelText,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                NeumorphicButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.of(context).pop();
+                    onConfirm();
+                  },
+                  isDestructive: true,
+                  child: Text(
+                    confirmText,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onError,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

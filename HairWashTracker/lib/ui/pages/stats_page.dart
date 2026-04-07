@@ -95,28 +95,33 @@ class StatsPage extends StatelessWidget {
 
     return NeumorphicContainer(
       padding: const EdgeInsets.all(24),
-      depth: 10,
+      depth: 4,
       child: Row(
         children: [
-          NeumorphicContainer(
+          // Flat design icon with radial gradient and single subtle shadow
+          Container(
             padding: const EdgeInsets.all(16),
-            borderRadius: AppTheme.radiusCard,
-            depth: isDark ? 6 : 8,
-            color: isDark
-                ? colorScheme.surfaceContainerHighest
-                : colorScheme.surface,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    color.withValues(alpha: 0.2),
-                    color.withValues(alpha: 0.05),
-                  ],
-                ),
-                shape: BoxShape.circle,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+              gradient: RadialGradient(
+                colors: [
+                  color.withValues(alpha: 0.2),
+                  color.withValues(alpha: 0.05),
+                ],
               ),
-              child: Icon(icon, color: color, size: 32),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  spreadRadius: -3,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
+            child: Icon(icon, color: color, size: 32),
           ),
           const SizedBox(width: 20),
           Expanded(

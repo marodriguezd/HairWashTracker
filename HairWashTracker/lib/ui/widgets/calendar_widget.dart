@@ -5,68 +5,18 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../models/wash_event.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
+import 'neumorphic_container.dart';
 
 class CalendarWidget extends StatelessWidget {
   const CalendarWidget({super.key});
 
-  List<BoxShadow> _buildNeumorphicShadows(
-      BuildContext context, bool isPressed) {
+  /// Uses centralized shadow builder for consistency across the app
+  List<BoxShadow> _buildCalendarShadows(BuildContext context, bool isPressed) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final depth = isPressed ? 2.0 : 4.0;
-
-    if (isDark) {
-      return isPressed
-          ? [
-              BoxShadow(
-                color: const Color.fromRGBO(255, 255, 255, 0.1),
-                offset: Offset(-depth, -depth),
-                blurRadius: depth * 2,
-              ),
-              BoxShadow(
-                color: const Color.fromRGBO(0, 0, 0, 0.6),
-                offset: Offset(depth, depth),
-                blurRadius: depth * 2,
-              ),
-            ]
-          : [
-              const BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.5),
-                offset: Offset(-4, -4),
-                blurRadius: 8,
-              ),
-              const BoxShadow(
-                color: Color.fromRGBO(255, 255, 255, 0.08),
-                offset: Offset(4, 4),
-                blurRadius: 8,
-              ),
-            ];
-    } else {
-      return isPressed
-          ? [
-              BoxShadow(
-                color: const Color.fromRGBO(0, 0, 0, 0.25),
-                offset: Offset(-depth, -depth),
-                blurRadius: depth * 2,
-              ),
-              BoxShadow(
-                color: const Color.fromRGBO(255, 255, 255, 0.9),
-                offset: Offset(depth, depth),
-                blurRadius: depth * 2,
-              ),
-            ]
-          : [
-              const BoxShadow(
-                color: Color.fromRGBO(255, 255, 255, 0.9),
-                offset: Offset(-4, -4),
-                blurRadius: 8,
-              ),
-              const BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.2),
-                offset: Offset(4, 4),
-                blurRadius: 8,
-              ),
-            ];
-    }
+    // Use refined depth values: 2.0 for raised, 1.5 for pressed
+    final depth = isPressed ? 1.5 : 2.0;
+    return NeumorphicContainer.buildShadows(isDark,
+        depth: depth, isPressed: isPressed);
   }
 
   @override
@@ -112,7 +62,7 @@ class CalendarWidget extends StatelessWidget {
             todayDecoration: BoxDecoration(
               color: colorScheme.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              boxShadow: _buildNeumorphicShadows(context, true),
+              boxShadow: _buildCalendarShadows(context, true),
             ),
             todayTextStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
                   color: colorScheme.primary,
@@ -139,7 +89,7 @@ class CalendarWidget extends StatelessWidget {
                       color: colorScheme.primary,
                       borderRadius:
                           BorderRadius.circular(AppTheme.radiusButton),
-                      boxShadow: _buildNeumorphicShadows(context, false),
+                      boxShadow: _buildCalendarShadows(context, false),
                     ),
                     child: Center(
                       child: Text(
@@ -175,7 +125,7 @@ class CalendarWidget extends StatelessWidget {
                       color: colorScheme.primary,
                       width: 2,
                     ),
-                    boxShadow: _buildNeumorphicShadows(context, true),
+                    boxShadow: _buildCalendarShadows(context, true),
                   ),
                   child: Center(
                     child: Text(

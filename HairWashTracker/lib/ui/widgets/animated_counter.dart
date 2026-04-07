@@ -133,7 +133,7 @@ class AnimatedStatValue extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         NeumorphicContainer(
-          borderRadius: AppTheme.radiusCircle - 30,
+          borderRadius: 40,
           padding: const EdgeInsets.all(16),
           depth: isDark ? 8 : 12,
           color: isDark

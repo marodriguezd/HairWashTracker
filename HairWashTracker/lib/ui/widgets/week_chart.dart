@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/wash_event.dart';
 import '../../utils/app_theme.dart';
-import '../widgets/soft_container.dart';
+import 'neumorphic_container.dart';
 
 /// WeekChart - Horizontal bar chart showing washes per day
 ///
@@ -33,9 +33,9 @@ class WeekChart extends StatelessWidget {
         .reduce((a, b) => a > b ? a : b)
         .clamp(1, 10);
 
-    return SoftCard(
+    return NeumorphicContainer(
       padding: const EdgeInsets.all(24),
-      glowColor: AppTheme.sageMist.withValues(alpha: 0.06),
+      depth: 3.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -240,10 +240,9 @@ class WeekChartCard extends StatelessWidget {
     final totalWeekWashes = weekData.fold(0, (sum, d) => sum + d.count);
     final daysWithWashes = weekData.where((d) => d.count > 0).length;
 
-    return SoftCard(
+    return NeumorphicContainer(
       padding: const EdgeInsets.all(24),
-      glowColor: AppTheme.sageMist.withValues(alpha: 0.08),
-      hasInnerShadow: true,
+      depth: 4,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

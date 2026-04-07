@@ -42,7 +42,7 @@ class AppDrawer extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
+                    shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.waves_rounded,
                       color: Colors.white, size: 30),

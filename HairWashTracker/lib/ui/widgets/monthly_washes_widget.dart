@@ -37,20 +37,46 @@ class MonthlyWashesWidget extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${controller.currentMonthWashes}',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.primary,
-                            letterSpacing: -0.5,
-                            height: 1.0,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.displayMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.primary,
+                                letterSpacing: -0.5,
+                                height: 1.0,
+                              ),
                     ),
                   ],
                 ),
               ),
-              NeumorphicContainer(
+              // Flat design icon with radial gradient and single subtle shadow
+              Container(
                 padding: const EdgeInsets.all(16),
-                borderRadius: 70,
-                depth: 8,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.15),
+                      Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.05),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      spreadRadius: -4,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Icon(
                   Icons.waves_rounded,
                   color: Theme.of(context).colorScheme.primary,

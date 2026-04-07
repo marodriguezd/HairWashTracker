@@ -219,7 +219,7 @@ class _SoftIllustrationState extends State<_SoftIllustration>
           child: Transform.scale(
             scale: _scaleAnimation.value,
             child: NeumorphicContainer(
-              borderRadius: AppTheme.radiusCircle,
+              borderRadius: 70,
               depth: widget.isDark ? 12 : 15,
               padding: const EdgeInsets.all(28),
               color: widget.isDark

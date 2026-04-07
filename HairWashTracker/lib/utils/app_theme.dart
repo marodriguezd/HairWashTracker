@@ -41,9 +41,9 @@ class AppTheme {
 
   /// Standard border radius values
   static const double radiusCard = 24.0;
-  static const double radiusButton = 12.0;
-  static const double radiusCircle = 70.0;
-  static const double radiusSmall = 8.0;
+  static const double radiusButton = 16.0;
+  static const double radiusSmall = 12.0;
+  static const double radiusChip = 8.0;
 
   /// Standard spacing values
   static const double spacingScreen = 16.0;
