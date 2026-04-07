@@ -33,11 +33,12 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Hair Wash Tracker',
           style: TextStyle(
             fontWeight: FontWeight.w500,
             letterSpacing: 0,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         centerTitle: true,

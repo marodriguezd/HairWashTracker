@@ -56,6 +56,16 @@ class CalendarWidget extends StatelessWidget {
             HapticFeedback.lightImpact();
             controller.setFocusedDay(focusedDay);
           },
+          daysOfWeekStyle: DaysOfWeekStyle(
+            weekdayStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+            weekendStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: colorScheme.error.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
           calendarStyle: CalendarStyle(
             outsideDaysVisible: false,
             markersMaxCount: 0,
