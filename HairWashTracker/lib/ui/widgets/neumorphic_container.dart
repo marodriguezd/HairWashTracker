@@ -11,6 +11,7 @@ class NeumorphicContainer extends StatelessWidget {
   final bool isPressed;
   final Color? color;
   final bool hasTexture;
+  final bool clipContent;
 
   const NeumorphicContainer({
     super.key,
@@ -22,6 +23,7 @@ class NeumorphicContainer extends StatelessWidget {
     this.isPressed = false,
     this.color,
     this.hasTexture = false,
+    this.clipContent = true,
   });
 
   /// Builds subtle, refined raised shadows for light theme
@@ -153,10 +155,12 @@ class NeumorphicContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: buildShadows(isDark, depth: depth, isPressed: isPressed),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: content,
-      ),
+      child: clipContent
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: content,
+            )
+          : content,
     );
   }
 }

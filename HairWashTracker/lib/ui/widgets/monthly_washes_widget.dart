@@ -14,9 +14,10 @@ class MonthlyWashesWidget extends StatelessWidget {
     return Consumer<AppController>(
       builder: (context, controller, child) {
         return NeumorphicContainer(
+          clipContent: false,
           padding: EdgeInsets.symmetric(
             vertical: isSmallScreen ? 20 : 28,
-            horizontal: isSmallScreen ? 16 : 24,
+            horizontal: isSmallScreen ? 28 : 36,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
