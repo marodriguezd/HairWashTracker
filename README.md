@@ -55,4 +55,3 @@ A beautiful and modern Flutter application designed to help you track your hair 
 ## 📱 Compatibility
 
 *   Android
-*   iOS

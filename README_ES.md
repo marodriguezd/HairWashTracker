@@ -55,4 +55,3 @@ Una aplicación Flutter hermosa y moderna diseñada para ayudarte a realizar un 
 ## 📱 Compatibilidad
 
 *   Android
-*   iOS
