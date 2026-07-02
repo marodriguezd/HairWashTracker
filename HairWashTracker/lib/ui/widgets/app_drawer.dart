@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../models/theme_preference.dart';
 import '../../providers/app_controller.dart';
 import '../pages/stats_page.dart';
 import 'confirmation_dialog.dart';
@@ -108,6 +109,69 @@ class AppDrawer extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
                   child: ThemeSwitch(),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, bottom: 8),
+                  child: Text(
+                    'Color Palette',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: 0.75,
+                        ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Consumer<AppController>(
+                    builder: (context, controller, _) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: AppPresetTheme.values.map((preset) {
+                          final isSelected = controller.themePreset == preset;
+                          final seedColor = AppTheme.getSeedColor(preset);
+
+                          return GestureDetector(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              controller.setThemePreset(preset);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: seedColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? colorScheme.onSurface
+                                      : Colors.transparent,
+                                  width: 3,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: seedColor.withValues(alpha: 0.4),
+                                    blurRadius: isSelected ? 8 : 4,
+                                    spreadRadius: isSelected ? 1 : 0,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    )
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

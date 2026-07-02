@@ -16,6 +16,7 @@ class AppController extends ChangeNotifier {
   List<WashEvent> _selectedEvents = [];
   DateTime _focusedDay = DateTime.now();
   AppThemeMode _themeMode = AppThemeMode.system;
+  AppPresetTheme _themePreset = AppPresetTheme.warmCoral;
   bool _useComplexAnimations = true;
   bool _disposed = false;
 
@@ -26,12 +27,14 @@ class AppController extends ChangeNotifier {
         _fileOperations = fileOperations {
     _loadEvents();
     _loadThemeMode();
+    _loadThemePreset();
   }
 
   // Getters
   List<WashEvent> get selectedEvents => List.unmodifiable(_selectedEvents);
   DateTime get focusedDay => _focusedDay;
   AppThemeMode get themeMode => _themeMode;
+  AppPresetTheme get themePreset => _themePreset;
   bool get useComplexAnimations => _useComplexAnimations;
 
   int get totalWashes => StatisticsCalculator.getTotalWashes(_selectedEvents);
@@ -39,6 +42,10 @@ class AppController extends ChangeNotifier {
       StatisticsCalculator.getWashesForWeek(_selectedEvents, DateTime.now());
   int get currentMonthWashes =>
       StatisticsCalculator.getWashesForMonth(_selectedEvents, _focusedDay);
+  double get averageInterval =>
+      StatisticsCalculator.getAverageIntervalDays(_selectedEvents);
+  DateTime? get nextRecommendedWashDate =>
+      StatisticsCalculator.getNextRecommendedWashDate(_selectedEvents);
 
   // Event management
   List<WashEvent> getEventsForDay(DateTime day) {
@@ -69,6 +76,12 @@ class AppController extends ChangeNotifier {
   void setThemeMode(AppThemeMode mode) {
     _themeMode = mode;
     ThemePreference.setThemeMode(mode);
+    notifyListeners();
+  }
+
+  void setThemePreset(AppPresetTheme preset) {
+    _themePreset = preset;
+    ThemePreference.setThemePreset(preset);
     notifyListeners();
   }
 
@@ -110,6 +123,20 @@ class AppController extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading theme: $e');
       _themeMode = AppThemeMode.system;
+      if (_disposed) return;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadThemePreset() async {
+    if (_disposed) return;
+    try {
+      _themePreset = await ThemePreference.getThemePreset();
+      if (_disposed) return;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading theme preset: $e');
+      _themePreset = AppPresetTheme.warmCoral;
       if (_disposed) return;
       notifyListeners();
     }

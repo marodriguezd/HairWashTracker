@@ -5,9 +5,9 @@
 Una aplicación Flutter hermosa y moderna diseñada para ayudarte a realizar un seguimiento de tu rutina de lavado de cabello con facilidad. Construida con la estética de **Material You** y elementos de **Neumorfismo**.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/demo2_new.png" width="45%" alt="Hair Wash Tracker Tema Claro">
+  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_1.jpg" width="45%" alt="Hair Wash Tracker Tema Claro">
   &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/demo_new.png" width="45%" alt="Hair Wash Tracker Tema Oscuro">
+  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_2.jpg" width="45%" alt="Hair Wash Tracker Tema Oscuro">
 </p>
 
 ## ✨ Características
@@ -15,7 +15,8 @@ Una aplicación Flutter hermosa y moderna diseñada para ayudarte a realizar un 
 *   **📅 Calendario Interactivo**: Visualiza tus días de lavado sin esfuerzo.
 *   **🫧 Toca para Registrar**: Simplemente toca un día para marcar o desmarcar un lavado.
 *   **📊 Estadísticas**: Visualiza estadísticas mensuales y semanales de un vistazo.
-*   **🎨 UI Moderna**: Interfaz impresionante con degradados, contenedores neumórficos suaves y animaciones fluidas.
+*   **🎨 Temas Dinámicos de Material You**: Elige entre esquemas de colores personalizados (Warm Coral, Lavender Mist, Sage Mist, Ocean Blue) que adaptan la interfaz dinámicamente.
+*   **🤖 Integraciones Modernas de Android**: Diseñado con patrones de Android 17, con soporte completo para iconos adaptativos e iconos temáticos de Material You (tinte dinámico monocromo).
 *   **🌓 Doble Tema**: Soporte completo para modos Claro y Oscuro.
 *   **💾 Persistencia de Datos**: Tus datos se guardan localmente para que nunca pierdas el historial.
 *   **📂 Importar/Exportar**: Copia de seguridad y restauración fácil en CSV para mantener tus datos seguros y portables (Compatible con formatos antiguos).
@@ -31,9 +32,9 @@ Una aplicación Flutter hermosa y moderna diseñada para ayudarte a realizar un 
 ## 📸 Estadísticas
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/demo2_opt_new.png" width="45%" alt="Estadísticas Tema Claro">
+  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_3.jpg" width="45%" alt="Estadísticas Tema Claro">
   &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/demo_opt_new.png" width="45%" alt="Estadísticas Tema Oscuro">
+  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_4.jpg" width="45%" alt="Estadísticas Tema Oscuro">
 </p>
 
 ## 🚀 Empezando

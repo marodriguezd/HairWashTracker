@@ -89,6 +89,39 @@ class CalendarWidget extends StatelessWidget {
                 ),
           ),
           calendarBuilders: CalendarBuilders(
+            todayBuilder: (context, day, focusedDay) {
+              final isWash = controller.isWashDay(day);
+              return Center(
+                child: Container(
+                  width: dayCellSize,
+                  height: dayCellSize,
+                  decoration: BoxDecoration(
+                    color: isWash
+                        ? colorScheme.primary
+                        : colorScheme.primary.withValues(alpha: 0.15),
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.radiusButton),
+                    border: Border.all(
+                      color: colorScheme.primary,
+                      width: 2,
+                    ),
+                    boxShadow: _buildCalendarShadows(context, !isWash),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: isWash
+                                ? colorScheme.onPrimary
+                                : colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.25,
+                          ),
+                    ),
+                  ),
+                ),
+              );
+            },
             defaultBuilder: (context, day, focusedDay) {
               if (controller.isWashDay(day)) {
                 return Center(

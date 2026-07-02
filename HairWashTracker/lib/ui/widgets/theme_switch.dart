@@ -88,16 +88,16 @@ class _ThemeModeButtonState extends State<_ThemeModeButton> {
               : Colors.transparent,
           borderRadius: BorderRadius.only(
             topLeft: widget.isFirst
-                ? Radius.circular(AppTheme.radiusButton + 4)
+                ? const Radius.circular(AppTheme.radiusButton + 4)
                 : Radius.zero,
             bottomLeft: widget.isFirst
-                ? Radius.circular(AppTheme.radiusButton + 4)
+                ? const Radius.circular(AppTheme.radiusButton + 4)
                 : Radius.zero,
             topRight: widget.isLast
-                ? Radius.circular(AppTheme.radiusButton + 4)
+                ? const Radius.circular(AppTheme.radiusButton + 4)
                 : Radius.zero,
             bottomRight: widget.isLast
-                ? Radius.circular(AppTheme.radiusButton + 4)
+                ? const Radius.circular(AppTheme.radiusButton + 4)
                 : Radius.zero,
           ),
           boxShadow: widget.isSelected

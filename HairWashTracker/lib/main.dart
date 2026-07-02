@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
             title: 'Hair Wash Tracker',
             debugShowCheckedModeBanner: false,
             themeMode: _appThemeModeToThemeMode(controller.themeMode),
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.getTheme(controller.themePreset, Brightness.light),
+            darkTheme: AppTheme.getTheme(controller.themePreset, Brightness.dark),
             home: const HomePage(),
           );
         },

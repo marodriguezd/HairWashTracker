@@ -23,6 +23,33 @@ class StatisticsCalculator {
         .length;
   }
 
+  static double getAverageIntervalDays(List<WashEvent> events) {
+    if (events.length < 2) return 0.0;
+
+    final sortedEvents = List<WashEvent>.from(events)
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    int totalDays = 0;
+    for (int i = 0; i < sortedEvents.length - 1; i++) {
+      totalDays += sortedEvents[i + 1].date.difference(sortedEvents[i].date).inDays;
+    }
+
+    return totalDays / (sortedEvents.length - 1);
+  }
+
+  static DateTime? getNextRecommendedWashDate(List<WashEvent> events) {
+    if (events.isEmpty) return null;
+
+    final sortedEvents = List<WashEvent>.from(events)
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    final lastWash = sortedEvents.last.date;
+    final avgInterval = getAverageIntervalDays(events);
+
+    final intervalDays = avgInterval > 0 ? avgInterval.round() : 3;
+    return lastWash.add(Duration(days: intervalDays));
+  }
+
   static DateTime _getStartOfWeek(DateTime date) {
     final daysFromMonday = date.weekday - 1;
     return DateTime(date.year, date.month, date.day - daysFromMonday);

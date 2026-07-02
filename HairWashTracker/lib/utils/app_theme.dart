@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/theme_preference.dart';
 
 /// AppTheme - Design system for Hair Wash Tracker
 ///
@@ -294,4 +295,92 @@ class AppTheme {
     ),
     textTheme: _darkTextTheme,
   );
+
+  static Color getSeedColor(AppPresetTheme preset) {
+    switch (preset) {
+      case AppPresetTheme.warmCoral:
+        return const Color(0xFFE07A5F);
+      case AppPresetTheme.lavenderMist:
+        return const Color(0xFF9B5DE5);
+      case AppPresetTheme.sageMist:
+        return const Color(0xFF588157);
+      case AppPresetTheme.oceanBlue:
+        return const Color(0xFF0077B6);
+    }
+  }
+
+  static Color getSurfaceColor(AppPresetTheme preset, Brightness brightness) {
+    if (brightness == Brightness.light) {
+      switch (preset) {
+        case AppPresetTheme.warmCoral:
+          return const Color(0xFFF4F1DE);
+        case AppPresetTheme.lavenderMist:
+          return const Color(0xFFFAF2E4);
+        case AppPresetTheme.sageMist:
+          return const Color(0xFFEBF0E9);
+        case AppPresetTheme.oceanBlue:
+          return const Color(0xFFEAF5FA);
+      }
+    } else {
+      switch (preset) {
+        case AppPresetTheme.warmCoral:
+          return const Color(0xFF3D405B);
+        case AppPresetTheme.lavenderMist:
+          return const Color(0xFF1E132D);
+        case AppPresetTheme.sageMist:
+          return const Color(0xFF1A261D);
+        case AppPresetTheme.oceanBlue:
+          return const Color(0xFF0B1B2C);
+      }
+    }
+  }
+
+  static List<Color> getGradientColors(AppPresetTheme preset, Brightness brightness) {
+    final primary = getSeedColor(preset);
+    final surface = getSurfaceColor(preset, brightness);
+    if (brightness == Brightness.light) {
+      return [
+        surface,
+        Color.lerp(surface, primary, 0.08) ?? surface,
+      ];
+    } else {
+      return [
+        surface,
+        Color.lerp(surface, primary, 0.12) ?? surface,
+      ];
+    }
+  }
+
+  static ThemeData getTheme(AppPresetTheme preset, Brightness brightness) {
+    final seed = getSeedColor(preset);
+    final surface = getSurfaceColor(preset, brightness);
+    final isDark = brightness == Brightness.dark;
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: seed,
+        brightness: brightness,
+        primary: seed,
+        surface: surface,
+        surfaceContainerHighest: surface,
+      ),
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+      cardTheme: CardThemeData(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusCard),
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: (isDark ? _darkTextTheme : _lightTextTheme).titleLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      textTheme: isDark ? _darkTextTheme : _lightTextTheme,
+    );
+  }
 }

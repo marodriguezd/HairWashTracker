@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="drop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4DD0E1"/>
+      <stop offset="100%" stop-color="#0097A7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#006064" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Transparent background for adaptive foreground -->
+  <g transform="translate(102, 102) scale(0.8)">
+    <!-- Main water drop representing hair wash -->
+    <path d="M512 200 C512 200, 256 520, 256 680 C256 821.4, 370.6 936, 512 936 C653.4 936, 768 821.4, 768 680 C768 520, 512 200, 512 200 Z" fill="url(#drop)" filter="url(#shadow)" />
+    
+    <!-- Cleanliness sparkles -->
+    <path d="M280 380 Q330 380 330 330 Q330 380 380 380 Q330 380 330 430 Q330 380 280 380 Z" fill="#FFFFFF" opacity="0.9" />
+    <path d="M720 480 Q750 480 750 450 Q750 480 780 480 Q750 480 750 510 Q750 480 720 480 Z" fill="#FFFFFF" opacity="0.8" />
+    
+    <!-- Subtle highlight curve on the drop -->
+    <path d="M360 680 C360 590, 430 480, 512 360" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" opacity="0.4" />
+  </g>
+</svg>

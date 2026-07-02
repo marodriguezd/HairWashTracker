@@ -11,24 +11,18 @@ import '../../utils/app_theme.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const LinearGradient _lightGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [AppTheme.lightGradientStart, AppTheme.lightGradientEnd],
-  );
-
-  static const LinearGradient _darkGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [AppTheme.darkGradientStart, AppTheme.darkGradientEnd],
-  );
-
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<AppController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth < 360 ? 12.0 : 16.0;
     final bottomPadding = screenWidth < 360 ? 12.0 : 16.0;
+
+    final gradientColors = AppTheme.getGradientColors(
+      controller.themePreset,
+      isDark ? Brightness.dark : Brightness.light,
+    );
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -48,7 +42,11 @@ class HomePage extends StatelessWidget {
       drawer: const AppDrawer(),
       body: Container(
         decoration: BoxDecoration(
-          gradient: isDark ? _darkGradient : _lightGradient,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: gradientColors,
+          ),
         ),
         child: SafeArea(
           child: Column(

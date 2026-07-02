@@ -1,7 +1,7 @@
 name: hair_wash_tracker
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.0.0+2
+version: 26.07.02+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -29,6 +29,9 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon.png"
+  adaptive_icon_background: "#E0F7FA"
+  adaptive_icon_foreground: "assets/icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon_monochrome.png"
 
 flutter:
   uses-material-design: true

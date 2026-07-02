@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
 import '../widgets/neumorphic_container.dart';
@@ -11,6 +12,7 @@ class StatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final controller = context.watch<AppController>();
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -31,8 +33,7 @@ class StatsPage extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppTheme.warmCoral.withValues(alpha: 0.15),
-                  AppTheme.softSand.withValues(alpha: 0.1),
+                  AppTheme.getSeedColor(controller.themePreset).withValues(alpha: 0.15),
                   Theme.of(context).colorScheme.surface,
                 ],
               ),
@@ -41,6 +42,11 @@ class StatsPage extends StatelessWidget {
           SafeArea(
             child: Consumer<AppController>(
               builder: (context, controller, child) {
+                final nextWash = controller.nextRecommendedWashDate;
+                final nextWashStr = nextWash != null
+                    ? DateFormat('yyyy-MM-dd').format(nextWash)
+                    : 'N/A';
+
                 return ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
@@ -72,6 +78,26 @@ class StatsPage extends StatelessWidget {
                       colorScheme.tertiary,
                       'Past 30 days',
                       delay: 200,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildNeumorphicStatCard(
+                      context,
+                      'Average Interval',
+                      '${controller.averageInterval.toStringAsFixed(1)} days',
+                      Icons.av_timer_rounded,
+                      colorScheme.secondary,
+                      'Routine frequency',
+                      delay: 300,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildNeumorphicStatCard(
+                      context,
+                      'Next Wash Recommended',
+                      nextWashStr,
+                      Icons.calendar_today_rounded,
+                      colorScheme.primary,
+                      'Suggested date',
+                      delay: 400,
                     ),
                   ],
                 );

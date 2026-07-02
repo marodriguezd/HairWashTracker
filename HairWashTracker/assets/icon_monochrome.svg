@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Transparent background, single-color shapes (black) for Android's monochrome tinting -->
+  <g transform="translate(102, 102) scale(0.8)">
+    <!-- Main water drop shape -->
+    <path d="M512 200 C512 200, 256 520, 256 680 C256 821.4, 370.6 936, 512 936 C653.4 936, 768 821.4, 768 680 C768 520, 512 200, 512 200 Z" fill="#000000" />
+    
+    <!-- Cleanliness sparkles -->
+    <path d="M280 380 Q330 380 330 330 Q330 380 380 380 Q330 380 330 430 Q330 380 280 380 Z" fill="#000000" />
+    <path d="M720 480 Q750 480 750 450 Q750 480 780 480 Q750 480 750 510 Q750 480 720 480 Z" fill="#000000" />
+  </g>
+</svg>
