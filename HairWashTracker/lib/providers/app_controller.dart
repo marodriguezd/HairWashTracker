@@ -44,8 +44,12 @@ class AppController extends ChangeNotifier {
       StatisticsCalculator.getWashesForMonth(_selectedEvents, _focusedDay);
   double get averageInterval =>
       StatisticsCalculator.getAverageIntervalDays(_selectedEvents);
+  double get medianInterval =>
+      StatisticsCalculator.getMedianIntervalDays(_selectedEvents);
   DateTime? get nextRecommendedWashDate =>
       StatisticsCalculator.getNextRecommendedWashDate(_selectedEvents);
+  List<DateTime> get predictedWashDates =>
+      StatisticsCalculator.getPredictedWashDates(_selectedEvents);
 
   // Event management
   List<WashEvent> getEventsForDay(DateTime day) {
@@ -56,6 +60,10 @@ class AppController extends ChangeNotifier {
 
   bool isWashDay(DateTime day) {
     return _selectedEvents.any((event) => isSameDay(event.date, day));
+  }
+
+  bool isPredictedWashDay(DateTime day) {
+    return predictedWashDates.any((d) => isSameDay(d, day));
   }
 
   void toggleWashDay(DateTime day) {

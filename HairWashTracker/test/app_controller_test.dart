@@ -151,18 +151,60 @@ void main() {
       expect(mockFileOps.exportJsonCalled, isTrue);
     });
 
-    test('averageInterval and nextRecommendedWashDate expose correct values', () async {
+    test('averageInterval, medianInterval and nextRecommendedWashDate expose correct values', () async {
       await Future.delayed(Duration.zero);
       expect(controller.averageInterval, 0.0);
+      expect(controller.medianInterval, 0.0);
       expect(controller.nextRecommendedWashDate, isNull);
 
       controller.toggleWashDay(DateTime(2026, 7, 2));
       expect(controller.averageInterval, 0.0);
+      expect(controller.medianInterval, 0.0);
       expect(controller.nextRecommendedWashDate, DateTime(2026, 7, 5, 12, 0, 0));
 
       controller.toggleWashDay(DateTime(2026, 7, 6)); // 4 days later
       expect(controller.averageInterval, 4.0);
+      expect(controller.medianInterval, 4.0); // same as avg for 1 interval
       expect(controller.nextRecommendedWashDate, DateTime(2026, 7, 10, 12, 0, 0));
+    });
+
+    test('predictedWashDates returns predictions from last wash forward', () async {
+      await Future.delayed(Duration.zero);
+      expect(controller.predictedWashDates, isEmpty);
+
+      controller.toggleWashDay(DateTime(2026, 7, 2));
+      controller.toggleWashDay(DateTime(2026, 7, 5)); // 3-day interval
+
+      final predicted = controller.predictedWashDates;
+      expect(predicted, isNotEmpty);
+
+      // First prediction should be last wash + interval = Jul 5 + 3 = Jul 8
+      expect(predicted.first, DateTime(2026, 7, 8, 12, 0, 0));
+
+      // All predictions should be after the last wash
+      for (final date in predicted) {
+        expect(date.isAfter(DateTime(2026, 7, 5, 12, 0, 0)), isTrue);
+      }
+    });
+
+    test('isPredictedWashDay returns true for predicted dates', () async {
+      await Future.delayed(Duration.zero);
+      controller.toggleWashDay(DateTime(2026, 7, 2));
+      controller.toggleWashDay(DateTime(2026, 7, 5)); // 3-day interval
+
+      // predictedWashDates only includes future dates
+      // So check that the first predicted date returns true
+      final predicted = controller.predictedWashDates;
+      if (predicted.isNotEmpty) {
+        expect(controller.isPredictedWashDay(predicted.first), isTrue);
+      }
+
+      // A non-predicted day should return false
+      expect(controller.isPredictedWashDay(DateTime(2020, 1, 1)), isFalse);
+
+      // Past wash days should not be marked as predicted
+      expect(controller.isPredictedWashDay(DateTime(2026, 7, 2)), isFalse);
+      expect(controller.isPredictedWashDay(DateTime(2026, 7, 5)), isFalse);
     });
 
     test('themePreset loading and updating works', () async {

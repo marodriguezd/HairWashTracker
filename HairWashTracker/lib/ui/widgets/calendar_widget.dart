@@ -13,10 +13,23 @@ class CalendarWidget extends StatelessWidget {
   /// Uses centralized shadow builder for consistency across the app
   List<BoxShadow> _buildCalendarShadows(BuildContext context, bool isPressed) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // Use refined depth values: 2.0 for raised, 1.5 for pressed
     final depth = isPressed ? 1.5 : 2.0;
     return NeumorphicContainer.buildShadows(isDark,
         depth: depth, isPressed: isPressed);
+  }
+
+  /// Builds a predicted-date indicator: a subtle dotted ring around the day.
+  Widget _buildPredictedOverlay(
+      BuildContext context, double size, double strokeWidth) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _DashedBorderPainter(
+        color: colorScheme.tertiary.withValues(alpha: 0.65),
+        strokeWidth: strokeWidth,
+        cornerRadius: AppTheme.radiusButton - 2,
+      ),
+    );
   }
 
   @override
@@ -28,6 +41,8 @@ class CalendarWidget extends StatelessWidget {
 
     return Consumer<AppController>(
       builder: (context, controller, child) {
+        final predictedDates = controller.predictedWashDates;
+
         return TableCalendar<WashEvent>(
           firstDay: DateTime.utc(2020, 1, 1),
           lastDay: DateTime.utc(2030, 12, 31),
@@ -91,6 +106,8 @@ class CalendarWidget extends StatelessWidget {
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) {
               final isWash = controller.isWashDay(day);
+              final isPredicted = !isWash &&
+                  predictedDates.any((d) => isSameDay(d, day));
               return Center(
                 child: Container(
                   width: dayCellSize,
@@ -102,22 +119,33 @@ class CalendarWidget extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(AppTheme.radiusButton),
                     border: Border.all(
-                      color: colorScheme.primary,
-                      width: 2,
+                      color: isPredicted
+                          ? colorScheme.tertiary
+                          : colorScheme.primary,
+                      width: isPredicted ? 2.5 : 2,
                     ),
                     boxShadow: _buildCalendarShadows(context, !isWash),
                   ),
-                  child: Center(
-                    child: Text(
-                      '${day.day}',
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: isWash
-                                ? colorScheme.onPrimary
-                                : colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.25,
-                          ),
-                    ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        '${day.day}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(
+                              color: isWash
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.primary,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.25,
+                            ),
+                      ),
+                      if (isPredicted)
+                        _buildPredictedOverlay(
+                            context, dayCellSize - 4, 1.2),
+                    ],
                   ),
                 ),
               );
@@ -147,10 +175,37 @@ class CalendarWidget extends StatelessWidget {
                   ),
                 );
               }
+
+              if (predictedDates.any((d) => isSameDay(d, day))) {
+                return Center(
+                  child: SizedBox(
+                    width: dayCellSize,
+                    height: dayCellSize,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          '${day.day}',
+                          style:
+                              Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                    color: colorScheme.onSurface,
+                                    letterSpacing: 0.25,
+                                  ),
+                        ),
+                        _buildPredictedOverlay(
+                            context, dayCellSize, 1.5),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
               return null;
             },
             selectedBuilder: (context, day, focusedDay) {
               final isWash = controller.isWashDay(day);
+              final isPredicted = !isWash &&
+                  predictedDates.any((d) => isSameDay(d, day));
               return Center(
                 child: Container(
                   width: dayCellSize + 4,
@@ -165,22 +220,30 @@ class CalendarWidget extends StatelessWidget {
                                 .withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     border: Border.all(
-                      color: colorScheme.primary,
+                      color: isPredicted
+                          ? colorScheme.tertiary
+                          : colorScheme.primary,
                       width: 2,
                     ),
                     boxShadow: _buildCalendarShadows(context, true),
                   ),
-                  child: Center(
-                    child: Text(
-                      '${day.day}',
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: isWash
-                                ? colorScheme.onPrimary
-                                : colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.25,
-                          ),
-                    ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        '${day.day}',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              color: isWash
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.25,
+                            ),
+                      ),
+                      if (isPredicted)
+                        _buildPredictedOverlay(
+                            context, dayCellSize, 1.2),
+                    ],
                   ),
                 ),
               );
@@ -190,4 +253,59 @@ class CalendarWidget extends StatelessWidget {
       },
     );
   }
+}
+
+/// A custom painter that draws a dashed rounded-rectangle border,
+/// used as a subtle visual indicator for predicted wash dates.
+class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double cornerRadius;
+
+  _DashedBorderPainter({
+    required this.color,
+    this.strokeWidth = 1.5,
+    this.cornerRadius = 12.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromLTWH(
+      strokeWidth / 2,
+      strokeWidth / 2,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
+    );
+    final rrect = RRect.fromRectAndRadius(
+        rect, Radius.circular(cornerRadius));
+
+    final path = Path()..addRRect(rrect);
+
+    const dashWidth = 3.5;
+    const dashGap = 2.5;
+
+    for (final metric in path.computeMetrics()) {
+      double distance = 0.0;
+      while (distance < metric.length) {
+        final end = (distance + dashWidth).clamp(0.0, metric.length);
+        final segmentPath = metric.extractPath(distance, end);
+        if (segmentPath != null) {
+          canvas.drawPath(segmentPath, paint);
+        }
+        distance += dashWidth + dashGap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.strokeWidth != strokeWidth ||
+      oldDelegate.cornerRadius != cornerRadius;
 }

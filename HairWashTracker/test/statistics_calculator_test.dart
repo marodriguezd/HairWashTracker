@@ -87,17 +87,115 @@ void main() {
       expect(StatisticsCalculator.getAverageIntervalDays([WashEvent(date: DateTime(2026, 7, 2))]), 0.0);
     });
 
-    test('getNextRecommendedWashDate returns correct recommendation', () {
-      // Last wash is Jul 3. Avg interval is 4.5, rounded to 5 days.
-      // Jul 3 + 5 days = Jul 8.
-      expect(StatisticsCalculator.getNextRecommendedWashDate(events), DateTime(2026, 7, 8, 12, 0, 0));
+    test('getMedianIntervalDays returns correct median', () {
+      // Intervals: 1, 6, 10, 1 → sorted: [1, 1, 6, 10] → median: (1+6)/2 = 3.5
+      expect(StatisticsCalculator.getMedianIntervalDays(events), 3.5);
+
+      // Less than 2 events returns 0.0
+      expect(StatisticsCalculator.getMedianIntervalDays([]), 0.0);
+      expect(StatisticsCalculator.getMedianIntervalDays(
+          [WashEvent(date: DateTime(2026, 7, 2))]), 0.0);
+    });
+
+    test('getMedianIntervalDays is robust against outliers', () {
+      // Odd number of intervals: [2, 3, 4, 5, 100] → median = 4 (not affected by 100)
+      final outlierEvents = [
+        WashEvent(date: DateTime(2026, 7, 1)),
+        WashEvent(date: DateTime(2026, 7, 3)),  // +2
+        WashEvent(date: DateTime(2026, 7, 6)),  // +3
+        WashEvent(date: DateTime(2026, 7, 10)), // +4
+        WashEvent(date: DateTime(2026, 7, 15)), // +5
+        WashEvent(date: DateTime(2026, 10, 23)), // +100 ← outlier
+      ];
+      expect(StatisticsCalculator.getMedianIntervalDays(outlierEvents), 4.0);
+
+      // Average would be (2+3+4+5+100)/5 = 114/5 = 22.8
+      expect(StatisticsCalculator.getAverageIntervalDays(outlierEvents), 22.8);
+    });
+
+    test('getNextRecommendedWashDate uses median interval', () {
+      // Intervals: 1, 6, 10, 1 → median: (1+6)/2 = 3.5 → 3.5*24 = 84 hours.
+      // Last wash is Jul 3. Jul 3 12:00 + 84h = Jul 7 00:00.
+      expect(StatisticsCalculator.getNextRecommendedWashDate(events),
+          DateTime(2026, 7, 7, 0, 0, 0));
 
       // If empty, returns null
       expect(StatisticsCalculator.getNextRecommendedWashDate([]), isNull);
 
-      // If 1 event, defaults to 3 days
-      // Jul 2 + 3 days = Jul 5
-      expect(StatisticsCalculator.getNextRecommendedWashDate([WashEvent(date: DateTime(2026, 7, 2))]), DateTime(2026, 7, 5, 12, 0, 0));
+      // If 1 event, defaults to 72 hours (3 days)
+      // Jul 2 12:00 + 72h = Jul 5 12:00
+      expect(StatisticsCalculator.getNextRecommendedWashDate(
+              [WashEvent(date: DateTime(2026, 7, 2))]),
+          DateTime(2026, 7, 5, 12, 0, 0));
+    });
+
+    test('getPredictedWashDates uses median interval', () {
+      // Intervals: 1, 6, 10, 1 → median: (1+6)/2 = 3.5 → 3.5*24 = 84 hours
+      // Last wash is Jul 3. Predictions: Jul 7 00:00, Jul 10 12:00, Jul 14 00:00, ...
+      final predicted = StatisticsCalculator.getPredictedWashDates(events);
+
+      // First prediction should be lastWash + 84h = Jul 7 00:00
+      expect(predicted.first, DateTime(2026, 7, 7, 0, 0, 0));
+
+      // Predictions should be spaced by 84 hours each
+      if (predicted.length >= 2) {
+        for (int i = 0; i < predicted.length - 1; i++) {
+          final diffHours =
+              predicted[i + 1].difference(predicted[i]).inHours;
+          expect(diffHours, 84);
+        }
+      }
+
+      // Should not exceed 12 predictions
+      expect(predicted.length, lessThanOrEqualTo(12));
+
+      // All predictions should be after the last wash
+      for (final date in predicted) {
+        expect(date.isAfter(DateTime(2026, 7, 3, 12, 0, 0)), isTrue);
+      }
+    });
+
+    test('getPredictedWashDates returns empty list for empty events', () {
+      expect(StatisticsCalculator.getPredictedWashDates([]), isEmpty);
+    });
+
+    test('getPredictedWashDates defaults to 72h interval for single event', () {
+      // Single event → defaults to 72 hours (3 days)
+      // Last wash Jul 2. Predictions: Jul 5 12:00, Jul 8 12:00, Jul 11 12:00, ...
+      final predicted = StatisticsCalculator.getPredictedWashDates([
+        WashEvent(date: DateTime(2026, 7, 2)),
+      ]);
+
+      expect(predicted.first, DateTime(2026, 7, 5, 12, 0, 0));
+
+      if (predicted.length >= 2) {
+        for (int i = 0; i < predicted.length - 1; i++) {
+          final diffHours =
+              predicted[i + 1].difference(predicted[i]).inHours;
+          expect(diffHours, 72);
+        }
+      }
+    });
+
+    test('getPredictedWashDates includes all dates from last wash forward', () {
+      // Events with last wash in the past
+      final oldEvents = [
+        WashEvent(date: DateTime(2022, 1, 1)),
+        WashEvent(date: DateTime(2022, 1, 4)), // 3-day interval
+      ];
+
+      final predicted = StatisticsCalculator.getPredictedWashDates(oldEvents);
+
+      // Should include predictions even if they are in the past
+      expect(predicted, isNotEmpty);
+
+      // First prediction should be Jan 4 + 72h = Jan 7 12:00 (3 days exactly)
+      expect(predicted.first, DateTime(2022, 1, 7, 12, 0, 0));
+
+      // All should be after the last wash
+      for (final date in predicted) {
+        expect(date.isAfter(DateTime(2022, 1, 4, 12, 0, 0)), isTrue);
+      }
     });
   });
 }
