@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/app_controller.dart';
+import '../../models/prediction_result.dart';
 import '../../utils/app_theme.dart';
 import '../widgets/neumorphic_container.dart';
 
@@ -46,6 +47,21 @@ class StatsPage extends StatelessWidget {
                 final nextWashStr = nextWash != null
                     ? DateFormat('yyyy-MM-dd').format(nextWash)
                     : 'N/A';
+                final confidenceStr = switch (controller.predictionConfidence) {
+                  PredictionConfidence.low => 'Low',
+                  PredictionConfidence.medium => 'Medium',
+                  PredictionConfidence.high => 'High',
+                };
+                final confidenceIcon = switch (controller.predictionConfidence) {
+                  PredictionConfidence.low => Icons.signal_cellular_alt_1_bar_rounded,
+                  PredictionConfidence.medium => Icons.signal_cellular_alt_2_bar_rounded,
+                  PredictionConfidence.high => Icons.signal_cellular_alt_rounded,
+                };
+                final trendStr = controller.trendSlope > 0.2
+                    ? '↑ Increasing'
+                    : controller.trendSlope < -0.2
+                        ? '↓ Decreasing'
+                        : '→ Stable';
 
                 return ListView(
                   padding: const EdgeInsets.all(16.0),
@@ -82,22 +98,32 @@ class StatsPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildNeumorphicStatCard(
                       context,
-                      'Median Interval',
-                      '${controller.medianInterval.toStringAsFixed(1)} days',
-                      Icons.av_timer_rounded,
-                      colorScheme.tertiary,
-                      'Prediction metric',
+                      'Adaptive Interval',
+                      '${controller.adaptiveInterval.toStringAsFixed(1)} days',
+                      Icons.auto_graph_rounded,
+                      colorScheme.primary,
+                      'EWMA prediction',
                       delay: 300,
                     ),
                     const SizedBox(height: 16),
                     _buildNeumorphicStatCard(
                       context,
-                      'Average Interval',
-                      '${controller.averageInterval.toStringAsFixed(1)} days',
-                      Icons.analytics_rounded,
-                      colorScheme.secondary,
-                      'Routine reference',
+                      'Model Confidence',
+                      confidenceStr,
+                      confidenceIcon,
+                      colorScheme.tertiary,
+                      'Prediction quality',
                       delay: 350,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildNeumorphicStatCard(
+                      context,
+                      'Interval Trend',
+                      trendStr,
+                      Icons.trending_up_rounded,
+                      colorScheme.secondary,
+                      'Recent pattern',
+                      delay: 400,
                     ),
                     const SizedBox(height: 16),
                     _buildNeumorphicStatCard(
@@ -107,7 +133,7 @@ class StatsPage extends StatelessWidget {
                       Icons.calendar_today_rounded,
                       colorScheme.primary,
                       'Suggested date',
-                      delay: 400,
+                      delay: 450,
                     ),
                   ],
                 );

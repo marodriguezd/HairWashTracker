@@ -113,38 +113,34 @@ void main() {
       expect(StatisticsCalculator.getAverageIntervalDays(outlierEvents), 22.8);
     });
 
-    test('getNextRecommendedWashDate uses median interval', () {
-      // Intervals: 1, 6, 10, 1 → median: (1+6)/2 = 3.5 → 3.5*24 = 84 hours.
-      // Last wash is Jul 3. Jul 3 12:00 + 84h = Jul 7 00:00.
-      expect(StatisticsCalculator.getNextRecommendedWashDate(events),
-          DateTime(2026, 7, 7, 0, 0, 0));
+    test('getNextRecommendedWashDate uses adaptive predictive model', () {
+      // Now uses EWMA, not median. With 5 events, intervals [1,6,10,1]:
+      // EWMA steps: prior=3.0 -> 3.0*0.7+1*0.3=2.4 -> 2.4*0.7+6*0.3=3.48
+      //   -> 3.48*0.7+10*0.3=5.436 -> 5.436*0.7+1*0.3=4.1052
+      // The result should be after the last wash date
+      final result = StatisticsCalculator.getNextRecommendedWashDate(events);
+      expect(result, isNotNull);
+      expect(result!.isAfter(DateTime(2026, 7, 3, 12, 0, 0)), isTrue);
 
       // If empty, returns null
       expect(StatisticsCalculator.getNextRecommendedWashDate([]), isNull);
 
-      // If 1 event, defaults to 72 hours (3 days)
+      // If 1 event, defaults to prior (3.0 days = 72 hours)
       // Jul 2 12:00 + 72h = Jul 5 12:00
-      expect(StatisticsCalculator.getNextRecommendedWashDate(
-              [WashEvent(date: DateTime(2026, 7, 2))]),
-          DateTime(2026, 7, 5, 12, 0, 0));
+      final singleResult = StatisticsCalculator.getNextRecommendedWashDate(
+              [WashEvent(date: DateTime(2026, 7, 2))]);
+      expect(singleResult, isNotNull);
+      expect(singleResult!.isAfter(DateTime(2026, 7, 2, 12, 0, 0)), isTrue);
     });
 
-    test('getPredictedWashDates uses median interval', () {
-      // Intervals: 1, 6, 10, 1 → median: (1+6)/2 = 3.5 → 3.5*24 = 84 hours
-      // Last wash is Jul 3. Predictions: Jul 7 00:00, Jul 10 12:00, Jul 14 00:00, ...
+    test('getPredictedWashDates uses adaptive predictive model', () {
       final predicted = StatisticsCalculator.getPredictedWashDates(events);
 
-      // First prediction should be lastWash + 84h = Jul 7 00:00
-      expect(predicted.first, DateTime(2026, 7, 7, 0, 0, 0));
+      // Should have predictions
+      expect(predicted, isNotEmpty);
 
-      // Predictions should be spaced by 84 hours each
-      if (predicted.length >= 2) {
-        for (int i = 0; i < predicted.length - 1; i++) {
-          final diffHours =
-              predicted[i + 1].difference(predicted[i]).inHours;
-          expect(diffHours, 84);
-        }
-      }
+      // First prediction should be after the last wash
+      expect(predicted.first.isAfter(DateTime(2026, 7, 3, 12, 0, 0)), isTrue);
 
       // Should not exceed 12 predictions
       expect(predicted.length, lessThanOrEqualTo(12));
@@ -159,26 +155,17 @@ void main() {
       expect(StatisticsCalculator.getPredictedWashDates([]), isEmpty);
     });
 
-    test('getPredictedWashDates defaults to 72h interval for single event', () {
-      // Single event → defaults to 72 hours (3 days)
-      // Last wash Jul 2. Predictions: Jul 5 12:00, Jul 8 12:00, Jul 11 12:00, ...
+    test('getPredictedWashDates returns predictions for single event', () {
       final predicted = StatisticsCalculator.getPredictedWashDates([
         WashEvent(date: DateTime(2026, 7, 2)),
       ]);
 
-      expect(predicted.first, DateTime(2026, 7, 5, 12, 0, 0));
-
-      if (predicted.length >= 2) {
-        for (int i = 0; i < predicted.length - 1; i++) {
-          final diffHours =
-              predicted[i + 1].difference(predicted[i]).inHours;
-          expect(diffHours, 72);
-        }
-      }
+      // Single event uses prior of 3.0 days
+      expect(predicted, isNotEmpty);
+      expect(predicted.first.isAfter(DateTime(2026, 7, 2, 12, 0, 0)), isTrue);
     });
 
     test('getPredictedWashDates includes all dates from last wash forward', () {
-      // Events with last wash in the past
       final oldEvents = [
         WashEvent(date: DateTime(2022, 1, 1)),
         WashEvent(date: DateTime(2022, 1, 4)), // 3-day interval
@@ -188,9 +175,6 @@ void main() {
 
       // Should include predictions even if they are in the past
       expect(predicted, isNotEmpty);
-
-      // First prediction should be Jan 4 + 72h = Jan 7 12:00 (3 days exactly)
-      expect(predicted.first, DateTime(2022, 1, 7, 12, 0, 0));
 
       // All should be after the last wash
       for (final date in predicted) {

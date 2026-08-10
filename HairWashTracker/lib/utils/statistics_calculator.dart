@@ -1,4 +1,6 @@
 import '../models/wash_event.dart';
+import '../models/prediction_result.dart';
+import 'wash_predictive_model.dart';
 
 class StatisticsCalculator {
   static int getTotalWashes(List<WashEvent> events) {
@@ -62,51 +64,25 @@ class StatisticsCalculator {
     }
   }
 
+  /// Returns next recommended wash date using the adaptive predictive model.
+  /// Falls back to null if no events exist.
   static DateTime? getNextRecommendedWashDate(List<WashEvent> events) {
     if (events.isEmpty) return null;
-
-    final sortedEvents = List<WashEvent>.from(events)
-      ..sort((a, b) => a.date.compareTo(b.date));
-
-    final lastWash = sortedEvents.last.date;
-    // Use median (more robust against outliers)
-    final medInterval = getMedianIntervalDays(events);
-
-    final intervalHours = medInterval > 0 ? (medInterval * 24).round() : 72;
-    return lastWash.add(Duration(hours: intervalHours.clamp(24, 2160)));
+    return WashPredictiveModel.predict(events).nextWashDate;
   }
 
-  /// Generates predicted wash dates based on the user's median interval.
-  /// Uses median (not average) to be more robust against outlier gaps.
-  /// Uses exact hours to preserve precision.
-  /// Returns all dates from the last wash + interval forward,
-  /// up to 3 months or 12 predictions ahead (past and future).
+  /// Generates predicted wash dates using the adaptive predictive model.
+  /// Uses EWMA + trend detection + day-of-week affinity.
+  /// Returns up to 12 dates within 90 days of the last wash.
   static List<DateTime> getPredictedWashDates(List<WashEvent> events) {
     if (events.isEmpty) return [];
+    return WashPredictiveModel.predict(events).predictedDates;
+  }
 
-    final sortedEvents = List<WashEvent>.from(events)
-      ..sort((a, b) => a.date.compareTo(b.date));
-
-    final lastWash = sortedEvents.last.date;
-    // Use median (more robust against outliers)
-    final medInterval = getMedianIntervalDays(events);
-    final intervalHours =
-        (medInterval > 0 ? (medInterval * 24).round() : 72).clamp(24, 2160);
-
-    final predicted = <DateTime>[];
-
-    // Generate up to 3 months of predictions from the last wash, max 12 dates
-    final limit = lastWash.add(const Duration(days: 90));
-    int count = 0;
-    DateTime nextDate = lastWash.add(Duration(hours: intervalHours));
-
-    while (nextDate.isBefore(limit) && count < 12) {
-      predicted.add(nextDate);
-      nextDate = nextDate.add(Duration(hours: intervalHours));
-      count++;
-    }
-
-    return predicted;
+  /// Returns the full prediction result from the adaptive model.
+  /// Includes confidence level, trend slope, preferred weekday, etc.
+  static PredictionResult getPrediction(List<WashEvent> events) {
+    return WashPredictiveModel.predict(events);
   }
 
   static DateTime _getStartOfWeek(DateTime date) {

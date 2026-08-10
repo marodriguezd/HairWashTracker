@@ -8,6 +8,7 @@ import '../models/theme_preference.dart';
 import '../services/data_repository.dart';
 import '../services/file_operations_service.dart';
 import '../utils/statistics_calculator.dart';
+import '../models/prediction_result.dart';
 
 class AppController extends ChangeNotifier {
   final IDataRepository _repository;
@@ -50,6 +51,16 @@ class AppController extends ChangeNotifier {
       StatisticsCalculator.getNextRecommendedWashDate(_selectedEvents);
   List<DateTime> get predictedWashDates =>
       StatisticsCalculator.getPredictedWashDates(_selectedEvents);
+  PredictionResult get prediction =>
+      StatisticsCalculator.getPrediction(_selectedEvents);
+  PredictionConfidence get predictionConfidence =>
+      prediction.confidence;
+  double get adaptiveInterval =>
+      prediction.adaptiveIntervalDays;
+  double get trendSlope =>
+      prediction.trendSlope;
+  int? get preferredWeekday =>
+      prediction.preferredWeekday;
 
   // Event management
   List<WashEvent> getEventsForDay(DateTime day) {
