@@ -295,9 +295,7 @@ class _DashedBorderPainter extends CustomPainter {
       while (distance < metric.length) {
         final end = (distance + dashWidth).clamp(0.0, metric.length);
         final segmentPath = metric.extractPath(distance, end);
-        if (segmentPath != null) {
-          canvas.drawPath(segmentPath, paint);
-        }
+        canvas.drawPath(segmentPath, paint);
         distance += dashWidth + dashGap;
       }
     }

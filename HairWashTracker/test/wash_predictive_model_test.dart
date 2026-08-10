@@ -207,7 +207,7 @@ void main() {
       final resNormal = WashPredictiveModel.predict(normalEvents);
       final resOutlier = WashPredictiveModel.predict(outlierEvents);
       
-      // Outlier shouldn't totally wreck the EWMA compared to straight average
+      expect(resNormal.adaptiveIntervalDays, lessThan(resOutlier.adaptiveIntervalDays));
       expect(resOutlier.adaptiveIntervalDays, lessThan(10.0));
     });
 
