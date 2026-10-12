@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 class AnimationConstants {
   AnimationConstants._();
 
-  // Durations - Phase 7 naming convention
+  // Durations
   static const Duration quickDuration = Duration(milliseconds: 150);
   static const Duration normalDuration = Duration(milliseconds: 300);
   static const Duration slowDuration = Duration(milliseconds: 500);
@@ -18,14 +18,14 @@ class AnimationConstants {
 
   // Spring Curves - Soft and calming motion
   static const Curve softSpring = Curves.fastEaseInToSlowEaseOut;
-  static const Curve bouncySpring = Curves.elasticOut;
+  static const Curve bouncySpring = Curves.easeOut;
   static const Curve smoothEase = Curves.easeInOutCubic;
 
   // Legacy curves (for backward compatibility)
   static const Curve easeInOut = Curves.easeInOut;
   static const Curve easeOut = Curves.easeOut;
   static const Curve easeIn = Curves.easeIn;
-  static const Curve elasticOut = Curves.elasticOut;
+  static const Curve elasticOut = Curves.easeOut;
 }
 
 /// Spring curve definitions with customizable parameters

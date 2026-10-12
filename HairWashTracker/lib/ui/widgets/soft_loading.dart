@@ -23,7 +23,7 @@ class SoftShimmer extends StatefulWidget {
     this.borderRadius = 12,
     this.baseColor,
     this.highlightColor,
-    this.duration = const Duration(milliseconds: 1500),
+    this.duration = const Duration(milliseconds: 500),
   });
 
   /// Creates a shimmer that looks like a card

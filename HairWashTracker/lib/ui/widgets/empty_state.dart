@@ -12,7 +12,7 @@ import 'neumorphic_container.dart';
 /// - Animated entrance
 /// - Optional action button
 /// - Haptic feedback on interaction
-/// - Neumorphic styling
+/// - M3 tonal styling
 class EmptyState extends StatelessWidget {
   final String? title;
   final String? message;
@@ -70,7 +70,7 @@ class EmptyState extends StatelessWidget {
           children: [
             _SoftIllustration(
               icon: effectiveIcon,
-              color: AppTheme.warmCoral,
+              color: Theme.of(context).colorScheme.primary,
               isDark: isDark,
             ),
             const SizedBox(height: 32),
@@ -147,7 +147,7 @@ class EmptyState extends StatelessWidget {
                     end: const Offset(1, 1),
                     duration: 400.ms,
                     delay: 400.ms,
-                    curve: Curves.elasticOut,
+                    curve: Curves.easeOut,
                   ),
           ],
         ),
@@ -156,7 +156,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Animated soft illustration with floating animation and neumorphic styling
+/// Animated soft illustration with floating animation and M3 tonal styling
 class _SoftIllustration extends StatefulWidget {
   final IconData icon;
   final Color color;
@@ -241,11 +241,11 @@ class _SoftIllustrationState extends State<_SoftIllustration>
                   color: widget.color.withValues(alpha: 0.9),
                 ),
               ),
-            ).animate().fadeIn(duration: 600.ms).scale(
+            ).animate().fadeIn(duration: 400.ms).scale(
                   begin: const Offset(0.5, 0.5),
                   end: const Offset(1, 1),
-                  duration: 600.ms,
-                  curve: Curves.elasticOut,
+                  duration: 400.ms,
+                  curve: Curves.easeOut,
                 ),
           ),
         );

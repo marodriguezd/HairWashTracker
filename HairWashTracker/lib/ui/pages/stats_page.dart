@@ -8,25 +8,15 @@ import '../../utils/app_theme.dart';
 import '../widgets/neumorphic_container.dart';
 
 class StatsPage extends StatelessWidget {
-  const StatsPage({super.key});
+  final bool embed;
+  const StatsPage({super.key, this.embed = false});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final controller = context.watch<AppController>();
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text('Statistics',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            )),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Stack(
+    Widget content = Stack(
         children: [
           Container(
             decoration: BoxDecoration(
@@ -141,7 +131,11 @@ class StatsPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      );
+    if (embed) return content;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Statistics')),
+      body: content,
     );
   }
 
@@ -244,14 +238,8 @@ class StatsPage extends StatelessWidget {
         ],
       ),
     )
-        .animate(delay: Duration(milliseconds: delay))
-        .fadeIn(duration: 600.ms)
-        .slideX(
-            begin: 0.2, end: 0, duration: 600.ms, curve: Curves.easeOutQuart)
-        .scale(
-          begin: const Offset(0.95, 0.95),
-          end: const Offset(1, 1),
-          duration: 600.ms,
-        );
+        .animate(delay: Duration(milliseconds: delay.clamp(0, 400)))
+        .fadeIn(duration: 300.ms)
+        .slideX(begin: 0.1, end: 0, duration: 300.ms, curve: Curves.easeOut);
   }
 }

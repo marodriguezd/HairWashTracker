@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'neumorphic_container.dart';
-import '../../utils/app_theme.dart';
 
 class ConfirmationDialog extends StatelessWidget {
   final String title;
@@ -21,87 +19,36 @@ class ConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      child: NeumorphicContainer(
-        padding: const EdgeInsets.all(24),
-        depth: 5,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Text(
-              title,
-              style: textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Content
-            Text(
-              content,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).pop();
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusButton),
-                    ),
-                  ),
-                  child: Text(
-                    cancelText,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                NeumorphicButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    Navigator.of(context).pop();
-                    onConfirm();
-                  },
-                  isDestructive: true,
-                  child: Text(
-                    confirmText,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onError,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+    return AlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        TextButton(
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).pop();
+          },
+          child: Text(cancelText),
         ),
-      ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
+          ),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            Navigator.of(context).pop();
+            onConfirm();
+          },
+          child: Text(confirmText),
+        ),
+      ],
     );
   }
 }
 
-class NeumorphicButton extends StatefulWidget {
+// Compatibility shim: legacy NeumorphicButton call sites now render as M3 FilledButton.
+class NeumorphicButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
   final bool isDestructive;
@@ -114,59 +61,27 @@ class NeumorphicButton extends StatefulWidget {
   });
 
   @override
-  State<NeumorphicButton> createState() => _NeumorphicButtonState();
-}
-
-class _NeumorphicButtonState extends State<NeumorphicButton> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final backgroundColor =
-        widget.isDestructive ? colorScheme.error : colorScheme.primary;
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onPressed();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-          boxShadow: _isPressed
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    offset: const Offset(2, 2),
-                    blurRadius: 4,
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    offset: const Offset(-2, -2),
-                    blurRadius: 4,
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    offset: const Offset(-4, -4),
-                    blurRadius: 8,
-                  ),
-                ],
+    if (isDestructive) {
+      return FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.error,
+          foregroundColor: colorScheme.onError,
         ),
-        child: widget.child,
-      ),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          onPressed();
+        },
+        child: child,
+      );
+    }
+    return FilledButton(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        onPressed();
+      },
+      child: child,
     );
   }
 }

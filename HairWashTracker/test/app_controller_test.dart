@@ -215,5 +215,17 @@ void main() {
       controller.setThemePreset(AppPresetTheme.lavenderMist);
       expect(controller.themePreset, AppPresetTheme.lavenderMist);
     });
+
+    test('dynamic color defaults to system and preset opts out', () async {
+      await Future.delayed(Duration.zero);
+      expect(controller.useDynamicColor, isTrue);
+
+      controller.setThemePreset(AppPresetTheme.oceanBlue);
+      expect(controller.useDynamicColor, isFalse);
+      expect(controller.themePreset, AppPresetTheme.oceanBlue);
+
+      controller.setUseDynamicColor(true);
+      expect(controller.useDynamicColor, isTrue);
+    });
   });
 }

@@ -77,7 +77,7 @@ class CircularProgressPainter extends CustomPainter {
         colors: [
           color.withValues(alpha: 0.7),
           color,
-          AppTheme.peachBlush,
+          color,
         ],
         stops: const [0.0, 0.6, 1.0],
         transform: GradientRotation(radians(startAngle.toDouble())),
@@ -138,7 +138,7 @@ class CircularProgressPainter extends CustomPainter {
 /// - Soft glow effects
 /// - Customizable size, colors, and stroke width
 /// - Optional center label/value display
-/// - Spa color integration
+/// - Theme color integration
 class AnimatedCircularProgress extends StatefulWidget {
   final double progress;
   final double size;
@@ -159,7 +159,7 @@ class AnimatedCircularProgress extends StatefulWidget {
     required this.color,
     this.backgroundColor,
     this.strokeWidth = 12,
-    this.duration = const Duration(milliseconds: 1500),
+    this.duration = const Duration(milliseconds: 500),
     this.curve = Curves.easeOutQuart,
     this.centerChild,
     this.label,
@@ -293,10 +293,10 @@ class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
   }
 }
 
-/// CircularProgressCard - Neumorphic card with embedded circular progress
+/// CircularProgressCard - M3 card with embedded circular progress
 ///
-/// A complete widget combining NeumorphicContainer styling with animated
-/// circular progress for monthly goal tracking using spa color palette.
+/// A complete widget combining M3 tonal card styling with animated
+/// circular progress for monthly goal tracking using the theme color scheme.
 class CircularProgressCard extends StatelessWidget {
   final int currentValue;
   final int targetValue;
@@ -376,19 +376,19 @@ class CircularProgressCard extends StatelessWidget {
             strokeWidth: 10,
             currentValue: currentValue,
             targetValue: targetValue,
-            duration: const Duration(milliseconds: 1800),
+            duration: const Duration(milliseconds: 500),
           ),
         ],
       ),
     )
         .animate(delay: delay)
-        .fadeIn(duration: 600.ms)
+        .fadeIn(duration: 400.ms)
         .slideX(
-            begin: 0.2, end: 0, duration: 600.ms, curve: Curves.easeOutQuart)
+            begin: 0.2, end: 0, duration: 400.ms, curve: Curves.easeOutQuart)
         .scale(
           begin: const Offset(0.95, 0.95),
           end: const Offset(1, 1),
-          duration: 600.ms,
+          duration: 400.ms,
         );
   }
 }

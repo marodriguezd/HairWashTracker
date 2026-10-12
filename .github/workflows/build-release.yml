@@ -58,5 +58,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: HairWashTracker/build/app/outputs/flutter-apk/app-release.apk
-          name: Hair Wash Tracker 🌊 (v26.08.10)
+          name: Hair Wash Tracker (${{ github.ref_name }})
           generate_release_notes: true

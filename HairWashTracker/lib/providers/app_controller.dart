@@ -18,6 +18,7 @@ class AppController extends ChangeNotifier {
   DateTime _focusedDay = DateTime.now();
   AppThemeMode _themeMode = AppThemeMode.system;
   AppPresetTheme _themePreset = AppPresetTheme.warmCoral;
+  bool _useDynamicColor = true;
   bool _useComplexAnimations = true;
   bool _disposed = false;
 
@@ -29,13 +30,14 @@ class AppController extends ChangeNotifier {
     _loadEvents();
     _loadThemeMode();
     _loadThemePreset();
+    _loadUseDynamicColor();
   }
 
-  // Getters
   List<WashEvent> get selectedEvents => List.unmodifiable(_selectedEvents);
   DateTime get focusedDay => _focusedDay;
   AppThemeMode get themeMode => _themeMode;
   AppPresetTheme get themePreset => _themePreset;
+  bool get useDynamicColor => _useDynamicColor;
   bool get useComplexAnimations => _useComplexAnimations;
 
   int get totalWashes => StatisticsCalculator.getTotalWashes(_selectedEvents);
@@ -62,7 +64,6 @@ class AppController extends ChangeNotifier {
   int? get preferredWeekday =>
       prediction.preferredWeekday;
 
-  // Event management
   List<WashEvent> getEventsForDay(DateTime day) {
     return _selectedEvents
         .where((event) => isSameDay(event.date, day))
@@ -101,6 +102,17 @@ class AppController extends ChangeNotifier {
   void setThemePreset(AppPresetTheme preset) {
     _themePreset = preset;
     ThemePreference.setThemePreset(preset);
+    // Picking a seed accent opts out of system dynamic color.
+    if (_useDynamicColor) {
+      _useDynamicColor = false;
+      ThemePreference.setUseDynamicColor(false);
+    }
+    notifyListeners();
+  }
+
+  void setUseDynamicColor(bool value) {
+    _useDynamicColor = value;
+    ThemePreference.setUseDynamicColor(value);
     notifyListeners();
   }
 
@@ -121,7 +133,6 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Data persistence
   Future<void> _loadEvents() async {
     if (_disposed) return;
     try {
@@ -142,6 +153,20 @@ class AppController extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading theme: $e');
       _themeMode = AppThemeMode.system;
+      if (_disposed) return;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadUseDynamicColor() async {
+    if (_disposed) return;
+    try {
+      _useDynamicColor = await ThemePreference.getUseDynamicColor();
+      if (_disposed) return;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading dynamic color preference: $e');
+      _useDynamicColor = true;
       if (_disposed) return;
       notifyListeners();
     }
@@ -169,7 +194,6 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  // Import/Export operations
   Future<void> exportData() async {
     try {
       final csvContent = await _fileOperations.exportToCSV(_selectedEvents);

@@ -3,17 +3,31 @@ import '../models/wash_event.dart';
 import '../models/prediction_result.dart';
 
 /// Predictive model for estimating future wash dates based on user history.
+///
+/// Cold start: with no history the model falls back to [priorIntervalDays].
+/// As washes accumulate, an EWMA over outlier-clipped (winsorized) intervals
+/// takes over, so one-off gaps (e.g. vacations) cannot drag the estimate.
 class WashPredictiveModel {
   WashPredictiveModel._();
+
+  /// Default interval in days used before enough history exists.
+  static const double priorIntervalDays = 3.0;
+
+  /// Hard bounds for any interval estimate.
+  static const double minIntervalDays = 1.0;
+  static const double maxIntervalDays = 90.0;
+
+  /// Floor for the MAD scale so tight rhythms still clip vacation gaps.
+  static const double minScaleDays = 0.5;
 
   /// Predicts future wash dates based on a history of wash events.
   static PredictionResult predict(List<WashEvent> events) {
     if (events.isEmpty) {
       final now = DateTime.now();
       return PredictionResult(
-        nextWashDate: now.add(const Duration(days: 3)),
+        nextWashDate: now.add(Duration(days: priorIntervalDays.round())),
         predictedDates: [],
-        adaptiveIntervalDays: 3.0,
+        adaptiveIntervalDays: priorIntervalDays,
         confidence: PredictionConfidence.low,
         trendSlope: 0.0,
       );
@@ -28,14 +42,20 @@ class WashPredictiveModel {
       intervals.add(diff.inHours / 24.0);
     }
 
-    final ewma = _computeEWMA(intervals);
-    final trendSlope = _computeTrendSlope(intervals);
-    
+    // Outlier control: clip one-off gaps to median +/- 3*MAD before any
+    // averaging, so vacations or missed logs skew neither level nor trend.
+    final winsorized = _winsorize(intervals);
+    final clippedCount = _countClipped(intervals, winsorized);
+
+    final ewma = _computeEWMA(winsorized);
+    final trendSlope = _computeTrendSlope(winsorized);
+
     var adjustedInterval = ewma + trendSlope * 0.5;
-    adjustedInterval = adjustedInterval.clamp(1.0, 90.0);
-    
+    adjustedInterval =
+        adjustedInterval.clamp(minIntervalDays, maxIntervalDays);
+
     final preferredWeekday = _computePreferredWeekday(sortedEvents);
-    final confidence = _computeConfidence(intervals.length);
+    final confidence = _computeConfidence(intervals.length, clippedCount);
     
     final lastWashDate = sortedEvents.last.date;
     final intervalHours = (adjustedInterval * 24.0).round();
@@ -65,13 +85,46 @@ class WashPredictiveModel {
     );
   }
 
-  static double _computeEWMA(List<double> intervals, {double alpha = 0.3, double prior = 3.0}) {
+  static double _computeEWMA(List<double> intervals,
+      {double alpha = 0.3, double prior = priorIntervalDays}) {
     if (intervals.isEmpty) return prior;
     double ewma = prior;
     for (final interval in intervals) {
       ewma = alpha * interval + (1 - alpha) * ewma;
     }
-    return ewma.clamp(1.0, 90.0);
+    return ewma.clamp(minIntervalDays, maxIntervalDays);
+  }
+
+  /// Median of a non-empty sample.
+  static double _median(List<double> values) {
+    final sorted = List<double>.from(values)..sort();
+    final n = sorted.length;
+    if (n.isOdd) return sorted[n ~/ 2];
+    return (sorted[n ~/ 2 - 1] + sorted[n ~/ 2]) / 2.0;
+  }
+
+  /// Winsorizes intervals to [minIntervalDays, median + 3 * scale] where
+  /// scale is MAD floored at [minScaleDays]. Returns a new list; a single
+  /// interval can never be an outlier (there is no baseline yet).
+  static List<double> _winsorize(List<double> intervals) {
+    if (intervals.length < 2) return List<double>.from(intervals);
+    final median = _median(intervals);
+    final deviations =
+        intervals.map((x) => (x - median).abs()).toList(growable: false);
+    final scale = max(_median(deviations), minScaleDays);
+    final cap = median + 3 * scale;
+    return intervals
+        .map((x) => x.clamp(minIntervalDays, cap))
+        .toList(growable: false);
+  }
+
+  /// Counts how many intervals winsorization actually altered.
+  static int _countClipped(List<double> raw, List<double> clipped) {
+    var count = 0;
+    for (int i = 0; i < raw.length; i++) {
+      if ((raw[i] - clipped[i]).abs() > 1e-9) count++;
+    }
+    return count;
   }
 
   static double _computeTrendSlope(List<double> intervals) {
@@ -145,9 +198,26 @@ class WashPredictiveModel {
     return baseDate;
   }
 
-  static PredictionConfidence _computeConfidence(int intervalCount) {
-    if (intervalCount <= 1) return PredictionConfidence.low;
-    if (intervalCount <= 4) return PredictionConfidence.medium;
-    return PredictionConfidence.high;
+  /// Confidence grows with sample size; each clipped outlier indicates a
+  /// noisier history, so it downgrades the level by one step.
+  static PredictionConfidence _computeConfidence(
+      int intervalCount, int clippedCount) {
+    final PredictionConfidence base;
+    if (intervalCount <= 1) {
+      base = PredictionConfidence.low;
+    } else if (intervalCount <= 4) {
+      base = PredictionConfidence.medium;
+    } else {
+      base = PredictionConfidence.high;
+    }
+    if (clippedCount == 0) return base;
+    switch (base) {
+      case PredictionConfidence.high:
+        return PredictionConfidence.medium;
+      case PredictionConfidence.medium:
+        return PredictionConfidence.low;
+      case PredictionConfidence.low:
+        return PredictionConfidence.low;
+    }
   }
 }

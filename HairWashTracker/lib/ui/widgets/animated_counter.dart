@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../utils/app_theme.dart';
 import 'neumorphic_container.dart';
 
 /// AnimatedCounter - A reusable widget that animates from 0 to target value
@@ -10,7 +9,7 @@ import 'neumorphic_container.dart';
 /// - Customizable duration, curve, and text style
 /// - Optional suffix/prefix
 /// - Integer or decimal counting support
-/// - Neumorphic design integration
+/// - M3 tonal card integration
 class AnimatedCounter extends StatefulWidget {
   final int value;
   final Duration duration;
@@ -24,7 +23,7 @@ class AnimatedCounter extends StatefulWidget {
   const AnimatedCounter({
     super.key,
     required this.value,
-    this.duration = const Duration(milliseconds: 1500),
+    this.duration = const Duration(milliseconds: 500),
     this.curve = Curves.easeOutQuart,
     this.style,
     this.prefix,
@@ -99,7 +98,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
 /// AnimatedStatValue - Enhanced counter with icon and label
 ///
 /// A complete stat display with animated counting number,
-/// icon, and label in a vertical layout with neumorphic styling.
+/// icon, and label in a vertical layout with M3 tonal styling.
 class AnimatedStatValue extends StatelessWidget {
   final int value;
   final String label;
@@ -118,7 +117,7 @@ class AnimatedStatValue extends StatelessWidget {
     required this.icon,
     required this.color,
     this.delay = Duration.zero,
-    this.duration = const Duration(milliseconds: 1500),
+    this.duration = const Duration(milliseconds: 500),
     this.iconSize = 32,
     this.valueStyle,
     this.labelStyle,
@@ -157,7 +156,7 @@ class AnimatedStatValue extends StatelessWidget {
               begin: const Offset(0, 0),
               end: const Offset(1, 1),
               duration: 500.ms,
-              curve: Curves.elasticOut,
+              curve: Curves.easeOut,
             )
             .fadeIn(duration: 400.ms),
         const SizedBox(height: 16),
@@ -166,7 +165,7 @@ class AnimatedStatValue extends StatelessWidget {
           duration: duration,
           style: valueStyle ??
               Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: AppTheme.warmCoral,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
                     height: 1.0,
                     letterSpacing: -1,

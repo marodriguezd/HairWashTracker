@@ -1,57 +1,70 @@
-# Hair Wash Tracker 🌊
+# Hair Wash Tracker
 
-[🇪🇸 Versión en Español](README_ES.md)
+[![License: GPL-3.0-only](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg)](LICENSE)
 
-A beautiful and modern Flutter application designed to help you track your hair wash routine with ease. Built with **Material You** aesthetics and **Neumorphism** elements.
+[Versión en español](README_ES.md)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_1.jpg" width="45%" alt="Hair Wash Tracker Light Theme">
-  &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_2.jpg" width="45%" alt="Hair Wash Tracker Dark Theme">
-</p>
-
-## ✨ Features
-
-*   **📅 Interactive Calendar**: Visualize your wash days effortlessly.
-*   **🫧 Tap to Track**: Simply tap a day to toggle a wash event.
-*   **📊 Statistics**: View monthly and weekly wash insights at a glance.
-*   **🎨 Dynamic Material You Presets**: Choose from custom color themes (Warm Coral, Lavender Mist, Sage Mist, Ocean Blue) dynamically adapting the UI.
-*   **🤖 Modern Android Integrations**: Built with Android 17 design patterns, supporting adaptive icons and Material You themed-icons (monochrome dynamic tint).
-*   **🌓 Dual Theme**: Full support for both Light and Dark modes.
-*   **💾 Data Persistence**: Your data is saved locally so you never lose track.
-*   **📂 Import/Export**: Easy CSV backup and restore to keep your data safe and portable (Compatible with legacy formats).
-
-## 🛠️ Tech Stack
-
-*   **Flutter** & **Dart**
-*   **Provider** for state management
-*   **TableCalendar** for the calendar view
-*   **Shared Preferences** for local storage
-*   **Neumorphism** UI principles
-
-## 📸 Statistics
+Local-first Flutter application for tracking a hair-wash routine. Log wash
+days on a calendar, review weekly and monthly statistics, and get an adaptive
+prediction for the next recommended wash. No account, no cloud: data stays on
+the device.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_3.jpg" width="45%" alt="Statistics Light Theme">
+  <img src="HairWashTracker/assets/readme_home_light.png" width="45%" alt="Home screen, light theme">
   &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/marodriguezd/HairWashTracker/main/HairWashTracker/assets/new_july_2026_4.jpg" width="45%" alt="Statistics Dark Theme">
+  <img src="HairWashTracker/assets/readme_home_dark.png" width="45%" alt="Home screen, dark theme">
 </p>
 
-## 🚀 Getting Started
+## Features
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/marodriguezd/HairWashTracker.git
-    ```
-2.  **Install dependencies**:
-    ```bash
-    flutter pub get
-    ```
-3.  **Run the app**:
-    ```bash
-    flutter run
-    ```
+- Interactive month calendar; tap a day to log or remove a wash
+- Predicted wash dates derived from logged history
+- Weekly bar chart and monthly counters
+- Adaptive next-wash estimate (EWMA interval, trend, weekday affinity)
+- Light, dark, and system themes; four seed presets (Warm Coral, Lavender
+  Mist, Sage Mist, Ocean Blue) plus Android dynamic color on supported devices
+- Adaptive navigation (bottom bar on phones, side rail on large screens)
+- Local persistence; CSV and JSON import/export, sharing exports through the system share sheet
 
-## 📱 Compatibility
+## Statistics
 
-*   Android
+<p align="center">
+  <img src="HairWashTracker/assets/readme_stats_light.png" width="45%" alt="Statistics screen, light theme">
+  &nbsp;&nbsp;
+  <img src="HairWashTracker/assets/readme_stats_dark.png" width="45%" alt="Statistics screen, dark theme">
+</p>
+
+## Tech stack
+
+- Flutter / Dart, Material 3
+- `provider` for state management
+- `table_calendar` for the calendar view
+- `shared_preferences` for local storage
+- `dynamic_color` for Android dynamic theming
+
+## Getting started
+
+```bash
+git clone https://github.com/marodriguezd/HairWashTracker.git
+cd HairWashTracker/HairWashTracker
+flutter pub get
+flutter run
+```
+
+Quality gates:
+
+```bash
+flutter analyze
+flutter test
+```
+
+## Compatibility
+
+- Android (minSdk 24, targetSdk 36)
+- Adaptive and monochrome launcher icons included
+
+## License
+
+License: GNU General Public License v3.0 only (GPL-3.0-only)
+
+See [LICENSE](LICENSE) for the full license text.

@@ -250,4 +250,84 @@ void main() {
       expect(WashPredictiveModel.predict(generateEvents(baseDate, [3, 3, 3, 3, 3])).confidence, PredictionConfidence.high);
     });
   });
+
+  group('WashPredictiveModel outlier control', () {
+    WashEvent createEvent(DateTime date) {
+      return WashEvent(date: date);
+    }
+
+    List<WashEvent> generateEvents(DateTime start, List<int> intervals) {
+      final events = <WashEvent>[createEvent(start)];
+      var current = start;
+      for (final interval in intervals) {
+        current = current.add(Duration(days: interval));
+        events.add(createEvent(current));
+      }
+      return events;
+    }
+
+    double leaveLastOutMae(List<WashEvent> events) {
+      var errSum = 0.0;
+      var n = 0;
+      for (int i = 2; i <= events.length; i++) {
+        final train = events.sublist(0, i - 1);
+        final actual = events[i - 1].date;
+        final pred = WashPredictiveModel.predict(train).nextWashDate;
+        errSum += (pred.difference(actual).inHours / 24.0).abs();
+        n++;
+      }
+      return errSum / n;
+    }
+
+    test('23. Cold start uses the 3-day prior with 0 or 1 events', () {
+      expect(WashPredictiveModel.predict([]).adaptiveIntervalDays, 3.0);
+      final single = WashPredictiveModel.predict(
+          [createEvent(DateTime(2026, 1, 1))]);
+      // A single interval blends toward the prior instead of trusting one sample.
+      expect(single.adaptiveIntervalDays, inInclusiveRange(2.0, 4.0));
+      expect(single.confidence, PredictionConfidence.low);
+    });
+
+    test('24. Vacation gap is clipped: estimate stays near the rhythm', () {
+      final baseDate = DateTime(2026, 1, 1, 12);
+      final intervals = [4, 4, 4, 4, 4, 4, 4, 4, 4, 45, 4, 4, 4, 4, 4];
+      final result =
+          WashPredictiveModel.predict(generateEvents(baseDate, intervals));
+      // Without clipping a 45-day gap would drag the EWMA above ~15 days.
+      expect(result.adaptiveIntervalDays, lessThan(8.0));
+      final lastWash = baseDate.add(
+          Duration(days: intervals.reduce((a, b) => a + b)));
+      final nextInDays =
+          result.nextWashDate.difference(lastWash).inHours / 24.0;
+      expect(nextInDays, inInclusiveRange(2.0, 7.0));
+    });
+
+    test('25. Clipped outliers downgrade confidence one level', () {
+      final baseDate = DateTime(2026, 1, 1, 12);
+      // 15 intervals with a vacation gap: base level would be high.
+      final result = WashPredictiveModel.predict(generateEvents(
+          baseDate, [4, 4, 4, 4, 4, 4, 4, 4, 4, 45, 4, 4, 4, 4, 4]));
+      expect(result.confidence, PredictionConfidence.medium);
+      // Clean history with the same size keeps high confidence.
+      final clean = WashPredictiveModel.predict(generateEvents(
+          baseDate, [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]));
+      expect(clean.confidence, PredictionConfidence.high);
+    });
+
+    test('26. Backtest regression: vacation-gap MAE stays below 3.5 days', () {
+      final baseDate = DateTime(2026, 1, 1, 12);
+      final events = generateEvents(
+          baseDate, [4, 4, 4, 4, 4, 4, 4, 4, 4, 45, 4, 4, 4, 4, 4]);
+      // The pre-robust model scored 5.22 days here.
+      expect(leaveLastOutMae(events), lessThan(3.5));
+    });
+
+    test('27. Clean rhythms are untouched by winsorization', () {
+      final baseDate = DateTime(2026, 1, 1, 12);
+      final steady =
+          WashPredictiveModel.predict(generateEvents(baseDate, [3, 3, 3, 3, 3]));
+      expect(steady.adaptiveIntervalDays, closeTo(3.0, 0.2));
+      expect(steady.confidence, PredictionConfidence.high);
+    });
+  });
 }

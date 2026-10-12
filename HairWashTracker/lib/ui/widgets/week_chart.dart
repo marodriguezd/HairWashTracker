@@ -41,9 +41,9 @@ class WeekChart extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.bar_chart_rounded,
-                color: AppTheme.warmCoral,
+                color: Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -94,9 +94,9 @@ class WeekChart extends StatelessWidget {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final barColor = isToday
-        ? AppTheme.warmCoral
+        ? Theme.of(context).colorScheme.primary
         : dayData.count > 0
-            ? AppTheme.peachBlush
+            ? Theme.of(context).colorScheme.secondary
             : colorScheme.surfaceContainerHighest;
 
     return Column(
@@ -122,7 +122,6 @@ class WeekChart extends StatelessWidget {
               .animate(delay: delay + 300.ms)
               .fadeIn(duration: 300.ms)
               .scale(begin: const Offset(0.5, 0.5), end: const Offset(1, 1)),
-        // Bar
         Container(
           width: 32,
           height: barHeight,
@@ -151,23 +150,22 @@ class WeekChart extends StatelessWidget {
             .slideY(
               begin: 1,
               end: 0,
-              duration: 600.ms,
+              duration: 400.ms,
               curve: Curves.easeOutQuart,
             )
             .fadeIn(duration: 400.ms),
         const SizedBox(height: 12),
-        // Day label
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: isToday ? AppTheme.warmCoral.withValues(alpha: 0.15) : null,
+            color: isToday ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15) : null,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             dayData.dayLabel,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: isToday
-                      ? AppTheme.warmCoral
+                      ? Theme.of(context).colorScheme.primary
                       : colorScheme.onSurfaceVariant,
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                 ),
@@ -246,7 +244,6 @@ class WeekChartCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -257,16 +254,16 @@ class WeekChartCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          AppTheme.warmCoral.withValues(alpha: 0.15),
-                          AppTheme.peachBlush.withValues(alpha: 0.1),
+                          Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                          Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                         ],
                       ),
                       borderRadius:
                           BorderRadius.circular(AppTheme.radiusButton),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.calendar_view_week_rounded,
-                      color: AppTheme.warmCoral,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 24,
                     ),
                   ),
@@ -299,20 +296,20 @@ class WeekChartCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.warmCoral.withValues(alpha: 0.12),
-                      AppTheme.peachBlush.withValues(alpha: 0.05),
+                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                      Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                   border: Border.all(
-                    color: AppTheme.warmCoral.withValues(alpha: 0.2),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
                 child: Text(
                   '$totalWeekWashes washes',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppTheme.warmCoral,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -324,7 +321,6 @@ class WeekChartCard extends StatelessWidget {
               .fadeIn(duration: 500.ms)
               .slideY(begin: 0.1, end: 0, duration: 500.ms),
           const SizedBox(height: 28),
-          // Chart
           _buildChart(context, weekData, delay: delay + 200.ms),
         ],
       ),
@@ -374,15 +370,14 @@ class WeekChartCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final hasWashes = dayData.count > 0;
     final barColor = isToday
-        ? AppTheme.warmCoral
+        ? Theme.of(context).colorScheme.primary
         : hasWashes
-            ? AppTheme.peachBlush
+            ? Theme.of(context).colorScheme.secondary
             : colorScheme.surfaceContainerHighest;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Count indicator
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -405,7 +400,6 @@ class WeekChartCard extends StatelessWidget {
             .animate(delay: delay + 400.ms)
             .fadeIn(duration: 300.ms)
             .scale(begin: const Offset(0, 0), end: const Offset(1, 1)),
-        // Bar container with track
         Container(
           width: 36,
           height: 140,
@@ -413,7 +407,6 @@ class WeekChartCard extends StatelessWidget {
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
-              // Background track
               Container(
                 width: 36,
                 height: 140,
@@ -423,7 +416,6 @@ class WeekChartCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                 ),
               ),
-              // Animated fill
               Container(
                 width: 36,
                 height: barHeight,
@@ -462,15 +454,14 @@ class WeekChartCard extends StatelessWidget {
             )
             .fadeIn(duration: 400.ms),
         const SizedBox(height: 12),
-        // Day label
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: isToday ? AppTheme.warmCoral.withValues(alpha: 0.12) : null,
+            color: isToday ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12) : null,
             borderRadius: BorderRadius.circular(AppTheme.radiusButton - 2),
             border: isToday
                 ? Border.all(
-                    color: AppTheme.warmCoral.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                     width: 1,
                   )
                 : null,
@@ -479,7 +470,7 @@ class WeekChartCard extends StatelessWidget {
             dayData.dayLabel,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: isToday
-                      ? AppTheme.warmCoral
+                      ? Theme.of(context).colorScheme.primary
                       : colorScheme.onSurfaceVariant,
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                   fontSize: 12,

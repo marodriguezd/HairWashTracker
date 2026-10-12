@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../models/theme_preference.dart';
 import '../../providers/app_controller.dart';
+import '../pages/settings_page.dart';
 import '../pages/stats_page.dart';
 import 'confirmation_dialog.dart';
-import 'theme_switch.dart';
 import '../../utils/app_theme.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -29,12 +28,8 @@ class AppDrawer extends StatelessWidget {
             width: double.infinity,
             padding:
                 const EdgeInsets.only(top: 60, bottom: 30, left: 24, right: 24),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppTheme.warmCoral, AppTheme.peachBlush],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,17 +37,17 @@ class AppDrawer extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: colorScheme.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.waves_rounded,
-                      color: Colors.white, size: 30),
+                  child: Icon(Icons.waves_rounded,
+                      color: colorScheme.onPrimaryContainer, size: 30),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Hair Wash Tracker',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
+                        color: colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0,
                       ),
@@ -61,7 +56,7 @@ class AppDrawer extends StatelessWidget {
                 Text(
                   'Taking care of your hair',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                         letterSpacing: 0.25,
                       ),
                 ),
@@ -91,87 +86,15 @@ class AppDrawer extends StatelessWidget {
                         MaterialPageRoute(builder: (_) => const StatsPage()));
                   },
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Divider(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12, bottom: 8),
-                  child: Text(
-                    'Appearance',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: 0.75,
-                        ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: ThemeSwitch(),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12, bottom: 8),
-                  child: Text(
-                    'Color Palette',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: 0.75,
-                        ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Consumer<AppController>(
-                    builder: (context, controller, _) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: AppPresetTheme.values.map((preset) {
-                          final isSelected = controller.themePreset == preset;
-                          final seedColor = AppTheme.getSeedColor(preset);
-
-                          return GestureDetector(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              controller.setThemePreset(preset);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 38,
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: seedColor,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? colorScheme.onSurface
-                                      : Colors.transparent,
-                                  width: 3,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: seedColor.withValues(alpha: 0.4),
-                                    blurRadius: isSelected ? 8 : 4,
-                                    spreadRadius: isSelected ? 1 : 0,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: isSelected
-                                  ? const Icon(
-                                      Icons.check_rounded,
-                                      color: Colors.white,
-                                      size: 20,
-                                    )
-                                  : null,
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
+                _DrawerItem(
+                  icon: Icons.settings_rounded,
+                  label: 'Settings',
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const SettingsPage()));
+                  },
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -183,7 +106,7 @@ class AppDrawer extends StatelessWidget {
                     'Data Management',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: colorScheme.primary,
-                          fontWeight: FontWeight.w300,
+                          fontWeight: FontWeight.w500,
                           letterSpacing: 0.75,
                         ),
                   ),

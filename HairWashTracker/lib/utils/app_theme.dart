@@ -40,15 +40,16 @@ class AppTheme {
   static const Color darkGradientStart = Color(0xFF3D405B);
   static const Color darkGradientEnd = Color(0xFF2D3040);
 
-  /// Standard border radius values
-  static const double radiusCard = 24.0;
-  static const double radiusButton = 16.0;
-  static const double radiusSmall = 12.0;
+  /// MD3 shape tokens (spec): xs 4, small 8, medium 12, large 16, xl 28, full pill
+  static const double radiusCard = 12.0;
+  static const double radiusButton = 999.0;
+  static const double radiusSmall = 4.0;
   static const double radiusChip = 8.0;
+  static const double radiusDialog = 28.0;
 
-  /// Standard spacing values
+  /// MD3 8dp spacing scale
   static const double spacingScreen = 16.0;
-  static const double spacingCard = 24.0;
+  static const double spacingCard = 16.0;
   static const double spacingItem = 16.0;
   static const double spacingTight = 8.0;
 
@@ -121,25 +122,25 @@ class AppTheme {
         ),
         bodySmall: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           letterSpacing: 0.4,
           height: 1.33,
         ),
         labelLarge: TextStyle(
           fontSize: 14,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           letterSpacing: 0.1,
           height: 1.43,
         ),
         labelMedium: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
           height: 1.33,
         ),
         labelSmall: TextStyle(
           fontSize: 11,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
           height: 1.45,
         ),
@@ -214,87 +215,33 @@ class AppTheme {
         ),
         bodySmall: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w400,
           letterSpacing: 0.4,
           height: 1.33,
         ),
         labelLarge: TextStyle(
           fontSize: 14,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           letterSpacing: 0.1,
           height: 1.43,
         ),
         labelMedium: TextStyle(
           fontSize: 12,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
           height: 1.33,
         ),
         labelSmall: TextStyle(
           fontSize: 11,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
           height: 1.45,
         ),
       );
 
-  static ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: warmCoral,
-      brightness: Brightness.light,
-      primary: warmCoral,
-      secondary: softSand,
-      tertiary: sageMist,
-      surface: warmCream,
-      surfaceContainerHighest: warmCream,
-    ),
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    cardTheme: CardThemeData(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: _lightTextTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-    textTheme: _lightTextTheme,
-  );
+  static ThemeData lightTheme = getTheme(AppPresetTheme.warmCoral, Brightness.light);
 
-  static ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: warmCoral,
-      brightness: Brightness.dark,
-      primary: warmCoral,
-      secondary: softSand,
-      tertiary: sageMist,
-      surface: deepCharcoal,
-      surfaceContainerHighest: deepCharcoal,
-    ),
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    cardTheme: CardThemeData(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: _darkTextTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-    textTheme: _darkTextTheme,
-  );
+  static ThemeData darkTheme = getTheme(AppPresetTheme.warmCoral, Brightness.dark);
 
   static Color getSeedColor(AppPresetTheme preset) {
     switch (preset) {
@@ -351,36 +298,68 @@ class AppTheme {
     }
   }
 
-  static ThemeData getTheme(AppPresetTheme preset, Brightness brightness) {
+  static ThemeData getTheme(AppPresetTheme preset, Brightness brightness,
+      {ColorScheme? dynamicScheme}) {
     final seed = getSeedColor(preset);
-    final surface = getSurfaceColor(preset, brightness);
     final isDark = brightness == Brightness.dark;
+    // Dynamic color (Android 12+) wins when available; otherwise use the seed-generated tonal scheme.
+    final ColorScheme scheme = dynamicScheme ??
+        ColorScheme.fromSeed(seedColor: seed, brightness: brightness);
 
+    final textTheme = isDark ? _darkTextTheme : _lightTextTheme;
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: seed,
-        brightness: brightness,
-        primary: seed,
-        surface: surface,
-        surfaceContainerHighest: surface,
-      ),
+      colorScheme: scheme,
       visualDensity: VisualDensity.adaptivePlatformDensity,
+      scaffoldBackgroundColor: scheme.surface,
       cardTheme: CardThemeData(
         elevation: 0,
+        color: scheme.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusCard),
         ),
       ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: (isDark ? _darkTextTheme : _lightTextTheme).titleLarge?.copyWith(
-          fontWeight: FontWeight.w500,
+      dialogTheme: DialogThemeData(
+        backgroundColor: scheme.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusDialog),
         ),
       ),
-      textTheme: isDark ? _darkTextTheme : _lightTextTheme,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surfaceContainer,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surfaceContainer,
+        indicatorColor: scheme.secondaryContainer,
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: scheme.surface,
+        indicatorColor: scheme.secondaryContainer,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: scheme.primary),
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        scrolledUnderElevation: 2,
+        elevation: 0,
+        centerTitle: true,
+        foregroundColor: scheme.onSurface,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: scheme.onSurface,
+        ),
+      ),
+      textTheme: textTheme,
     );
   }
 }
