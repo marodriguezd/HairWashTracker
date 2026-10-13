@@ -156,8 +156,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Animated soft illustration with floating animation and M3 tonal styling
-class _SoftIllustration extends StatefulWidget {
+class _SoftIllustration extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isDark;
@@ -169,83 +168,28 @@ class _SoftIllustration extends StatefulWidget {
   });
 
   @override
-  State<_SoftIllustration> createState() => _SoftIllustrationState();
-}
-
-class _SoftIllustrationState extends State<_SoftIllustration>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _floatAnimation;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-
-    _floatAnimation = Tween<double>(begin: -5, end: 5).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-      ),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutSine,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _floatAnimation.value),
-          child: Transform.scale(
-            scale: _scaleAnimation.value,
-            child: NeumorphicContainer(
-              borderRadius: 70,
-              depth: widget.isDark ? 12 : 15,
-              padding: const EdgeInsets.all(28),
-              color: widget.isDark
-                  ? colorScheme.surfaceContainerHighest
-                  : colorScheme.surface,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.icon,
-                  size: 48,
-                  color: colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ).animate().fadeIn(duration: 400.ms).scale(
-                  begin: const Offset(0.5, 0.5),
-                  end: const Offset(1, 1),
-                  duration: 400.ms,
-                  curve: Curves.easeOut,
-                ),
-          ),
-        );
-      },
+    return NeumorphicContainer(
+      borderRadius: 70,
+      depth: isDark ? 12 : 15,
+      padding: const EdgeInsets.all(28),
+      color: isDark
+          ? colorScheme.surfaceContainerHighest
+          : colorScheme.surface,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: 48,
+          color: colorScheme.onPrimaryContainer,
+        ),
+      ),
     );
   }
 }

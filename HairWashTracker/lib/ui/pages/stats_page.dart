@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/app_controller.dart';
@@ -118,7 +117,7 @@ class StatsPage extends StatelessWidget {
                     ],
                   ),
                 ),
-              ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0),
+              ),
 
               const SizedBox(height: 24),
               Text(
@@ -156,7 +155,7 @@ class StatsPage extends StatelessWidget {
                     ),
                   ),
                 ],
-              ).animate(delay: 100.ms).fadeIn(duration: 300.ms),
+              ),
 
               const SizedBox(height: 24),
               Text(
@@ -211,7 +210,7 @@ class StatsPage extends StatelessWidget {
                     ],
                   ),
                 ),
-              ).animate(delay: 200.ms).fadeIn(duration: 300.ms),
+              ),
             ],
           );
         },

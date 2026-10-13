@@ -148,20 +148,21 @@ class _AdaptiveBody extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 840),
-            child: const Column(
-              children: [
-                SizedBox(height: 16),
-                Expanded(
-                  child: Padding(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  SizedBox(height: 16),
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: _CalendarGestureDetector(),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: MonthlyWashesWidget(),
-                ),
-              ],
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: MonthlyWashesWidget(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

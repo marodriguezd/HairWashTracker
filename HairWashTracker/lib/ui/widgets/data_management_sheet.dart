@@ -27,7 +27,7 @@ class DataManagementSheet extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,

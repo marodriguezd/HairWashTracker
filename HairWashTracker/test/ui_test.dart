@@ -118,11 +118,11 @@ void main() {
       await tester.pumpWidget(createTestApp(controller: controller));
       await tester.pumpAndSettle();
 
-      // Tap on Settings tab
+      // Tap on Settings tab in NavigationBar
       await tester.tap(find.byIcon(Icons.settings_outlined));
       await tester.pumpAndSettle();
 
-      expect(find.text('Settings'), findsOneWidget);
+      expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
       expect(find.text('Appearance'), findsOneWidget);
       expect(find.text('Accent color'), findsOneWidget);
     });
