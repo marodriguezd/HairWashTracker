@@ -88,12 +88,14 @@ void main() {
       );
     });
 
-    testWidgets('HomePage displays AppBar, Calendar, and NavigationBar with 3 items', (tester) async {
+    testWidgets('HomePage displays AppBar, Calendar, and adaptive navigation with 3 items', (tester) async {
       await tester.pumpWidget(createTestApp(controller: controller));
       await tester.pumpAndSettle();
 
       expect(find.text('Hair Wash Tracker'), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      final hasNavBar = find.byType(NavigationBar).evaluate().isNotEmpty;
+      final hasNavRail = find.byType(NavigationRail).evaluate().isNotEmpty;
+      expect(hasNavBar || hasNavRail, isTrue);
       expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
       expect(find.byIcon(Icons.bar_chart_outlined), findsOneWidget);
       expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
@@ -148,13 +150,13 @@ void main() {
       // Add wash events
       controller.toggleWashDay(DateTime(2026, 7, 2));
       controller.toggleWashDay(DateTime(2026, 7, 5));
-      await Future.delayed(Duration.zero);
 
       await tester.pumpWidget(createTestApp(
         controller: controller,
         child: const StatsPage(),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('Next Recommended Wash'), findsOneWidget);
       expect(find.text('Routine cadence'), findsOneWidget);

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../utils/haptics.dart';
 import '../../utils/app_theme.dart';
 import 'neumorphic_container.dart';
@@ -82,10 +81,7 @@ class EmptyState extends StatelessWidget {
                       color: colorScheme.onSurface,
                     ),
                 textAlign: TextAlign.center,
-              )
-                  .animate()
-                  .fadeIn(duration: 400.ms, delay: 200.ms)
-                  .slideY(begin: 0.2, end: 0, duration: 400.ms),
+              ),
             if (title != null && message != null) const SizedBox(height: 12),
             if (message != null)
               Text(
@@ -95,16 +91,9 @@ class EmptyState extends StatelessWidget {
                       height: 1.5,
                     ),
                 textAlign: TextAlign.center,
-              )
-                  .animate()
-                  .fadeIn(duration: 400.ms, delay: 300.ms)
-                  .slideY(begin: 0.2, end: 0, duration: 400.ms),
+              ),
             const SizedBox(height: 32),
-            if (customWidget != null)
-              customWidget!
-                  .animate()
-                  .fadeIn(duration: 400.ms, delay: 400.ms)
-                  .slideY(begin: 0.2, end: 0, duration: 400.ms),
+            if (customWidget != null) customWidget!,
             if (actionLabel != null && onAction != null)
               NeumorphicContainer(
                 padding: const EdgeInsets.symmetric(
@@ -138,17 +127,7 @@ class EmptyState extends StatelessWidget {
                     ],
                   ),
                 ),
-              )
-                  .animate()
-                  .fadeIn(duration: 400.ms, delay: 400.ms)
-                  .slideY(begin: 0.2, end: 0, duration: 400.ms)
-                  .scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    duration: 400.ms,
-                    delay: 400.ms,
-                    curve: Curves.easeOut,
-                  ),
+              ),
           ],
         ),
       ),
