@@ -9,23 +9,24 @@ class ThemeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<AppController>().themeMode;
+    final controller = context.watch<AppController>();
+    final themeMode = controller.themeMode;
     return SegmentedButton<AppThemeMode>(
-      segments: const [
+      segments: [
         ButtonSegment(
           value: AppThemeMode.light,
-          label: Text('Light'),
-          icon: Icon(Icons.light_mode_outlined, size: 18),
+          label: Text(controller.tr('themeLight')),
+          icon: const Icon(Icons.light_mode_outlined, size: 18),
         ),
         ButtonSegment(
           value: AppThemeMode.dark,
-          label: Text('Dark'),
-          icon: Icon(Icons.dark_mode_outlined, size: 18),
+          label: Text(controller.tr('themeDark')),
+          icon: const Icon(Icons.dark_mode_outlined, size: 18),
         ),
         ButtonSegment(
           value: AppThemeMode.system,
-          label: Text('Auto'),
-          icon: Icon(Icons.settings_suggest_outlined, size: 18),
+          label: Text(controller.tr('themeAuto')),
+          icon: const Icon(Icons.settings_suggest_outlined, size: 18),
         ),
       ],
       selected: {themeMode},

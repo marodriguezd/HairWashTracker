@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../models/language_preference.dart';
 import '../../models/theme_preference.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
@@ -15,26 +17,75 @@ class SettingsPage extends StatelessWidget {
   final bool embed;
   const SettingsPage({super.key, this.embed = false});
 
-  static String presetLabel(AppPresetTheme preset) {
+  static String presetLabel(AppPresetTheme preset, AppController controller) {
     switch (preset) {
       case AppPresetTheme.warmCoral:
-        return 'Warm Coral';
+        return controller.tr('presetWarmCoral');
       case AppPresetTheme.lavenderMist:
-        return 'Lavender';
+        return controller.tr('presetLavender');
       case AppPresetTheme.sageMist:
-        return 'Sage';
+        return controller.tr('presetSage');
       case AppPresetTheme.oceanBlue:
-        return 'Ocean';
+        return controller.tr('presetOcean');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<AppController>();
     final Widget content = ListView(
       padding: const EdgeInsets.all(AppTheme.spacingScreen),
       children: [
         Text(
-          'Appearance',
+          controller.tr('setLanguage'),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.75,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spacingScreen),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  controller.tr('setLanguageDesc'),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: controller.languageCode,
+                  decoration: const InputDecoration(border: OutlineInputBorder()),
+                  items: [
+                    DropdownMenuItem(
+                      value: LanguagePreference.auto,
+                      child: Text(controller.tr('setLangAuto')),
+                    ),
+                    ...AppLanguage.supported.map(
+                      (lang) => DropdownMenuItem(
+                        value: lang.code,
+                        child: Text(lang.nativeName),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    HapticFeedback.selectionClick();
+                    controller.setLanguageCode(value);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          controller.tr('setAppearance'),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w500,
@@ -50,7 +101,7 @@ class SettingsPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Accent color',
+          controller.tr('setAccent'),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w500,
@@ -65,9 +116,8 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 children: [
                   _AccentTile(
-                    title: 'System',
-                    subtitle:
-                        'Follows your wallpaper on Android 12+. Falls back to the selected preset otherwise.',
+                    title: controller.tr('setAccentSystem'),
+                    subtitle: controller.tr('setAccentSystemDesc'),
                     selected: controller.useDynamicColor,
                     leading: Container(
                       width: 40,
@@ -95,7 +145,7 @@ class SettingsPage extends StatelessWidget {
                           controller.themePreset == preset;
                       final seed = AppTheme.getSeedColor(preset);
                       return _AccentTile(
-                        title: presetLabel(preset),
+                        title: presetLabel(preset, controller),
                         selected: selected,
                         leading: Container(
                           width: 40,
@@ -128,7 +178,7 @@ class SettingsPage extends StatelessWidget {
 
     if (embed) return content;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(controller.tr('navSettings'))),
       body: content,
     );
   }

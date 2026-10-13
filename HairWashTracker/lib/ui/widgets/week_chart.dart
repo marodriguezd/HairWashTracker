@@ -1,8 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import '../../models/wash_event.dart';
+import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
 import 'neumorphic_container.dart';
+
+const _weekdayKeys = ['wdMon', 'wdTue', 'wdWed', 'wdThu', 'wdFri', 'wdSat', 'wdSun'];
+const _weekdayFallback = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/// Localized weekday abbreviations, English when no controller is available.
+List<String> _weekdayLabels(BuildContext context) {
+  try {
+    final controller = Provider.of<AppController>(context, listen: false);
+    return [for (final k in _weekdayKeys) controller.tr(k)];
+  } catch (_) {
+    return _weekdayFallback;
+  }
+}
+
+/// Localized string with an English [fallback] when no controller exists.
+String _trs(BuildContext context, String key, String fallback,
+    [Map<String, String>? params]) {
+  var value = fallback;
+  try {
+    value = Provider.of<AppController>(context, listen: false).tr(key);
+  } catch (_) {
+    value = fallback;
+  }
+  if (params != null) {
+    params.forEach((name, v) {
+      value = value.replaceAll('{$name}', v);
+    });
+  }
+  return value;
+}
 
 /// WeekChart - Horizontal bar chart showing washes per day
 ///
@@ -27,7 +59,7 @@ class WeekChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final weekData = _getWeekData();
+    final weekData = _getWeekData(_weekdayLabels(context));
     final maxWashes = weekData
         .map((d) => d.count)
         .reduce((a, b) => a > b ? a : b)
@@ -48,7 +80,7 @@ class WeekChart extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'This Week',
+                _trs(context, 'statsWeekTitle', 'This Week'),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
@@ -175,10 +207,9 @@ class WeekChart extends StatelessWidget {
     );
   }
 
-  List<_DayData> _getWeekData() {
+  List<_DayData> _getWeekData(List<String> days) {
     final now = currentDate;
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return List.generate(7, (index) {
       final date = startOfWeek.add(Duration(days: index));
@@ -234,7 +265,7 @@ class WeekChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final weekData = _getWeekData();
+    final weekData = _getWeekData(_weekdayLabels(context));
     final totalWeekWashes = weekData.fold(0, (sum, d) => sum + d.count);
     final daysWithWashes = weekData.where((d) => d.count > 0).length;
 
@@ -272,7 +303,7 @@ class WeekChartCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Weekly Overview',
+                        _trs(context, 'statsWeeklyOverview', 'Weekly Overview'),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: colorScheme.onSurface,
@@ -281,7 +312,8 @@ class WeekChartCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$daysWithWashes days active',
+                        _trs(context, 'statsDaysActive', '{n} days active',
+                            {'n': '$daysWithWashes'}),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
@@ -307,7 +339,8 @@ class WeekChartCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  '$totalWeekWashes washes',
+                  _trs(context, 'statsWashes', '{n} washes',
+                      {'n': '$totalWeekWashes'}),
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -484,10 +517,9 @@ class WeekChartCard extends StatelessWidget {
     );
   }
 
-  List<_DayData> _getWeekData() {
+  List<_DayData> _getWeekData(List<String> days) {
     final now = currentDate;
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return List.generate(7, (index) {
       final date = startOfWeek.add(Duration(days: index));

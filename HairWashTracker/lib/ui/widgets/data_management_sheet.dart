@@ -25,6 +25,7 @@ class DataManagementSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = Provider.of<AppController>(context);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -36,7 +37,7 @@ class DataManagementSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Text(
-                'Data Management',
+                strings.tr('dataTitle'),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
@@ -46,14 +47,14 @@ class DataManagementSheet extends StatelessWidget {
             const SizedBox(height: 8),
             ListTile(
               leading: Icon(Icons.file_download_outlined, color: colorScheme.primary),
-              title: const Text('Export Data (CSV)'),
-              subtitle: const Text('Share routine history as a CSV spreadsheet'),
+              title: Text(strings.tr('drawerExport')),
+              subtitle: Text(strings.tr('dataExportDesc')),
               onTap: () => _handleExport(context),
             ),
             ListTile(
               leading: Icon(Icons.file_upload_outlined, color: colorScheme.primary),
-              title: const Text('Import Data (CSV)'),
-              subtitle: const Text('Restore routine records from a CSV backup'),
+              title: Text(strings.tr('drawerImport')),
+              subtitle: Text(strings.tr('dataImportDesc')),
               onTap: () => _handleImport(context),
             ),
             const Padding(
@@ -63,10 +64,10 @@ class DataManagementSheet extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.delete_outline_rounded, color: colorScheme.error),
               title: Text(
-                'Clear all data',
+                strings.tr('dataClearAll'),
                 style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.w600),
               ),
-              subtitle: const Text('Permanently erase all logged washes on device'),
+              subtitle: Text(strings.tr('dataClearDesc')),
               onTap: () => _handleClearData(context),
             ),
           ],
@@ -77,11 +78,12 @@ class DataManagementSheet extends StatelessWidget {
 
   void _handleImport(BuildContext context) async {
     Navigator.pop(context);
+    final controller = context.read<AppController>();
     try {
-      await context.read<AppController>().importData();
+      await controller.importData();
       if (context.mounted) {
         Haptics.successHaptic();
-        _showSnackBar(context, 'Data imported successfully', isError: false);
+        _showSnackBar(context, controller.tr('msgImported'), isError: false);
       }
     } catch (e) {
       if (context.mounted) {
@@ -93,11 +95,12 @@ class DataManagementSheet extends StatelessWidget {
 
   void _handleExport(BuildContext context) async {
     Navigator.pop(context);
+    final controller = context.read<AppController>();
     try {
-      await context.read<AppController>().exportData();
+      await controller.exportData();
       if (context.mounted) {
         Haptics.successHaptic();
-        _showSnackBar(context, 'Data exported successfully', isError: false);
+        _showSnackBar(context, controller.tr('msgExported'), isError: false);
       }
     } catch (e) {
       if (context.mounted) {
@@ -109,18 +112,19 @@ class DataManagementSheet extends StatelessWidget {
 
   void _handleClearData(BuildContext context) {
     Navigator.pop(context);
+    final controller = context.read<AppController>();
     showDialog(
       context: context,
       builder: (dialogCtx) => ConfirmationDialog(
-        title: 'Clear all data?',
-        content: 'This action will permanently erase all logged hair washes. It cannot be undone.',
-        confirmText: 'Clear data',
+        title: controller.tr('dataClearTitle'),
+        content: controller.tr('dataClearMsg'),
+        confirmText: controller.tr('dataClearConfirm'),
         onConfirm: () async {
           try {
             await context.read<AppController>().clearAllData();
             if (context.mounted) {
               Haptics.heavyHaptic();
-              _showSnackBar(context, 'All data has been cleared', isError: false);
+              _showSnackBar(context, controller.tr('msgCleared'), isError: false);
             }
           } catch (e) {
             if (context.mounted) {

@@ -5,6 +5,8 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../models/wash_event.dart';
 import '../models/theme_preference.dart';
+import '../models/language_preference.dart';
+import '../l10n/app_localizations.dart';
 import '../services/data_repository.dart';
 import '../services/file_operations_service.dart';
 import '../utils/statistics_calculator.dart';
@@ -18,6 +20,7 @@ class AppController extends ChangeNotifier {
   DateTime _focusedDay = DateTime.now();
   AppThemeMode _themeMode = AppThemeMode.system;
   AppPresetTheme _themePreset = AppPresetTheme.warmCoral;
+  String _languageCode = LanguagePreference.auto;
   bool _useDynamicColor = true;
   bool _useComplexAnimations = true;
   bool _disposed = false;
@@ -31,12 +34,59 @@ class AppController extends ChangeNotifier {
     _loadThemeMode();
     _loadThemePreset();
     _loadUseDynamicColor();
+    _loadLanguageCode();
   }
 
   List<WashEvent> get selectedEvents => List.unmodifiable(_selectedEvents);
   DateTime get focusedDay => _focusedDay;
   AppThemeMode get themeMode => _themeMode;
   AppPresetTheme get themePreset => _themePreset;
+
+  /// Stored language value: `'auto'` or a supported language code.
+  String get languageCode => _languageCode;
+
+  /// Effective UI language code after resolving `'auto'` from the OS locale.
+  String get effectiveLanguageCode {
+    if (_languageCode != LanguagePreference.auto) return _languageCode;
+    try {
+      final locale = WidgetsBinding.instance.platformDispatcher.locale;
+      return AppLocalizations.systemDefaultCode(
+        locale.languageCode,
+        locale.scriptCode,
+        locale.countryCode,
+      );
+    } catch (e) {
+      return 'en';
+    }
+  }
+
+  Locale get flutterLocale {
+    switch (effectiveLanguageCode) {
+      case 'zh':
+        return const Locale('zh');
+      default:
+        return Locale(effectiveLanguageCode);
+    }
+  }
+
+  /// Localized string lookup for the effective UI language.
+  String tr(String key, [Map<String, String>? params]) =>
+      AppLocalizations.stringFor(effectiveLanguageCode, key, params);
+
+  Future<void> setLanguageCode(String code) async {
+    final normalized = code.trim();
+    final next = normalized == LanguagePreference.auto ||
+            AppLocalizations.isSupported(normalized)
+        ? normalized
+        : 'en';
+    _languageCode = next;
+    try {
+      await LanguagePreference.setLanguageCode(next);
+    } catch (e) {
+      debugPrint('Error saving language: $e');
+    }
+    notifyListeners();
+  }
   bool get useDynamicColor => _useDynamicColor;
   bool get useComplexAnimations => _useComplexAnimations;
 
@@ -167,6 +217,24 @@ class AppController extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading dynamic color preference: $e');
       _useDynamicColor = true;
+      if (_disposed) return;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadLanguageCode() async {
+    if (_disposed) return;
+    try {
+      final stored = await LanguagePreference.getLanguageCode();
+      _languageCode = stored == LanguagePreference.auto ||
+              AppLocalizations.isSupported(stored)
+          ? stored
+          : 'en';
+      if (_disposed) return;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading language: $e');
+      _languageCode = LanguagePreference.auto;
       if (_disposed) return;
       notifyListeners();
     }

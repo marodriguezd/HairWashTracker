@@ -1,8 +1,12 @@
+<div align="center">
+  <img src="HairWashTracker/assets/icon.png" alt="logotipo de Hair Wash Tracker" height="96" />
+</div>
+
 # Hair Wash Tracker
 
 [![Licencia: GPL-3.0-only](https://img.shields.io/badge/Licencia-GPL--3.0--only-blue.svg)](LICENSE)
 
-[English version](README.md)
+[English version](README.md) · Versión en español · [Deutsche Version](README_DE.md) · [Version française](README_FR.md) · [Versione italiana](README_IT.md) · [中文版](README_ZH.md)
 
 Aplicación Flutter local para llevar el registro de lavados de cabello. Marca
 los días de lavado en un calendario, consulta estadísticas semanales y
@@ -66,9 +70,3 @@ flutter test
 
 - Android (minSdk 24, targetSdk 36)
 - Iconos adaptativos y monocromáticos incluidos
-
-## Licencia
-
-Licencia: GNU General Public License v3.0 only (GPL-3.0-only)
-
-Consulta el archivo [LICENSE](LICENSE) para ver el texto completo de la licencia.

@@ -6,6 +6,7 @@ import 'package:hair_wash_tracker/providers/app_controller.dart';
 import 'package:hair_wash_tracker/services/data_repository.dart';
 import 'package:hair_wash_tracker/services/file_operations_service.dart';
 import 'package:hair_wash_tracker/ui/pages/home_page.dart';
+import 'l10n/app_localizations.dart';
 import 'models/theme_preference.dart';
 import 'utils/app_theme.dart';
 
@@ -60,6 +61,9 @@ class MyApp extends StatelessWidget {
                 themeMode: _appThemeModeToThemeMode(controller.themeMode),
                 theme: light,
                 darkTheme: dark,
+                locale: controller.flutterLocale,
+                supportedLocales:
+                    AppLanguage.supported.map((l) => l.locale).toList(),
                 home: const HomePage(),
               );
             },

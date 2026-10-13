@@ -13,6 +13,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = Provider.of<AppController>(context);
 
     return Drawer(
       backgroundColor: colorScheme.surface,
@@ -45,7 +46,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Hair Wash Tracker',
+                  strings.tr('appTitle'),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w600,
@@ -54,7 +55,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Taking care of your hair',
+                  strings.tr('drawerTagline'),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                         letterSpacing: 0.25,
@@ -69,7 +70,7 @@ class AppDrawer extends StatelessWidget {
               children: [
                 _DrawerItem(
                   icon: Icons.home_rounded,
-                  label: 'Home',
+                  label: strings.tr('drawerHome'),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
@@ -78,7 +79,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.bar_chart_rounded,
-                  label: 'Statistics',
+                  label: strings.tr('pageStatistics'),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
@@ -88,7 +89,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.settings_rounded,
-                  label: 'Settings',
+                  label: strings.tr('navSettings'),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
@@ -103,7 +104,7 @@ class AppDrawer extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 12, bottom: 8),
                   child: Text(
-                    'Data Management',
+                    strings.tr('drawerSectionData'),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: colorScheme.primary,
                           fontWeight: FontWeight.w500,
@@ -113,12 +114,12 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.upload_file_rounded,
-                  label: 'Import Data (CSV)',
+                  label: strings.tr('drawerImport'),
                   onTap: () => _handleImport(context),
                 ),
                 _DrawerItem(
                   icon: Icons.download_for_offline_rounded,
-                  label: 'Export Data (CSV)',
+                  label: strings.tr('drawerExport'),
                   onTap: () => _handleExport(context),
                 ),
                 const Padding(
@@ -127,7 +128,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.delete_forever_rounded,
-                  label: 'Clear Data',
+                  label: strings.tr('drawerClear'),
                   iconColor: colorScheme.error,
                   textColor: colorScheme.error,
                   onTap: () => _handleClearData(context),
@@ -142,10 +143,11 @@ class AppDrawer extends StatelessWidget {
 
   void _handleImport(BuildContext context) async {
     Navigator.pop(context);
+    final controller = Provider.of<AppController>(context, listen: false);
     try {
-      await Provider.of<AppController>(context, listen: false).importData();
+      await controller.importData();
       if (context.mounted) {
-        _showSnackBar(context, 'Data imported successfully', isError: false);
+        _showSnackBar(context, controller.tr('msgImported'), isError: false);
       }
     } catch (e) {
       if (context.mounted) {
@@ -156,10 +158,11 @@ class AppDrawer extends StatelessWidget {
 
   void _handleExport(BuildContext context) async {
     Navigator.pop(context);
+    final controller = Provider.of<AppController>(context, listen: false);
     try {
-      await Provider.of<AppController>(context, listen: false).exportData();
+      await controller.exportData();
       if (context.mounted) {
-        _showSnackBar(context, 'Data exported successfully', isError: false);
+        _showSnackBar(context, controller.tr('msgExported'), isError: false);
       }
     } catch (e) {
       if (context.mounted) {
@@ -169,18 +172,19 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _handleClearData(BuildContext context) {
+    final controller = Provider.of<AppController>(context, listen: false);
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: 'Clear all data?',
-        content: 'This action cannot be undone.',
+        title: controller.tr('dataClearTitle'),
+        content: controller.tr('dataClearMsgShort'),
         onConfirm: () async {
           Navigator.pop(context);
           try {
             await Provider.of<AppController>(context, listen: false)
                 .clearAllData();
             if (context.mounted) {
-              _showSnackBar(context, 'All data has been cleared',
+              _showSnackBar(context, controller.tr('msgCleared'),
                   isError: false);
             }
           } catch (e) {

@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/app_controller.dart';
 import '../../utils/haptics.dart';
 import '../../utils/app_theme.dart';
 import 'neumorphic_container.dart';
+
+/// Reads a localized string, falling back to [fallback] when no
+/// [AppController] is available above this context.
+String _lt(BuildContext context, String key, String fallback) {
+  try {
+    return Provider.of<AppController>(context, listen: false).tr(key);
+  } catch (_) {
+    return fallback;
+  }
+}
 
 /// Empty state widget for when no data exists
 ///
@@ -31,26 +43,30 @@ class EmptyState extends StatelessWidget {
   });
 
   /// Creates an empty state for no wash data
-  factory EmptyState.noWashes({
+  factory EmptyState.noWashes(
+    BuildContext context, {
     VoidCallback? onAddWash,
   }) {
     return EmptyState(
-      title: 'No Washes Yet',
-      message:
-          'Start tracking your hair wash routine to see your progress here.',
+      title: _lt(context, 'emptyNoWashes', 'No Washes Yet'),
+      message: _lt(context, 'emptyNoWashesMsg',
+          'Start tracking your hair wash routine to see your progress here.'),
       icon: Icons.water_drop_outlined,
-      actionLabel: onAddWash != null ? 'Add First Wash' : null,
+      actionLabel:
+          onAddWash != null ? _lt(context, 'emptyAddFirst', 'Add First Wash') : null,
       onAction: onAddWash,
     );
   }
 
   /// Creates an empty state for no data in a date range
-  factory EmptyState.noDataInRange({
+  factory EmptyState.noDataInRange(
+    BuildContext context, {
     VoidCallback? onAction,
   }) {
-    return const EmptyState(
-      title: 'No Data Available',
-      message: 'There are no washes recorded for this time period.',
+    return EmptyState(
+      title: _lt(context, 'emptyNoData', 'No Data Available'),
+      message: _lt(context, 'emptyNoDataMsg',
+          'There are no washes recorded for this time period.'),
       icon: Icons.calendar_today_outlined,
     );
   }
@@ -185,30 +201,31 @@ class EmptyStatsState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyState(
-      title: 'No Statistics Yet',
-      message:
-          'Track your hair washes for at least a week to see insightful statistics about your routine.',
+      title: _lt(context, 'emptyNoStats', 'No Statistics Yet'),
+      message: _lt(context, 'emptyNoStatsMsg',
+          'Track your hair washes for at least a week to see insightful statistics about your routine.'),
       icon: Icons.analytics_outlined,
-      actionLabel: onStartTracking != null ? 'Start Tracking' : null,
+      actionLabel:
+          onStartTracking != null ? _lt(context, 'emptyStartTracking', 'Start Tracking') : null,
       onAction: onStartTracking,
       customWidget: Column(
         children: [
           _buildFeatureItem(
             context,
             icon: Icons.calendar_month_outlined,
-            text: 'Track wash frequency',
+            text: _lt(context, 'featTrack', 'Track wash frequency'),
           ),
           const SizedBox(height: 12),
           _buildFeatureItem(
             context,
             icon: Icons.trending_up_outlined,
-            text: 'View progress charts',
+            text: _lt(context, 'featCharts', 'View progress charts'),
           ),
           const SizedBox(height: 12),
           _buildFeatureItem(
             context,
             icon: Icons.schedule_outlined,
-            text: 'Optimize your routine',
+            text: _lt(context, 'featOptimize', 'Optimize your routine'),
           ),
         ],
       ),

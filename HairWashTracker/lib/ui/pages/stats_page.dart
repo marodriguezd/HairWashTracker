@@ -22,7 +22,7 @@ class StatsPage extends StatelessWidget {
             return Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppTheme.spacingScreen),
-                child: EmptyState.noWashes(),
+                child: EmptyState.noWashes(context),
               ),
             );
           }
@@ -30,11 +30,11 @@ class StatsPage extends StatelessWidget {
           final nextWash = controller.nextRecommendedWashDate;
           final nextWashStr = nextWash != null
               ? DateFormat('EEE, MMM d').format(nextWash)
-              : 'Keep logging washes';
+              : controller.tr('statsKeepLogging');
           final confidenceStr = switch (controller.predictionConfidence) {
-            PredictionConfidence.low => 'Low confidence',
-            PredictionConfidence.medium => 'Medium confidence',
-            PredictionConfidence.high => 'High confidence',
+            PredictionConfidence.low => controller.tr('confLow'),
+            PredictionConfidence.medium => controller.tr('confMedium'),
+            PredictionConfidence.high => controller.tr('confHigh'),
           };
           final confidenceIcon = switch (controller.predictionConfidence) {
             PredictionConfidence.low => Icons.signal_cellular_alt_1_bar_rounded,
@@ -42,10 +42,10 @@ class StatsPage extends StatelessWidget {
             PredictionConfidence.high => Icons.signal_cellular_alt_rounded,
           };
           final trendStr = controller.trendSlope > 0.2
-              ? 'Increasing'
+              ? controller.tr('trendUp')
               : controller.trendSlope < -0.2
-                  ? 'Decreasing'
-                  : 'Stable';
+                  ? controller.tr('trendDown')
+                  : controller.tr('trendFlat');
           final trendIcon = controller.trendSlope > 0.2
               ? Icons.trending_up_rounded
               : controller.trendSlope < -0.2
@@ -70,7 +70,7 @@ class StatsPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Next Recommended Wash',
+                            controller.tr('statsNextWash'),
                             style: textTheme.labelLarge?.copyWith(
                               color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                               fontWeight: FontWeight.w500,
@@ -109,7 +109,7 @@ class StatsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Calculated from your EWMA routine model and recent washing cadence',
+                        controller.tr('statsCalcDesc'),
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                         ),
@@ -121,7 +121,7 @@ class StatsPage extends StatelessWidget {
 
               const SizedBox(height: 24),
               Text(
-                'Routine cadence',
+                controller.tr('statsCadence'),
                 style: textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w500,
@@ -134,11 +134,11 @@ class StatsPage extends StatelessWidget {
                   Expanded(
                     child: _buildNeumorphicStatCard(
                       context,
-                      'Interval',
+                      controller.tr('statsInterval'),
                       '${controller.adaptiveInterval.toStringAsFixed(1)} d',
                       Icons.timelapse_rounded,
                       colorScheme.primary,
-                      'EWMA cadence',
+                      controller.tr('statsEwma'),
                       delay: 100,
                     ),
                   ),
@@ -146,11 +146,11 @@ class StatsPage extends StatelessWidget {
                   Expanded(
                     child: _buildNeumorphicStatCard(
                       context,
-                      'Trend',
+                      controller.tr('statsTrend'),
                       trendStr,
                       trendIcon,
                       colorScheme.secondary,
-                      'Recent pace',
+                      controller.tr('statsRecentPace'),
                       delay: 150,
                     ),
                   ),
@@ -159,7 +159,7 @@ class StatsPage extends StatelessWidget {
 
               const SizedBox(height: 24),
               Text(
-                'Volume overview',
+                controller.tr('statsVolume'),
                 style: textTheme.labelSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w500,
@@ -180,7 +180,7 @@ class StatsPage extends StatelessWidget {
                         child: _buildVolumeColumn(
                           context,
                           count: controller.totalWashes,
-                          label: 'All time',
+                          label: controller.tr('statsAllTime'),
                         ),
                       ),
                       Container(
@@ -192,7 +192,7 @@ class StatsPage extends StatelessWidget {
                         child: _buildVolumeColumn(
                           context,
                           count: controller.currentWeekWashes,
-                          label: 'This week',
+                          label: controller.tr('statsThisWeek'),
                         ),
                       ),
                       Container(
@@ -204,7 +204,7 @@ class StatsPage extends StatelessWidget {
                         child: _buildVolumeColumn(
                           context,
                           count: controller.currentMonthWashes,
-                          label: 'This month',
+                          label: controller.tr('statsThisMonth'),
                         ),
                       ),
                     ],
@@ -219,7 +219,9 @@ class StatsPage extends StatelessWidget {
 
     if (embed) return content;
     return Scaffold(
-      appBar: AppBar(title: const Text('Statistics')),
+      appBar: AppBar(
+          title: Text(
+              Provider.of<AppController>(context, listen: false).tr('pageStatistics'))),
       body: content,
     );
   }

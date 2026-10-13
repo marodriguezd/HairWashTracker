@@ -27,7 +27,7 @@ class MonthlyWashesWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Washes This Month',
+                      controller.tr('monthTitle'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,

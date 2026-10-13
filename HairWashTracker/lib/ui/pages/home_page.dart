@@ -19,20 +19,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _index = 0;
 
-  String _titleForIndex(int index) => switch (index) {
-        0 => 'Hair Wash Tracker',
-        1 => 'Statistics',
-        _ => 'Settings',
+  String _titleForIndex(AppController controller, int index) => switch (index) {
+        0 => controller.tr('appTitle'),
+        1 => controller.tr('pageStatistics'),
+        _ => controller.tr('navSettings'),
       };
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final controller = context.watch<AppController>();
     final appBar = AppBar(
-      title: Text(_titleForIndex(_index)),
+      title: Text(_titleForIndex(controller, _index)),
       actions: [
         IconButton(
-          tooltip: 'Data management',
+          tooltip: controller.tr('tooltipDataMgmt'),
           icon: const Icon(Icons.folder_outlined),
           onPressed: () => DataManagementSheet.show(context),
         ),
@@ -62,21 +63,21 @@ class _HomePageState extends State<HomePage> {
                     setState(() => _index = i);
                   },
                   labelType: NavigationRailLabelType.all,
-                  destinations: const [
+                  destinations: [
                     NavigationRailDestination(
-                      icon: Icon(Icons.calendar_month_outlined),
-                      selectedIcon: Icon(Icons.calendar_month),
-                      label: Text('Calendar'),
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      selectedIcon: const Icon(Icons.calendar_month),
+                      label: Text(controller.tr('navCalendar')),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.bar_chart_outlined),
-                      selectedIcon: Icon(Icons.bar_chart),
-                      label: Text('Stats'),
+                      icon: const Icon(Icons.bar_chart_outlined),
+                      selectedIcon: const Icon(Icons.bar_chart),
+                      label: Text(controller.tr('navStats')),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.settings_outlined),
-                      selectedIcon: Icon(Icons.settings),
-                      label: Text('Settings'),
+                      icon: const Icon(Icons.settings_outlined),
+                      selectedIcon: const Icon(Icons.settings),
+                      label: Text(controller.tr('navSettings')),
                     ),
                   ],
                 ),
@@ -97,21 +98,21 @@ class _HomePageState extends State<HomePage> {
               Haptics.selectionHaptic();
               setState(() => _index = i);
             },
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.calendar_month_outlined),
-                selectedIcon: Icon(Icons.calendar_month),
-                label: 'Calendar',
+                icon: const Icon(Icons.calendar_month_outlined),
+                selectedIcon: const Icon(Icons.calendar_month),
+                label: controller.tr('navCalendar'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.bar_chart_outlined),
-                selectedIcon: Icon(Icons.bar_chart),
-                label: 'Stats',
+                icon: const Icon(Icons.bar_chart_outlined),
+                selectedIcon: const Icon(Icons.bar_chart),
+                label: controller.tr('navStats'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: 'Settings',
+                icon: const Icon(Icons.settings_outlined),
+                selectedIcon: const Icon(Icons.settings),
+                label: controller.tr('navSettings'),
               ),
             ],
           ),

@@ -1,8 +1,12 @@
+<div align="center">
+  <img src="HairWashTracker/assets/icon.png" alt="Hair Wash Tracker logo" height="96" />
+</div>
+
 # Hair Wash Tracker
 
 [![License: GPL-3.0-only](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg)](LICENSE)
 
-[Versión en español](README_ES.md)
+English · [Versión en español](README_ES.md) · [Deutsche Version](README_DE.md) · [Version française](README_FR.md) · [Versione italiana](README_IT.md) · [中文版](README_ZH.md)
 
 Local-first Flutter application for tracking a hair-wash routine. Log wash
 days on a calendar, review weekly and monthly statistics, and get an adaptive
@@ -62,9 +66,3 @@ flutter test
 
 - Android (minSdk 24, targetSdk 36)
 - Adaptive and monochrome launcher icons included
-
-## License
-
-License: GNU General Public License v3.0 only (GPL-3.0-only)
-
-See [LICENSE](LICENSE) for the full license text.
