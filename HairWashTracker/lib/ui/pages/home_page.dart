@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
         final body = _AdaptiveBody(
           index: _index,
           onSelect: (i) {
-            Haptics.selectionClick();
+            Haptics.selectionHaptic();
             setState(() => _index = i);
           },
         );
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                 NavigationRail(
                   selectedIndex: _index,
                   onDestinationSelected: (i) {
-                    Haptics.selectionClick();
+                    Haptics.selectionHaptic();
                     setState(() => _index = i);
                   },
                   labelType: NavigationRailLabelType.all,
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
             selectedIndex: _index,
             backgroundColor: scheme.surfaceContainer,
             onDestinationSelected: (i) {
-              Haptics.selectionClick();
+              Haptics.selectionHaptic();
               setState(() => _index = i);
             },
             destinations: const [
@@ -177,7 +177,7 @@ class _CalendarGestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onHorizontalDragEnd: (DragEndDetails details) {
-        HapticFeedback.lightImpact();
+        Haptics.lightHaptic();
         if (details.primaryVelocity! > 0) {
           context.read<AppController>().previousMonth();
         } else if (details.primaryVelocity! < 0) {

@@ -30,7 +30,7 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = ListView(
+    final Widget content = ListView(
       padding: const EdgeInsets.all(AppTheme.spacingScreen),
       children: [
         Text(
@@ -41,95 +41,95 @@ class SettingsPage extends StatelessWidget {
                 letterSpacing: 0.75,
               ),
         ),
-          const SizedBox(height: 8),
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(AppTheme.spacingScreen),
-              child: ThemeSwitch(),
-            ),
+        const SizedBox(height: 8),
+        const Card(
+          child: Padding(
+            padding: EdgeInsets.all(AppTheme.spacingScreen),
+            child: ThemeSwitch(),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Accent color',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.75,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Consumer<AppController>(
-            builder: (context, controller, _) {
-              final scheme = Theme.of(context).colorScheme;
-              return Card(
-                child: Column(
-                  children: [
-                    _AccentTile(
-                      title: 'System',
-                      subtitle:
-                          'Follows your wallpaper on Android 12+. Falls back to the selected preset otherwise.',
-                      selected: controller.useDynamicColor,
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              scheme.primary,
-                              scheme.secondary,
-                              scheme.tertiary,
-                            ],
-                          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Accent color',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.75,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Consumer<AppController>(
+          builder: (context, controller, _) {
+            final scheme = Theme.of(context).colorScheme;
+            return Card(
+              child: Column(
+                children: [
+                  _AccentTile(
+                    title: 'System',
+                    subtitle:
+                        'Follows your wallpaper on Android 12+. Falls back to the selected preset otherwise.',
+                    selected: controller.useDynamicColor,
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            scheme.primary,
+                            scheme.secondary,
+                            scheme.tertiary,
+                          ],
                         ),
                       ),
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        controller.setUseDynamicColor(true);
-                      },
                     ),
-                    const Divider(height: 1, indent: 16, endIndent: 16),
-                    ...AppPresetTheme.values.map(
-                      (preset) {
-                        final selected = !controller.useDynamicColor &&
-                            controller.themePreset == preset;
-                        final seed = AppTheme.getSeedColor(preset);
-                        return _AccentTile(
-                          title: presetLabel(preset),
-                          selected: selected,
-                          leading: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: seed,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: selected
-                                    ? scheme.primary
-                                    : scheme.outlineVariant.withValues(alpha: 0.5),
-                                width: selected ? 2.5 : 1,
-                              ),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      controller.setUseDynamicColor(true);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  ...AppPresetTheme.values.map(
+                    (preset) {
+                      final selected = !controller.useDynamicColor &&
+                          controller.themePreset == preset;
+                      final seed = AppTheme.getSeedColor(preset);
+                      return _AccentTile(
+                        title: presetLabel(preset),
+                        selected: selected,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: seed,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: selected
+                                  ? scheme.primary
+                                  : scheme.outlineVariant.withValues(alpha: 0.5),
+                              width: selected ? 2.5 : 1,
                             ),
                           ),
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            controller.setThemePreset(preset);
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+                        ),
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          controller.setThemePreset(preset);
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
-    if (embed) return body;
+
+    if (embed) return content;
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: body,
+      body: content,
     );
   }
 }

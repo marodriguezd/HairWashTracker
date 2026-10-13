@@ -6,7 +6,6 @@ import '../../providers/app_controller.dart';
 import '../../models/prediction_result.dart';
 import '../../utils/app_theme.dart';
 import '../widgets/empty_state.dart';
-import '../widgets/neumorphic_container.dart';
 
 class StatsPage extends StatelessWidget {
   final bool embed;
@@ -16,7 +15,6 @@ class StatsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final controller = context.watch<AppController>();
 
     Widget content = SafeArea(
       child: Consumer<AppController>(

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hair_wash_tracker/models/theme_preference.dart';
 import 'package:hair_wash_tracker/models/wash_event.dart';
 import 'package:hair_wash_tracker/providers/app_controller.dart';
 import 'package:hair_wash_tracker/services/data_repository.dart';
 import 'package:hair_wash_tracker/services/file_operations_service.dart';
 import 'package:hair_wash_tracker/ui/pages/home_page.dart';
-import 'package:hair_wash_tracker/ui/pages/settings_page.dart';
 import 'package:hair_wash_tracker/ui/pages/stats_page.dart';
 import 'package:hair_wash_tracker/ui/widgets/confirmation_dialog.dart';
 import 'package:hair_wash_tracker/ui/widgets/data_management_sheet.dart';
