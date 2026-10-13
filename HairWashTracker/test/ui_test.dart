@@ -96,9 +96,9 @@ void main() {
       final hasNavBar = find.byType(NavigationBar).evaluate().isNotEmpty;
       final hasNavRail = find.byType(NavigationRail).evaluate().isNotEmpty;
       expect(hasNavBar || hasNavRail, isTrue);
-      expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.bar_chart_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+      expect(find.text('Calendar'), findsOneWidget);
+      expect(find.text('Stats'), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
       expect(find.byType(MonthlyWashesWidget), findsOneWidget);
     });
 
