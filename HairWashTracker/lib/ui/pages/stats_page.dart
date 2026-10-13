@@ -133,24 +133,26 @@ class StatsPage extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildMetricTile(
+                    child: _buildNeumorphicStatCard(
                       context,
-                      title: 'Interval',
-                      value: '${controller.adaptiveInterval.toStringAsFixed(1)} d',
-                      subtitle: 'EWMA cadence',
-                      icon: Icons.timelapse_rounded,
-                      color: colorScheme.primary,
+                      'Interval',
+                      '${controller.adaptiveInterval.toStringAsFixed(1)} d',
+                      Icons.timelapse_rounded,
+                      colorScheme.primary,
+                      'EWMA cadence',
+                      delay: 100,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildMetricTile(
+                    child: _buildNeumorphicStatCard(
                       context,
-                      title: 'Trend',
-                      value: trendStr,
-                      subtitle: 'Recent pace',
-                      icon: trendIcon,
-                      color: colorScheme.secondary,
+                      'Trend',
+                      trendStr,
+                      trendIcon,
+                      colorScheme.secondary,
+                      'Recent pace',
+                      delay: 150,
                     ),
                   ),
                 ],
