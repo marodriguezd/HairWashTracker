@@ -9,7 +9,7 @@ There is no account, no cloud, and no network usage: all data lives on the
 device with optional local CSV/JSON backup through the system share sheet.
 
 - **Status:** in development (`main` branch)
-- **Version:** `26.08.10+2` (single source: `HairWashTracker/pubspec.yaml`)
+- **Version:** `26.10.13+1` (single source: `HairWashTracker/pubspec.yaml`)
 - **License:** GNU General Public License v3.0 only ([LICENSE](LICENSE))
 - **Languages:** English UI ([README.md](README.md)); Spanish docs
   ([README_ES.md](README_ES.md))
@@ -44,7 +44,6 @@ README.md / README_ES.md   Product documentation (EN / ES)
 ABOUT.md                   This overview
 AGENTS.md                  Agent working contract
 LICENSE                    GPL-3.0-only, full text
-Hairwashtracker.apk        Tracked artifact of a published debug build
 HairWashTracker/           Flutter project (lib/, test/, android/, assets/)
 .github/workflows/         test, build-debug, build-release pipelines
 ```

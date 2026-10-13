@@ -18,7 +18,6 @@ import/export via the system share sheet).
   product docs, versioned in place.
 - `ABOUT.md` — industry-standard project overview.
 - `LICENSE` — GNU GPL v3.0 only, full text.
-- `Hairwashtracker.apk` — tracked build artifact of a published debug build.
 - `HairWashTracker/` — the Flutter project itself:
   - `lib/main.dart` — entry point (`SystemUiMode.edgeToEdge`,
     `DynamicColorBuilder` + `ChangeNotifierProvider(AppController)`).
@@ -63,7 +62,7 @@ import/export via the system share sheet).
 - Pub dependencies (`HairWashTracker/pubspec.yaml`): `provider`,
   `shared_preferences`, `table_calendar`, `intl`, `file_picker`,
   `share_plus`, `flutter_animate`, `dynamic_color`, `cupertino_icons`.
-- `pubspec.yaml` `version:` (`26.08.10+2`) is the single source of the
+- `pubspec.yaml` `version:` (`26.10.13+1`) is the single source of the
   project version.
 
 ## 4. Behavioral invariants
