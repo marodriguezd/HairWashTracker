@@ -126,6 +126,9 @@ void main() {
 
       expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
       expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('Light'), findsOneWidget);
+      expect(find.text('Dark'), findsOneWidget);
+      expect(find.text('Auto'), findsOneWidget);
       expect(find.text('Accent color'), findsOneWidget);
     });
 

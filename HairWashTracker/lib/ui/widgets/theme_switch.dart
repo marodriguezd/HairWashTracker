@@ -14,12 +14,12 @@ class ThemeSwitch extends StatelessWidget {
       segments: const [
         ButtonSegment(
           value: AppThemeMode.light,
-          label: Text('Claro'),
+          label: Text('Light'),
           icon: Icon(Icons.light_mode_outlined, size: 18),
         ),
         ButtonSegment(
           value: AppThemeMode.dark,
-          label: Text('Oscuro'),
+          label: Text('Dark'),
           icon: Icon(Icons.dark_mode_outlined, size: 18),
         ),
         ButtonSegment(
