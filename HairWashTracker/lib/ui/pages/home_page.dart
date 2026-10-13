@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:hair_wash_tracker/providers/app_controller.dart';
-import '../widgets/app_drawer.dart';
 import '../widgets/calendar_widget.dart';
+import '../widgets/data_management_sheet.dart';
 import '../widgets/monthly_washes_widget.dart';
 import '../widgets/neumorphic_container.dart';
+import '../../utils/haptics.dart';
+import 'settings_page.dart';
 import 'stats_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,29 +19,46 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _index = 0;
 
+  String _titleForIndex(int index) => switch (index) {
+        0 => 'Hair Wash Tracker',
+        1 => 'Statistics',
+        _ => 'Settings',
+      };
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final appBar = AppBar(
+      title: Text(_titleForIndex(_index)),
+      actions: [
+        IconButton(
+          tooltip: 'Data management',
+          icon: const Icon(Icons.folder_outlined),
+          onPressed: () => DataManagementSheet.show(context),
+        ),
+      ],
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMedium = constraints.maxWidth >= 600;
         final body = _AdaptiveBody(
           index: _index,
           onSelect: (i) {
-            HapticFeedback.selectionClick();
+            Haptics.selectionClick();
             setState(() => _index = i);
           },
         );
+
         if (isMedium) {
           return Scaffold(
-            appBar: AppBar(title: Text(_index == 0 ? 'Hair Wash Tracker' : 'Statistics')),
-            drawer: const AppDrawer(),
+            appBar: appBar,
             body: Row(
               children: [
                 NavigationRail(
                   selectedIndex: _index,
                   onDestinationSelected: (i) {
-                    HapticFeedback.selectionClick();
+                    Haptics.selectionClick();
                     setState(() => _index = i);
                   },
                   labelType: NavigationRailLabelType.all,
@@ -48,12 +66,17 @@ class _HomePageState extends State<HomePage> {
                     NavigationRailDestination(
                       icon: Icon(Icons.calendar_month_outlined),
                       selectedIcon: Icon(Icons.calendar_month),
-                      label: Text('Home'),
+                      label: Text('Calendar'),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.bar_chart_outlined),
                       selectedIcon: Icon(Icons.bar_chart),
                       label: Text('Stats'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.settings_outlined),
+                      selectedIcon: Icon(Icons.settings),
+                      label: Text('Settings'),
                     ),
                   ],
                 ),
@@ -63,27 +86,32 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         }
+
         return Scaffold(
-          appBar: AppBar(title: Text(_index == 0 ? 'Hair Wash Tracker' : 'Statistics')),
-          drawer: const AppDrawer(),
+          appBar: appBar,
           body: body,
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,
             backgroundColor: scheme.surfaceContainer,
             onDestinationSelected: (i) {
-              HapticFeedback.selectionClick();
+              Haptics.selectionClick();
               setState(() => _index = i);
             },
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.calendar_month_outlined),
                 selectedIcon: Icon(Icons.calendar_month),
-                label: 'Home',
+                label: 'Calendar',
               ),
               NavigationDestination(
                 icon: Icon(Icons.bar_chart_outlined),
                 selectedIcon: Icon(Icons.bar_chart),
                 label: 'Stats',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings),
+                label: 'Settings',
               ),
             ],
           ),
@@ -101,6 +129,7 @@ class _AdaptiveBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (index == 1) return const StatsPage(embed: true);
+    if (index == 2) return const SettingsPage(embed: true);
     context.watch<AppController>();
     final scheme = Theme.of(context).colorScheme;
     final gradientColors = [

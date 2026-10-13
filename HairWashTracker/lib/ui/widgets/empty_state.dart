@@ -226,19 +226,15 @@ class _SoftIllustrationState extends State<_SoftIllustration>
                   ? colorScheme.surfaceContainerHighest
                   : colorScheme.surface,
               child: Container(
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    colors: [
-                      widget.color.withValues(alpha: 0.25),
-                      widget.color.withValues(alpha: 0.08),
-                    ],
-                  ),
+                  color: colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   widget.icon,
                   size: 48,
-                  color: widget.color.withValues(alpha: 0.9),
+                  color: colorScheme.onPrimaryContainer,
                 ),
               ),
             ).animate().fadeIn(duration: 400.ms).scale(

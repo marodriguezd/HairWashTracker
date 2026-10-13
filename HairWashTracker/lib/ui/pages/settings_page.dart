@@ -12,7 +12,8 @@ import '../widgets/theme_switch.dart';
 /// Picking a preset seed opts out of dynamic color; re-selecting
 /// "System" opts back in.
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  final bool embed;
+  const SettingsPage({super.key, this.embed = false});
 
   static String presetLabel(AppPresetTheme preset) {
     switch (preset) {
@@ -29,19 +30,17 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppTheme.spacingScreen),
-        children: [
-          Text(
-            'Appearance',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.75,
-                ),
-          ),
+    final body = ListView(
+      padding: const EdgeInsets.all(AppTheme.spacingScreen),
+      children: [
+        Text(
+          'Appearance',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.75,
+              ),
+        ),
           const SizedBox(height: 8),
           const Card(
             child: Padding(
@@ -104,13 +103,12 @@ class SettingsPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: seed,
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: seed.withValues(alpha: 0.4),
-                                  blurRadius: selected ? 8 : 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                              border: Border.all(
+                                color: selected
+                                    ? scheme.primary
+                                    : scheme.outlineVariant.withValues(alpha: 0.5),
+                                width: selected ? 2.5 : 1,
+                              ),
                             ),
                           ),
                           onTap: () {
@@ -127,6 +125,11 @@ class SettingsPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (embed) return body;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: body,
     );
   }
 }

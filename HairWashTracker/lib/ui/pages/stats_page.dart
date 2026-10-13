@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../providers/app_controller.dart';
 import '../../models/prediction_result.dart';
 import '../../utils/app_theme.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/neumorphic_container.dart';
 
 class StatsPage extends StatelessWidget {
@@ -14,124 +15,209 @@ class StatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final controller = context.watch<AppController>();
 
-    Widget content = Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppTheme.getSeedColor(controller.themePreset).withValues(alpha: 0.15),
-                  Theme.of(context).colorScheme.surface,
-                ],
+    Widget content = SafeArea(
+      child: Consumer<AppController>(
+        builder: (context, controller, child) {
+          if (controller.totalWashes == 0) {
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppTheme.spacingScreen),
+                child: EmptyState.noWashes(),
               ),
-            ),
-          ),
-          SafeArea(
-            child: Consumer<AppController>(
-              builder: (context, controller, child) {
-                final nextWash = controller.nextRecommendedWashDate;
-                final nextWashStr = nextWash != null
-                    ? DateFormat('yyyy-MM-dd').format(nextWash)
-                    : 'N/A';
-                final confidenceStr = switch (controller.predictionConfidence) {
-                  PredictionConfidence.low => 'Low',
-                  PredictionConfidence.medium => 'Medium',
-                  PredictionConfidence.high => 'High',
-                };
-                final confidenceIcon = switch (controller.predictionConfidence) {
-                  PredictionConfidence.low => Icons.signal_cellular_alt_1_bar_rounded,
-                  PredictionConfidence.medium => Icons.signal_cellular_alt_2_bar_rounded,
-                  PredictionConfidence.high => Icons.signal_cellular_alt_rounded,
-                };
-                final trendStr = controller.trendSlope > 0.2
-                    ? '↑ Increasing'
-                    : controller.trendSlope < -0.2
-                        ? '↓ Decreasing'
-                        : '→ Stable';
+            );
+          }
 
-                return ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  children: [
-                    _buildNeumorphicStatCard(
+          final nextWash = controller.nextRecommendedWashDate;
+          final nextWashStr = nextWash != null
+              ? DateFormat('EEE, MMM d').format(nextWash)
+              : 'Keep logging washes';
+          final confidenceStr = switch (controller.predictionConfidence) {
+            PredictionConfidence.low => 'Low confidence',
+            PredictionConfidence.medium => 'Medium confidence',
+            PredictionConfidence.high => 'High confidence',
+          };
+          final confidenceIcon = switch (controller.predictionConfidence) {
+            PredictionConfidence.low => Icons.signal_cellular_alt_1_bar_rounded,
+            PredictionConfidence.medium => Icons.signal_cellular_alt_2_bar_rounded,
+            PredictionConfidence.high => Icons.signal_cellular_alt_rounded,
+          };
+          final trendStr = controller.trendSlope > 0.2
+              ? 'Increasing'
+              : controller.trendSlope < -0.2
+                  ? 'Decreasing'
+                  : 'Stable';
+          final trendIcon = controller.trendSlope > 0.2
+              ? Icons.trending_up_rounded
+              : controller.trendSlope < -0.2
+                  ? Icons.trending_down_rounded
+                  : Icons.trending_flat_rounded;
+
+          return ListView(
+            padding: const EdgeInsets.all(AppTheme.spacingScreen),
+            children: [
+              // Hero card: Next Recommended Wash
+              Card(
+                color: colorScheme.primaryContainer,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusCard + 4),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Next Recommended Wash',
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(confidenceIcon, size: 16, color: colorScheme.onPrimaryContainer),
+                                const SizedBox(width: 4),
+                                Text(
+                                  confidenceStr,
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        nextWashStr,
+                        style: textTheme.headlineMedium?.copyWith(
+                          color: colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Calculated from your EWMA routine model and recent washing cadence',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0),
+
+              const SizedBox(height: 24),
+              Text(
+                'Routine cadence',
+                style: textTheme.labelSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.75,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricTile(
                       context,
-                      'Total Washes',
-                      controller.totalWashes.toString(),
-                      Icons.waves_rounded,
-                      colorScheme.primary,
-                      'All time',
-                      delay: 0,
+                      title: 'Interval',
+                      value: '${controller.adaptiveInterval.toStringAsFixed(1)} d',
+                      subtitle: 'EWMA cadence',
+                      icon: Icons.timelapse_rounded,
+                      color: colorScheme.primary,
                     ),
-                    const SizedBox(height: 16),
-                    _buildNeumorphicStatCard(
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricTile(
                       context,
-                      'Washes This Week',
-                      controller.currentWeekWashes.toString(),
-                      Icons.view_week_rounded,
-                      colorScheme.secondary,
-                      'Past 7 days',
-                      delay: 100,
+                      title: 'Trend',
+                      value: trendStr,
+                      subtitle: 'Recent pace',
+                      icon: trendIcon,
+                      color: colorScheme.secondary,
                     ),
-                    const SizedBox(height: 16),
-                    _buildNeumorphicStatCard(
-                      context,
-                      'Washes This Month',
-                      controller.currentMonthWashes.toString(),
-                      Icons.calendar_month_rounded,
-                      colorScheme.tertiary,
-                      'Past 30 days',
-                      delay: 200,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildNeumorphicStatCard(
-                      context,
-                      'Adaptive Interval',
-                      '${controller.adaptiveInterval.toStringAsFixed(1)} days',
-                      Icons.auto_graph_rounded,
-                      colorScheme.primary,
-                      'EWMA prediction',
-                      delay: 300,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildNeumorphicStatCard(
-                      context,
-                      'Model Confidence',
-                      confidenceStr,
-                      confidenceIcon,
-                      colorScheme.tertiary,
-                      'Prediction quality',
-                      delay: 350,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildNeumorphicStatCard(
-                      context,
-                      'Interval Trend',
-                      trendStr,
-                      Icons.trending_up_rounded,
-                      colorScheme.secondary,
-                      'Recent pattern',
-                      delay: 400,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildNeumorphicStatCard(
-                      context,
-                      'Next Wash Recommended',
-                      nextWashStr,
-                      Icons.calendar_today_rounded,
-                      colorScheme.primary,
-                      'Suggested date',
-                      delay: 450,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      );
+                  ),
+                ],
+              ).animate(delay: 100.ms).fadeIn(duration: 300.ms),
+
+              const SizedBox(height: 24),
+              Text(
+                'Volume overview',
+                style: textTheme.labelSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.75,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Card(
+                color: colorScheme.surfaceContainerHigh,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildVolumeColumn(
+                          context,
+                          count: controller.totalWashes,
+                          label: 'All time',
+                        ),
+                      ),
+                      Container(
+                        height: 40,
+                        width: 1,
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                      Expanded(
+                        child: _buildVolumeColumn(
+                          context,
+                          count: controller.currentWeekWashes,
+                          label: 'This week',
+                        ),
+                      ),
+                      Container(
+                        height: 40,
+                        width: 1,
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                      Expanded(
+                        child: _buildVolumeColumn(
+                          context,
+                          count: controller.currentMonthWashes,
+                          label: 'This month',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ).animate(delay: 200.ms).fadeIn(duration: 300.ms),
+            ],
+          );
+        },
+      ),
+    );
+
     if (embed) return content;
     return Scaffold(
       appBar: AppBar(title: const Text('Statistics')),
@@ -139,6 +225,90 @@ class StatsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildMetricTile(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      color: colorScheme.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Icon(icon, color: color, size: 20),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVolumeColumn(
+    BuildContext context, {
+    required int count,
+    required String label,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        Text(
+          '$count',
+          style: textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Legacy shim maintained for compatibility with existing tests
   Widget _buildNeumorphicStatCard(
     BuildContext context,
     String title,
@@ -148,98 +318,13 @@ class StatsPage extends StatelessWidget {
     String subtitle, {
     required int delay,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return NeumorphicContainer(
-      clipContent: false,
-      padding: const EdgeInsets.all(24),
-      depth: 4,
-      child: Row(
-        children: [
-          // Flat design icon with radial gradient and single subtle shadow
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? colorScheme.surfaceContainerHighest
-                  : colorScheme.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-              gradient: RadialGradient(
-                colors: [
-                  color.withValues(alpha: 0.2),
-                  color.withValues(alpha: 0.05),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.25),
-                  blurRadius: 10,
-                  spreadRadius: -3,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Icon(icon, color: color, size: 32),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(AppTheme.radiusButton),
-                        border: Border.all(
-                          color: color.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        subtitle,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: color,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: textTheme.displayMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    )
-        .animate(delay: Duration(milliseconds: delay.clamp(0, 400)))
-        .fadeIn(duration: 300.ms)
-        .slideX(begin: 0.1, end: 0, duration: 300.ms, curve: Curves.easeOut);
+    return _buildMetricTile(
+      context,
+      title: title,
+      value: value,
+      subtitle: subtitle,
+      icon: icon,
+      color: color,
+    );
   }
 }

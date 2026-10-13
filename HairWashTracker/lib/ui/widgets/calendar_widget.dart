@@ -10,14 +10,6 @@ import 'neumorphic_container.dart';
 class CalendarWidget extends StatelessWidget {
   const CalendarWidget({super.key});
 
-  /// Uses centralized shadow builder for consistency across the app
-  List<BoxShadow> _buildCalendarShadows(BuildContext context, bool isPressed) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final depth = isPressed ? 1.5 : 2.0;
-    return NeumorphicContainer.buildShadows(isDark,
-        depth: depth, isPressed: isPressed);
-  }
-
   /// Builds a predicted-date indicator: a subtle dotted ring around the day.
   Widget _buildPredictedOverlay(
       BuildContext context, double size, double strokeWidth) {
@@ -87,7 +79,6 @@ class CalendarWidget extends StatelessWidget {
             todayDecoration: BoxDecoration(
               color: colorScheme.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
-              boxShadow: _buildCalendarShadows(context, true),
             ),
             todayTextStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
                   color: colorScheme.primary,
@@ -109,7 +100,7 @@ class CalendarWidget extends StatelessWidget {
               final isPredicted = !isWash &&
                   predictedDates.any((d) => isSameDay(d, day));
               return Center(
-                child: Container(
+                 child: Container(
                   width: dayCellSize,
                   height: dayCellSize,
                   decoration: BoxDecoration(
@@ -124,7 +115,6 @@ class CalendarWidget extends StatelessWidget {
                           : colorScheme.primary,
                       width: isPredicted ? 2.5 : 2,
                     ),
-                    boxShadow: _buildCalendarShadows(context, !isWash),
                   ),
                   child: Stack(
                     alignment: Alignment.center,
@@ -160,7 +150,6 @@ class CalendarWidget extends StatelessWidget {
                       color: colorScheme.primary,
                       borderRadius:
                           BorderRadius.circular(AppTheme.radiusButton),
-                      boxShadow: _buildCalendarShadows(context, false),
                     ),
                     child: Center(
                       child: Text(
@@ -225,7 +214,6 @@ class CalendarWidget extends StatelessWidget {
                           : colorScheme.primary,
                       width: 2,
                     ),
-                    boxShadow: _buildCalendarShadows(context, true),
                   ),
                   child: Stack(
                     alignment: Alignment.center,

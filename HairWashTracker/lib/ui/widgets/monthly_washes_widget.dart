@@ -49,38 +49,15 @@ class MonthlyWashesWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              // Flat design icon with radial gradient and single subtle shadow
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    colors: [
-                      Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.15),
-                      Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.05),
-                    ],
-                  ),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.2),
-                      blurRadius: 12,
-                      spreadRadius: -4,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Icon(
                   Icons.waves_rounded,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                   size: 28,
                 ),
               ),
