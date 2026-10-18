@@ -1,4 +1,4 @@
-package com.example.me_he_lavadado_el_pelo_app
+package io.github.marodriguezd.hairwashtracker
 
 import io.flutter.embedding.android.FlutterActivity
 

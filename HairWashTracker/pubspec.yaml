@@ -4,7 +4,10 @@ publish_to: 'none'
 version: 26.10.13+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  # Floors imposed by file_picker 13 / share_plus 13; a lower claim would
+  # advertise an SDK range that cannot resolve these dependencies.
+  sdk: '>=3.10.0 <4.0.0'
+  flutter: '>=3.38.1'
 
 dependencies:
   flutter:
@@ -14,8 +17,8 @@ dependencies:
   shared_preferences: ^2.2.3
   intl: ^0.19.0
   table_calendar: ^3.1.2
-  file_picker: ^10.3.1
-  share_plus: ^11.1.0
+  file_picker: ^13.1.0
+  share_plus: ^13.3.1
   provider: ^6.1.2
   flutter_animate: ^4.5.0
   dynamic_color: ^1.7.0
