@@ -1,10 +1,16 @@
 import 'package:table_calendar/table_calendar.dart';
 
+/// Stable calendar-day key (`YYYYMMDD`) for set lookups and deduplication.
+int dayKeyOf(DateTime date) => date.year * 10000 + date.month * 100 + date.day;
+
 class WashEvent {
   final DateTime date;
 
   WashEvent({required DateTime date})
       : date = DateTime(date.year, date.month, date.day, 12, 0, 0);
+
+  /// Day identity of this event; matches [dayKeyOf] for any instant that day.
+  int get dayKey => dayKeyOf(date);
 
   Map<String, dynamic> toJson() {
     return {'date': date.toIso8601String()};

@@ -23,9 +23,12 @@ class WashPredictiveModel {
   /// Predicts future wash dates based on a history of wash events.
   static PredictionResult predict(List<WashEvent> events) {
     if (events.isEmpty) {
+      // Anchor at noon like every stored event so the predicted day does not
+      // shift across DST or time-of-day boundaries.
       final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day, 12);
       return PredictionResult(
-        nextWashDate: now.add(Duration(days: priorIntervalDays.round())),
+        nextWashDate: today.add(Duration(days: priorIntervalDays.round())),
         predictedDates: [],
         adaptiveIntervalDays: priorIntervalDays,
         confidence: PredictionConfidence.low,

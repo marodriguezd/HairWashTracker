@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_controller.dart';
-import 'neumorphic_container.dart';
+import 'tonal_card.dart';
 
 class MonthlyWashesWidget extends StatelessWidget {
   const MonthlyWashesWidget({super.key});
@@ -13,7 +13,7 @@ class MonthlyWashesWidget extends StatelessWidget {
 
     return Consumer<AppController>(
       builder: (context, controller, child) {
-        return NeumorphicContainer(
+        return TonalCard(
           clipContent: false,
           padding: EdgeInsets.symmetric(
             vertical: isSmallScreen ? 20 : 28,

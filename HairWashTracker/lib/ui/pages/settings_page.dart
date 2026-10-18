@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/language_preference.dart';
 import '../../models/theme_preference.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/haptics.dart';
 import '../widgets/theme_switch.dart';
 
 /// Settings page: appearance (theme mode + accent color).
@@ -75,7 +75,7 @@ class SettingsPage extends StatelessWidget {
                   ],
                   onChanged: (value) {
                     if (value == null) return;
-                    HapticFeedback.selectionClick();
+                    Haptics.selectionHaptic();
                     controller.setLanguageCode(value);
                   },
                 ),
@@ -134,7 +134,7 @@ class SettingsPage extends StatelessWidget {
                       ),
                     ),
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      Haptics.selectionHaptic();
                       controller.setUseDynamicColor(true);
                     },
                   ),
@@ -162,7 +162,7 @@ class SettingsPage extends StatelessWidget {
                           ),
                         ),
                         onTap: () {
-                          HapticFeedback.mediumImpact();
+                          Haptics.mediumHaptic();
                           controller.setThemePreset(preset);
                         },
                       );

@@ -34,6 +34,7 @@ class MockDataRepository implements IDataRepository {
 class MockFileOperations implements IFileOperations {
   String csvContent = "Date\n2026-07-02";
   String jsonContent = "[]";
+  List<WashEvent> importedEvents = [WashEvent(date: DateTime(2026, 7, 2))];
   bool exportCSVCalled = false;
   bool importCSVCalled = false;
   bool exportJsonCalled = false;
@@ -49,7 +50,7 @@ class MockFileOperations implements IFileOperations {
   @override
   Future<List<WashEvent>> importFromCSV(String filePath) async {
     importCSVCalled = true;
-    return [WashEvent(date: DateTime(2026, 7, 2))];
+    return importedEvents;
   }
 
   @override
@@ -61,7 +62,7 @@ class MockFileOperations implements IFileOperations {
   @override
   Future<List<WashEvent>> importFromJson(String filePath) async {
     importJsonCalled = true;
-    return [WashEvent(date: DateTime(2026, 7, 2))];
+    return importedEvents;
   }
 
   @override
@@ -125,12 +126,9 @@ void main() {
       expect(controller.focusedDay.month, initialDate.month);
     });
 
-    test('Theme setting and animation config updates state', () {
+    test('Theme setting updates state', () {
       controller.setThemeMode(AppThemeMode.dark);
       expect(controller.themeMode, AppThemeMode.dark);
-
-      controller.setUseComplexAnimations(false);
-      expect(controller.useComplexAnimations, isFalse);
     });
 
     test('clearAllData clears state and repository', () async {
@@ -226,6 +224,111 @@ void main() {
 
       controller.setUseDynamicColor(true);
       expect(controller.useDynamicColor, isTrue);
+    });
+
+    test('importData reports a cancelled picker without importing', () async {
+      final repository = MockDataRepository();
+      final ops = MockFileOperations();
+      final cancelled = AppController(
+        repository: repository,
+        fileOperations: ops,
+        pickFile: (_) async => null,
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(await cancelled.importData(), isFalse);
+      expect(ops.importCSVCalled, isFalse);
+      expect(cancelled.selectedEvents, isEmpty);
+    });
+
+    test('importData imports the picked file and returns true', () async {
+      final repository = MockDataRepository();
+      final ops = MockFileOperations();
+      final importing = AppController(
+        repository: repository,
+        fileOperations: ops,
+        pickFile: (_) async => '/tmp/backup.csv',
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(await importing.importData(), isTrue);
+      expect(ops.importCSVCalled, isTrue);
+      expect(importing.selectedEvents, hasLength(1));
+      expect(importing.totalWashes, 1);
+    });
+
+    test('month navigation clamps the day instead of overflowing', () {
+      controller.setFocusedDay(DateTime(2026, 1, 31));
+      controller.nextMonth();
+      expect(controller.focusedDay, DateTime(2026, 2, 28));
+
+      controller.nextMonth();
+      expect(controller.focusedDay, DateTime(2026, 3, 28));
+
+      controller.setFocusedDay(DateTime(2026, 3, 31));
+      controller.previousMonth();
+      expect(controller.focusedDay, DateTime(2026, 2, 28));
+    });
+
+    test('importData rejects a backup with no usable dates', () async {
+      final repository = MockDataRepository();
+      final ops = MockFileOperations()..importedEvents = [];
+      final importing = AppController(
+        repository: repository,
+        fileOperations: ops,
+        pickFile: (_) async => '/tmp/empty.csv',
+      );
+      await Future.delayed(Duration.zero);
+      importing.toggleWashDay(DateTime(2026, 7, 2));
+
+      await expectLater(importing.importData(), throwsA(isA<Exception>()));
+      // A failed restore must leave the existing history untouched.
+      expect(importing.isWashDay(DateTime(2026, 7, 2)), isTrue);
+    });
+
+    test('predictedWashDates cannot mutate the cached prediction', () async {
+      await Future.delayed(Duration.zero);
+      controller.toggleWashDay(DateTime(2026, 7, 2));
+
+      final dates = controller.predictedWashDates;
+      expect(dates, isNotEmpty);
+      expect(() => dates.add(DateTime(2030)), throwsUnsupportedError);
+    });
+
+    test('duplicate days from storage collapse into one event', () async {
+      final repository = MockDataRepository()
+        ..events = [
+          WashEvent(date: DateTime(2026, 7, 2, 8)),
+          WashEvent(date: DateTime(2026, 7, 2, 20)),
+          WashEvent(date: DateTime(2026, 7, 5)),
+        ];
+      final deduped = AppController(
+        repository: repository,
+        fileOperations: mockFileOps,
+      );
+
+      await Future.delayed(Duration.zero);
+
+      expect(deduped.selectedEvents, hasLength(2));
+      expect(deduped.isWashDay(DateTime(2026, 7, 2)), isTrue);
+      expect(deduped.totalWashes, 2);
+    });
+
+    test('cached prediction is invalidated when a wash day changes', () async {
+      await Future.delayed(Duration.zero);
+
+      controller.toggleWashDay(DateTime(2026, 7, 2));
+      final before = controller.predictedWashDates;
+
+      controller.toggleWashDay(DateTime(2026, 7, 5));
+      final after = controller.predictedWashDates;
+
+      expect(identical(before, after), isFalse);
+      expect(after, isNotEmpty);
+      for (final date in after) {
+        expect(date.isAfter(DateTime(2026, 7, 5, 12)), isTrue);
+      }
+      expect(controller.isPredictedWashDay(after.first), isTrue);
     });
   });
 }

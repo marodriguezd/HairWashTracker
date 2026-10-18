@@ -10,15 +10,13 @@ void main() {
       expect(AppLanguage.supported, hasLength(6));
     });
 
-    test('every language exposes exactly the English key set', () {
+    test('every language defines exactly the English key set', () {
       final base = AppLocalizations.keys;
       expect(base, isNotEmpty);
+      // stringFor() falls back to English, so only a raw key comparison can
+      // detect a translation that was never added.
       for (final code in AppLocalizations.supportedCodes) {
-        if (code == 'en') continue;
-        for (final key in base) {
-          expect(AppLocalizations.stringFor(code, key), isNotEmpty,
-              reason: 'key $key in $code');
-        }
+        expect(AppLocalizations.keysFor(code), equals(base), reason: code);
       }
     });
 

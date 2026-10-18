@@ -8,13 +8,15 @@ class StatisticsCalculator {
   }
 
   static int getWashesForWeek(List<WashEvent> events, DateTime date) {
+    // Half-open [start, start + 7d) range on midnight boundaries. Widening the
+    // lower bound by a day would count the previous Sunday's noon event.
     final startOfWeek = _getStartOfWeek(date);
-    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    final endOfWeek = startOfWeek.add(const Duration(days: 7));
 
     return events
         .where((event) =>
-            event.date.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
-            event.date.isBefore(endOfWeek.add(const Duration(days: 1))))
+            !event.date.isBefore(startOfWeek) &&
+            event.date.isBefore(endOfWeek))
         .length;
   }
 
@@ -62,21 +64,6 @@ class StatisticsCalculator {
     } else {
       return (intervals[n ~/ 2 - 1] + intervals[n ~/ 2]) / 2.0;
     }
-  }
-
-  /// Returns next recommended wash date using the adaptive predictive model.
-  /// Falls back to null if no events exist.
-  static DateTime? getNextRecommendedWashDate(List<WashEvent> events) {
-    if (events.isEmpty) return null;
-    return WashPredictiveModel.predict(events).nextWashDate;
-  }
-
-  /// Generates predicted wash dates using the adaptive predictive model.
-  /// Uses EWMA + trend detection + day-of-week affinity.
-  /// Returns up to 12 dates within 90 days of the last wash.
-  static List<DateTime> getPredictedWashDates(List<WashEvent> events) {
-    if (events.isEmpty) return [];
-    return WashPredictiveModel.predict(events).predictedDates;
   }
 
   /// Returns the full prediction result from the adaptive model.

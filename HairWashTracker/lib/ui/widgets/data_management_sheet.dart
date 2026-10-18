@@ -77,75 +77,80 @@ class DataManagementSheet extends StatelessWidget {
   }
 
   void _handleImport(BuildContext context) async {
-    Navigator.pop(context);
     final controller = context.read<AppController>();
+    // The sheet closes immediately, so its context is unmounted before the
+    // async work finishes; messenger and colors must be captured first or the
+    // confirmation snackbar would be silently dropped.
+    final messenger = ScaffoldMessenger.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    Navigator.pop(context);
     try {
-      await controller.importData();
-      if (context.mounted) {
-        Haptics.successHaptic();
-        _showSnackBar(context, controller.tr('msgImported'), isError: false);
-      }
+      final imported = await controller.importData();
+      // Dismissing the picker is not an import: report nothing.
+      if (!imported) return;
+      Haptics.successHaptic();
+      _showSnackBar(messenger, scheme, controller.tr('msgImported'), isError: false);
     } catch (e) {
-      if (context.mounted) {
-        Haptics.errorHaptic();
-        _showSnackBar(context, 'Error importing data: $e', isError: true);
-      }
+      Haptics.errorHaptic();
+      _showSnackBar(messenger, scheme, 'Error importing data: $e', isError: true);
     }
   }
 
   void _handleExport(BuildContext context) async {
-    Navigator.pop(context);
     final controller = context.read<AppController>();
+    final messenger = ScaffoldMessenger.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    Navigator.pop(context);
     try {
       await controller.exportData();
-      if (context.mounted) {
-        Haptics.successHaptic();
-        _showSnackBar(context, controller.tr('msgExported'), isError: false);
-      }
+      Haptics.successHaptic();
+      _showSnackBar(messenger, scheme, controller.tr('msgExported'), isError: false);
     } catch (e) {
-      if (context.mounted) {
-        Haptics.errorHaptic();
-        _showSnackBar(context, 'Error exporting data: $e', isError: true);
-      }
+      Haptics.errorHaptic();
+      _showSnackBar(messenger, scheme, 'Error exporting data: $e', isError: true);
     }
   }
 
   void _handleClearData(BuildContext context) {
-    Navigator.pop(context);
     final controller = context.read<AppController>();
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => ConfirmationDialog(
+    final messenger = ScaffoldMessenger.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final navigatorContext = Navigator.of(context).context;
+    Navigator.pop(context);
+    showDialog<void>(
+      context: navigatorContext,
+      builder: (_) => ConfirmationDialog(
         title: controller.tr('dataClearTitle'),
         content: controller.tr('dataClearMsg'),
         confirmText: controller.tr('dataClearConfirm'),
         onConfirm: () async {
           try {
-            await context.read<AppController>().clearAllData();
-            if (context.mounted) {
-              Haptics.heavyHaptic();
-              _showSnackBar(context, controller.tr('msgCleared'), isError: false);
-            }
+            await controller.clearAllData();
+            Haptics.heavyHaptic();
+            _showSnackBar(messenger, scheme, controller.tr('msgCleared'), isError: false);
           } catch (e) {
-            if (context.mounted) {
-              Haptics.errorHaptic();
-              _showSnackBar(context, 'Error clearing data: $e', isError: true);
-            }
+            Haptics.errorHaptic();
+            _showSnackBar(messenger, scheme, 'Error clearing data: $e', isError: true);
           }
         },
       ),
     );
   }
 
-  void _showSnackBar(BuildContext context, String message, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(
+  void _showSnackBar(
+    ScaffoldMessengerState messenger,
+    ColorScheme scheme,
+    String message, {
+    required bool isError,
+  }) {
+    messenger.showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
-        backgroundColor: isError
-            ? Theme.of(context).colorScheme.error
-            : Theme.of(context).colorScheme.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        ),
+        backgroundColor: isError ? scheme.error : scheme.primary,
       ),
     );
   }

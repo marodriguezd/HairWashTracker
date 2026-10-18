@@ -62,6 +62,23 @@ void main() {
       expect(StatisticsCalculator.getWashesForWeek([], DateTime(2026, 7, 2)), 0);
     });
 
+    test('getWashesForWeek excludes the Sunday before the week', () {
+      final sunday = WashEvent(date: DateTime(2026, 6, 14));
+      final monday = WashEvent(date: DateTime(2026, 6, 15));
+      final wednesday = DateTime(2026, 6, 17);
+
+      // The previous Sunday's noon event must not leak into Mon–Sun week 25.
+      expect(StatisticsCalculator.getWashesForWeek([sunday, monday], wednesday), 1);
+      expect(StatisticsCalculator.getWashesForWeek([sunday], wednesday), 0);
+      // It still belongs to its own week.
+      expect(
+          StatisticsCalculator.getWashesForWeek([sunday], DateTime(2026, 6, 14)), 1);
+      // The following Monday is excluded from the previous week.
+      expect(
+          StatisticsCalculator.getWashesForWeek([monday], DateTime(2026, 6, 14)),
+          0);
+    });
+
     test('getWashesForMonth returns correct count', () {
       // June 2026 should have 3 washes
       expect(StatisticsCalculator.getWashesForMonth(events, DateTime(2026, 6, 10)), 3);
@@ -113,73 +130,5 @@ void main() {
       expect(StatisticsCalculator.getAverageIntervalDays(outlierEvents), 22.8);
     });
 
-    test('getNextRecommendedWashDate uses adaptive predictive model', () {
-      // Now uses EWMA, not median. With 5 events, intervals [1,6,10,1]:
-      // EWMA steps: prior=3.0 -> 3.0*0.7+1*0.3=2.4 -> 2.4*0.7+6*0.3=3.48
-      //   -> 3.48*0.7+10*0.3=5.436 -> 5.436*0.7+1*0.3=4.1052
-      // The result should be after the last wash date
-      final result = StatisticsCalculator.getNextRecommendedWashDate(events);
-      expect(result, isNotNull);
-      expect(result!.isAfter(DateTime(2026, 7, 3, 12, 0, 0)), isTrue);
-
-      // If empty, returns null
-      expect(StatisticsCalculator.getNextRecommendedWashDate([]), isNull);
-
-      // If 1 event, defaults to prior (3.0 days = 72 hours)
-      // Jul 2 12:00 + 72h = Jul 5 12:00
-      final singleResult = StatisticsCalculator.getNextRecommendedWashDate(
-              [WashEvent(date: DateTime(2026, 7, 2))]);
-      expect(singleResult, isNotNull);
-      expect(singleResult!.isAfter(DateTime(2026, 7, 2, 12, 0, 0)), isTrue);
-    });
-
-    test('getPredictedWashDates uses adaptive predictive model', () {
-      final predicted = StatisticsCalculator.getPredictedWashDates(events);
-
-      // Should have predictions
-      expect(predicted, isNotEmpty);
-
-      // First prediction should be after the last wash
-      expect(predicted.first.isAfter(DateTime(2026, 7, 3, 12, 0, 0)), isTrue);
-
-      // Should not exceed 12 predictions
-      expect(predicted.length, lessThanOrEqualTo(12));
-
-      // All predictions should be after the last wash
-      for (final date in predicted) {
-        expect(date.isAfter(DateTime(2026, 7, 3, 12, 0, 0)), isTrue);
-      }
-    });
-
-    test('getPredictedWashDates returns empty list for empty events', () {
-      expect(StatisticsCalculator.getPredictedWashDates([]), isEmpty);
-    });
-
-    test('getPredictedWashDates returns predictions for single event', () {
-      final predicted = StatisticsCalculator.getPredictedWashDates([
-        WashEvent(date: DateTime(2026, 7, 2)),
-      ]);
-
-      // Single event uses prior of 3.0 days
-      expect(predicted, isNotEmpty);
-      expect(predicted.first.isAfter(DateTime(2026, 7, 2, 12, 0, 0)), isTrue);
-    });
-
-    test('getPredictedWashDates includes all dates from last wash forward', () {
-      final oldEvents = [
-        WashEvent(date: DateTime(2022, 1, 1)),
-        WashEvent(date: DateTime(2022, 1, 4)), // 3-day interval
-      ];
-
-      final predicted = StatisticsCalculator.getPredictedWashDates(oldEvents);
-
-      // Should include predictions even if they are in the past
-      expect(predicted, isNotEmpty);
-
-      // All should be after the last wash
-      for (final date in predicted) {
-        expect(date.isAfter(DateTime(2022, 1, 4, 12, 0, 0)), isTrue);
-      }
-    });
   });
 }

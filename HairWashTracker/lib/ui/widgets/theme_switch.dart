@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../models/theme_preference.dart';
 import '../../providers/app_controller.dart';
+import '../../utils/haptics.dart';
 
 class ThemeSwitch extends StatelessWidget {
   const ThemeSwitch({super.key});
@@ -35,7 +35,7 @@ class ThemeSwitch extends StatelessWidget {
         visualDensity: VisualDensity.compact,
       ),
       onSelectionChanged: (selection) {
-        HapticFeedback.selectionClick();
+        Haptics.selectionHaptic();
         context.read<AppController>().setThemeMode(selection.first);
       },
     );

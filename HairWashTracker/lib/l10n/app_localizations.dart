@@ -7,22 +7,19 @@ import 'package:flutter/widgets.dart';
 /// the canonical base and the deterministic fallback: any missing key in
 /// another language resolves to English, never to a blank string.
 enum AppLanguage {
-  english('en', 'English', 'en'),
-  spanish('es', 'Español', 'es'),
-  german('de', 'Deutsch', 'de'),
-  french('fr', 'Français', 'fr'),
-  italian('it', 'Italiano', 'it'),
-  chinese('zh', '中文（简体）', 'zh');
+  english('en', 'English'),
+  spanish('es', 'Español'),
+  german('de', 'Deutsch'),
+  french('fr', 'Français'),
+  italian('it', 'Italiano'),
+  chinese('zh', '中文（简体）');
 
   final String code;
   final String nativeName;
 
-  /// BCP 47 tag used for [Locale] construction.
-  final String localeTag;
+  const AppLanguage(this.code, this.nativeName);
 
-  const AppLanguage(this.code, this.nativeName, this.localeTag);
-
-  Locale get locale => Locale(localeTag);
+  Locale get locale => Locale(code);
 
   static const List<AppLanguage> supported = AppLanguage.values;
 
@@ -94,6 +91,11 @@ class AppLocalizations {
   }
 
   static Set<String> get keys => _en.keys.toSet();
+
+  /// Keys defined for [code]. Comparing this against [keys] is what makes a
+  /// missing translation detectable: [stringFor] would otherwise mask it by
+  /// falling back to English.
+  static Set<String> keysFor(String code) => (_byCode[code] ?? _en).keys.toSet();
 
   static const Map<String, String> _en = {
     'appTitle': 'Hair Wash Tracker',

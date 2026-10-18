@@ -13,7 +13,16 @@ abstract class IFileOperations {
   Future<void> shareFile(String content, String filename);
 }
 
+/// Hands generated files to the platform share sheet. Injectable so the
+/// temp-file cleanup can be tested without the share plugin's platform channel.
+typedef FileShareCallback = Future<void> Function(
+    List<XFile> files, String text);
+
 class FileOperationsService implements IFileOperations {
+  final FileShareCallback? _share;
+
+  FileOperationsService({FileShareCallback? share}) : _share = share;
+
   @override
   Future<String> exportToCSV(List<WashEvent> events) async {
     final buffer = StringBuffer();
@@ -31,25 +40,24 @@ class FileOperationsService implements IFileOperations {
     try {
       final file = File(filePath);
       final content = await file.readAsString();
-      final lines = content.split('\n');
+      final lines = content.split(RegExp(r'\r?\n'));
 
       final events = <WashEvent>[];
-
-      // Skip header line
-      for (int i = 1; i < lines.length; i++) {
-        final line = lines[i].trim();
+      for (final rawLine in lines) {
+        final line = rawLine.trim();
         if (line.isEmpty) continue;
 
-        try {
-          // Parse date and force it to be treated as a local date at noon to avoid timezone shifting
-          // when converting back and forth or crossing DST boundaries.
-          final tempDate = DateTime.parse(line);
-          final date =
-              DateTime(tempDate.year, tempDate.month, tempDate.day, 12, 0, 0);
-          events.add(WashEvent(date: date));
-        } catch (e) {
-          debugPrint('Error parsing date: $line - $e');
+        // A header or malformed row is skipped by content rather than by
+        // position, so headerless exports do not lose their first date.
+        final parsed = DateTime.tryParse(line);
+        if (parsed == null) {
+          debugPrint('Skipping non-date CSV row: $line');
+          continue;
         }
+        // Noon anchor keeps the calendar day stable across DST boundaries.
+        events.add(WashEvent(
+          date: DateTime(parsed.year, parsed.month, parsed.day, 12, 0, 0),
+        ));
       }
 
       return events;
@@ -70,8 +78,21 @@ class FileOperationsService implements IFileOperations {
     try {
       final file = File(filePath);
       final content = await file.readAsString();
-      final List<dynamic> jsonList = jsonDecode(content);
-      return jsonList.map((j) => WashEvent.fromJson(j)).toList();
+      final decoded = jsonDecode(content);
+      if (decoded is! List) {
+        throw const FormatException('JSON backup must contain a list');
+      }
+      // A single unreadable entry should not block restoring the rest.
+      final events = <WashEvent>[];
+      for (final row in decoded) {
+        if (row is! Map) continue;
+        try {
+          events.add(WashEvent.fromJson(Map<String, dynamic>.from(row)));
+        } catch (e) {
+          debugPrint('Skipping invalid JSON row: $e');
+        }
+      }
+      return events;
     } catch (e) {
       debugPrint('Error reading JSON file: $e');
       throw Exception('Error importing JSON: $e');
@@ -83,11 +104,20 @@ class FileOperationsService implements IFileOperations {
     final directory = Directory.systemTemp;
     final file = File('${directory.path}/$filename');
     await file.writeAsString(content);
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path)],
-        text: 'Hair Wash Data',
-      ),
-    );
+    try {
+      final files = [XFile(file.path)];
+      final share = _share;
+      if (share != null) {
+        await share(files, 'Hair Wash Data');
+      } else {
+        await SharePlus.instance.share(
+          ShareParams(files: files, text: 'Hair Wash Data'),
+        );
+      }
+    } finally {
+      // Export copies are single-use; leaving them in temp leaks storage on
+      // every share, and the receiving app has already consumed the file.
+      if (await file.exists()) await file.delete();
+    }
   }
 }

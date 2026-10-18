@@ -329,5 +329,27 @@ void main() {
       expect(steady.adaptiveIntervalDays, closeTo(3.0, 0.2));
       expect(steady.confidence, PredictionConfidence.high);
     });
+
+    test('28. A wash history entirely in the past still predicts after it', () {
+      final oldEvents = [
+        createEvent(DateTime(2022, 1, 1)),
+        createEvent(DateTime(2022, 1, 4)),
+      ];
+      final result = WashPredictiveModel.predict(oldEvents);
+
+      expect(result.predictedDates, isNotEmpty);
+      for (final date in result.predictedDates) {
+        expect(date.isAfter(DateTime(2022, 1, 4, 12)), isTrue);
+      }
+    });
+
+    test('29. Empty history has no predicted dates and a noon anchor', () {
+      final result = WashPredictiveModel.predict([]);
+
+      expect(result.predictedDates, isEmpty);
+      // Noon keeps the recommended day stable across DST boundaries.
+      expect(result.nextWashDate.hour, 12);
+      expect(result.nextWashDate.minute, 0);
+    });
   });
 }

@@ -36,16 +36,12 @@ void main() {
       expect(darkTheme.brightness, Brightness.dark);
     });
 
-    test('All presets return distinct seed and surface colors', () {
+    test('All presets return distinct seed colors', () {
+      final seeds = <Color>{};
       for (final preset in AppPresetTheme.values) {
         final seed = AppTheme.getSeedColor(preset);
-        expect(seed, isNotNull);
-
-        final lightSurface = AppTheme.getSurfaceColor(preset, Brightness.light);
-        final darkSurface = AppTheme.getSurfaceColor(preset, Brightness.dark);
-        expect(lightSurface, isNotNull);
-        expect(darkSurface, isNotNull);
-        expect(lightSurface, isNot(darkSurface));
+        // Distinct seeds are what make the four presets visually different.
+        expect(seeds.add(seed), isTrue, reason: preset.name);
       }
     });
 

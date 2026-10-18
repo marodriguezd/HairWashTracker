@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../models/wash_event.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/haptics.dart';
 
 class CalendarWidget extends StatelessWidget {
   const CalendarWidget({super.key});
@@ -32,8 +32,6 @@ class CalendarWidget extends StatelessWidget {
 
     return Consumer<AppController>(
       builder: (context, controller, child) {
-        final predictedDates = controller.predictedWashDates;
-
         return TableCalendar<WashEvent>(
           firstDay: DateTime.utc(2020, 1, 1),
           lastDay: DateTime.utc(2030, 12, 31),
@@ -54,12 +52,12 @@ class CalendarWidget extends StatelessWidget {
                 Icon(Icons.chevron_right, color: colorScheme.primary),
           ),
           onDaySelected: (selectedDay, focusedDay) {
-            HapticFeedback.selectionClick();
+            Haptics.selectionHaptic();
             controller.toggleWashDay(selectedDay);
             controller.setFocusedDay(focusedDay);
           },
           onPageChanged: (focusedDay) {
-            HapticFeedback.lightImpact();
+            Haptics.lightHaptic();
             controller.setFocusedDay(focusedDay);
           },
           daysOfWeekStyle: DaysOfWeekStyle(
@@ -96,8 +94,8 @@ class CalendarWidget extends StatelessWidget {
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) {
               final isWash = controller.isWashDay(day);
-              final isPredicted = !isWash &&
-                  predictedDates.any((d) => isSameDay(d, day));
+              final isPredicted =
+                  !isWash && controller.isPredictedWashDay(day);
               return Center(
                  child: Container(
                   width: dayCellSize,
@@ -164,7 +162,7 @@ class CalendarWidget extends StatelessWidget {
                 );
               }
 
-              if (predictedDates.any((d) => isSameDay(d, day))) {
+              if (controller.isPredictedWashDay(day)) {
                 return Center(
                   child: SizedBox(
                     width: dayCellSize,
@@ -192,8 +190,8 @@ class CalendarWidget extends StatelessWidget {
             },
             selectedBuilder: (context, day, focusedDay) {
               final isWash = controller.isWashDay(day);
-              final isPredicted = !isWash &&
-                  predictedDates.any((d) => isSameDay(d, day));
+              final isPredicted =
+                  !isWash && controller.isPredictedWashDay(day);
               return Center(
                 child: Container(
                   width: dayCellSize + 4,

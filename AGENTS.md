@@ -32,22 +32,24 @@ import/export via the system share sheet).
     `theme_preset`).
   - `lib/utils/` — `wash_predictive_model.dart` (EWMA), 
     `statistics_calculator.dart`, `app_theme.dart` (M3 tokens),
-    `animations.dart` (durations/curves), `haptics.dart`.
+    `haptics.dart`.
   - `lib/ui/pages/` — `home_page.dart` (adaptive shell), `stats_page.dart`
     (`embed` mode for the shell, standalone `Scaffold` otherwise).
-  - `lib/ui/widgets/` — calendar, charts, progress, dialogs, drawer,
-    shimmer/loading, counters.
+  - `lib/ui/widgets/` — calendar, month counter, data sheet, dialogs,
+    theme and accent pickers.
   - `test/` — `app_controller_test.dart`,
     `statistics_calculator_test.dart`, `wash_predictive_model_test.dart`
-    (51 tests total).
+    (96 tests total).
   - `android/` — Kotlin DSL Gradle (`app/build.gradle.kts`,
     `settings.gradle.kts`), `MainActivity` (plain `FlutterActivity`;
     edge-to-edge is driven from Dart), manifest with
     `android:enableOnBackInvokedCallback="true"` for predictive back.
   - `assets/` — icons, screenshots.
-- `.github/workflows/` — `test.yml` (`flutter analyze --no-fatal-infos` +
-  `flutter test`), `build-debug.yml` (push/PR on `main`), 
-  `build-release.yml` (tags `v*` / `wash-tracker-*`, `contents: write`).
+- `.github/workflows/` — `test.yml` (`flutter analyze` + `flutter test`),
+  `build-debug.yml` (push/PR on `main`), `build-release.yml` (tags `v*` /
+  `wash-tracker-*` plus manual dispatch; signs with the `KEYSTORE_BASE64`,
+  `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` secrets and fails the build
+  on a debug-signed APK).
 - `.agents/` — agent-only workspace (git-ignored).
 
 ## 3. Technology stack (verified)
@@ -87,10 +89,9 @@ Preserve these (tests pin the prediction/statistics side):
 
 ## 5. UI / Material 3 rules
 
-- Tonal surfaces (`surfaceContainer*`), never dual light/dark hard shadows;
-  the legacy `NeumorphicContainer`/`NeumorphicButton` names are kept only
-  as API-compatible shims over M3 `Card`/`FilledButton` — do not reintroduce
-  neumorphic styling or `BoxShadow`-based elevation.
+- Tonal surfaces (`surfaceContainer*`) via `TonalCard`, never dual
+  light/dark hard shadows — do not reintroduce neumorphic styling or
+  `BoxShadow`-based elevation.
 - Shape tokens: cards `12dp`, dialogs `28dp`, buttons/chips pill (`full`);
   dividers use `outlineVariant`.
 - Real M3 components only: `AlertDialog`, `FilledButton`/`TextButton`,
@@ -114,9 +115,9 @@ Preserve these (tests pin the prediction/statistics side):
   delete them instead of writing them.
 - Never touch: runtime UI strings, `debugPrint`/log texts, test assertion
   messages, version literals, `README_ES.md`.
-- Known debt (do not "fix" opportunistically): private identifier
-  `_buildNeumorphicStatCard`, `applicationId`
-  `com.example.me_he_lavadado_el_pelo_app` (still the template placeholder).
+- Application identity is `io.github.marodriguezd.hairwashtracker` on every
+  platform (Android `namespace`/`applicationId`, iOS/macOS bundle ids, Linux
+  `APPLICATION_ID`). Changing it would break upgrades of installed copies.
 
 ## 7. Agent workflow
 
@@ -129,7 +130,7 @@ Preserve these (tests pin the prediction/statistics side):
 cd HairWashTracker
 flutter pub get
 flutter analyze              # must be clean
-flutter test                 # 51 tests, must pass
+flutter test                 # 96 tests, must pass
 flutter build apk --debug    # before declaring device-visible changes done
 ```
 

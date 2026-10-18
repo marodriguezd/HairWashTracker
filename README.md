@@ -23,7 +23,7 @@ the device.
 
 - Interactive month calendar; tap a day to log or remove a wash
 - Predicted wash dates derived from logged history
-- Weekly bar chart and monthly counters
+- Weekly, monthly, and all-time wash counters
 - Adaptive next-wash estimate (EWMA interval, trend, weekday affinity)
 - Light, dark, and system themes; four seed presets (Warm Coral, Lavender
   Mist, Sage Mist, Ocean Blue) plus Android dynamic color on supported devices

@@ -132,26 +132,25 @@ class StatsPage extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildNeumorphicStatCard(
+                    child: _buildMetricTile(
                       context,
-                      controller.tr('statsInterval'),
-                      '${controller.adaptiveInterval.toStringAsFixed(1)} d',
-                      Icons.timelapse_rounded,
-                      colorScheme.primary,
-                      controller.tr('statsEwma'),
-                      delay: 100,
+                      title: controller.tr('statsInterval'),
+                      value:
+                          '${controller.adaptiveInterval.toStringAsFixed(1)} d',
+                      icon: Icons.timelapse_rounded,
+                      color: colorScheme.primary,
+                      subtitle: controller.tr('statsEwma'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildNeumorphicStatCard(
+                    child: _buildMetricTile(
                       context,
-                      controller.tr('statsTrend'),
-                      trendStr,
-                      trendIcon,
-                      colorScheme.secondary,
-                      controller.tr('statsRecentPace'),
-                      delay: 150,
+                      title: controller.tr('statsTrend'),
+                      value: trendStr,
+                      icon: trendIcon,
+                      color: colorScheme.secondary,
+                      subtitle: controller.tr('statsRecentPace'),
                     ),
                   ),
                 ],
@@ -309,23 +308,4 @@ class StatsPage extends StatelessWidget {
     );
   }
 
-  /// Legacy shim maintained for compatibility with existing tests
-  Widget _buildNeumorphicStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-    String subtitle, {
-    required int delay,
-  }) {
-    return _buildMetricTile(
-      context,
-      title: title,
-      value: value,
-      subtitle: subtitle,
-      icon: icon,
-      color: color,
-    );
-  }
 }

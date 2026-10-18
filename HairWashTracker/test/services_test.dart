@@ -52,6 +52,17 @@ void main() {
       final loadedEvents = await repository.loadWashEvents();
       expect(loadedEvents, isEmpty);
     });
+
+    test('loadWashEvents keeps valid rows when one entry is corrupt', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('wash_events',
+          '[{"date":"2026-07-02T12:00:00.000"},{"broken":true},{"date":"2026-07-05T12:00:00.000"}]');
+
+      final loadedEvents = await repository.loadWashEvents();
+      // Losing one damaged row must not discard the whole history.
+      expect(loadedEvents.map((e) => e.date),
+          [DateTime(2026, 7, 2, 12), DateTime(2026, 7, 5, 12)]);
+    });
   });
 
   group('FileOperationsService Serialization Tests', () {
@@ -75,6 +86,35 @@ void main() {
       expect(lines[2].trim(), '2026-07-08');
     });
 
+    test('shareFile deletes the temp copy after a successful share', () async {
+      String? sharedPath;
+      final ops = FileOperationsService(share: (files, text) async {
+        final file = File(files.single.path);
+        // The receiver must be able to read the file while sharing runs.
+        expect(file.existsSync(), isTrue);
+        sharedPath = file.path;
+      });
+
+      await ops.shareFile('Date\n2026-08-10', 'cleanup_ok.csv');
+
+      expect(sharedPath, isNotNull);
+      expect(File(sharedPath!).existsSync(), isFalse);
+    });
+
+    test('shareFile deletes the temp copy when sharing fails', () async {
+      String? attemptedPath;
+      final ops = FileOperationsService(share: (files, text) async {
+        attemptedPath = files.single.path;
+        throw Exception('share failed');
+      });
+
+      await expectLater(ops.shareFile('Date\n2026-08-10', 'cleanup_fail.csv'),
+          throwsA(isA<Exception>()));
+
+      expect(attemptedPath, isNotNull);
+      expect(File(attemptedPath!).existsSync(), isFalse);
+    });
+
     test('exportToJson serializes list of WashEvents correctly', () async {
       final events = [
         WashEvent(date: DateTime(2026, 7, 2)),
@@ -93,6 +133,51 @@ void main() {
       expect(imported.length, 2);
       expect(imported[0].date, DateTime(2026, 8, 10, 12, 0, 0));
       expect(imported[1].date, DateTime(2026, 8, 14, 12, 0, 0));
+
+      await file.delete();
+    });
+
+    test('importFromCSV keeps the first date when the file has no header',
+        () async {
+      final file = File('${Directory.systemTemp.path}/test_headerless.csv');
+      await file.writeAsString('2026-08-10\r\n2026-08-14\r\n');
+
+      final imported = await fileOps.importFromCSV(file.path);
+      expect(imported.map((e) => e.date),
+          [DateTime(2026, 8, 10, 12), DateTime(2026, 8, 14, 12)]);
+
+      await file.delete();
+    });
+
+    test('importFromCSV skips header and malformed rows', () async {
+      final file = File('${Directory.systemTemp.path}/test_malformed.csv');
+      await file.writeAsString('Date\nnot-a-date\n2026-08-10\n');
+
+      final imported = await fileOps.importFromCSV(file.path);
+      expect(imported, hasLength(1));
+      expect(imported.single.date, DateTime(2026, 8, 10, 12));
+
+      await file.delete();
+    });
+
+    test('importFromJson skips invalid entries and keeps valid ones', () async {
+      final file = File('${Directory.systemTemp.path}/test_partial.json');
+      await file.writeAsString(
+          '[{"date":"2026-09-01T12:00:00.000"},{"oops":1}]');
+
+      final imported = await fileOps.importFromJson(file.path);
+      expect(imported, hasLength(1));
+      expect(imported.single.date, DateTime(2026, 9, 1, 12));
+
+      await file.delete();
+    });
+
+    test('importFromJson rejects a payload that is not a list', () async {
+      final file = File('${Directory.systemTemp.path}/test_not_list.json');
+      await file.writeAsString('{"date":"2026-09-01T12:00:00.000"}');
+
+      await expectLater(
+          fileOps.importFromJson(file.path), throwsA(isA<Exception>()));
 
       await file.delete();
     });

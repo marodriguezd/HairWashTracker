@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/haptics.dart';
 import '../../utils/app_theme.dart';
-import 'neumorphic_container.dart';
+import 'tonal_card.dart';
 
 /// Reads a localized string, falling back to [fallback] when no
 /// [AppController] is available above this context.
@@ -15,15 +15,10 @@ String _lt(BuildContext context, String key, String fallback) {
   }
 }
 
-/// Empty state widget for when no data exists
+/// Placeholder shown when the statistics have nothing to summarize yet.
 ///
-/// Features:
-/// - Soft, calming illustration
-/// - Gentle encouraging message
-/// - Animated entrance
-/// - Optional action button
-/// - Haptic feedback on interaction
-/// - M3 tonal styling
+/// Optional title, message, icon, and action keep the same primitive usable
+/// for both "no washes at all" and "no data in this range".
 class EmptyState extends StatelessWidget {
   final String? title;
   final String? message;
@@ -111,13 +106,12 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 32),
             if (customWidget != null) customWidget!,
             if (actionLabel != null && onAction != null)
-              NeumorphicContainer(
+              TonalCard(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
                 ),
                 borderRadius: AppTheme.radiusCard,
-                depth: 10,
                 child: InkWell(
                   onTap: () {
                     Haptics.mediumHaptic();
@@ -166,9 +160,8 @@ class _SoftIllustration extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return NeumorphicContainer(
+    return TonalCard(
       borderRadius: 70,
-      depth: isDark ? 12 : 15,
       padding: const EdgeInsets.all(28),
       color: isDark
           ? colorScheme.surfaceContainerHighest
@@ -189,69 +182,3 @@ class _SoftIllustration extends StatelessWidget {
   }
 }
 
-/// Empty state for stats page
-class EmptyStatsState extends StatelessWidget {
-  final VoidCallback? onStartTracking;
-
-  const EmptyStatsState({
-    super.key,
-    this.onStartTracking,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return EmptyState(
-      title: _lt(context, 'emptyNoStats', 'No Statistics Yet'),
-      message: _lt(context, 'emptyNoStatsMsg',
-          'Track your hair washes for at least a week to see insightful statistics about your routine.'),
-      icon: Icons.analytics_outlined,
-      actionLabel:
-          onStartTracking != null ? _lt(context, 'emptyStartTracking', 'Start Tracking') : null,
-      onAction: onStartTracking,
-      customWidget: Column(
-        children: [
-          _buildFeatureItem(
-            context,
-            icon: Icons.calendar_month_outlined,
-            text: _lt(context, 'featTrack', 'Track wash frequency'),
-          ),
-          const SizedBox(height: 12),
-          _buildFeatureItem(
-            context,
-            icon: Icons.trending_up_outlined,
-            text: _lt(context, 'featCharts', 'View progress charts'),
-          ),
-          const SizedBox(height: 12),
-          _buildFeatureItem(
-            context,
-            icon: Icons.schedule_outlined,
-            text: _lt(context, 'featOptimize', 'Optimize your routine'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureItem(BuildContext context,
-      {required IconData icon, required String text}) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: colorScheme.primary.withValues(alpha: 0.7),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-        ),
-      ],
-    );
-  }
-}

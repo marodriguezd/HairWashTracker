@@ -149,6 +149,43 @@ void main() {
       expect(find.text('Clear all data'), findsOneWidget);
     });
 
+    testWidgets('Clearing data from the sheet shows the confirmation snackbar',
+        (tester) async {
+      controller.toggleWashDay(DateTime(2026, 7, 2));
+
+      await tester.pumpWidget(createTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.folder_outlined));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clear all data'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Clear data'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('All data has been cleared'), findsOneWidget);
+      expect(controller.selectedEvents, isEmpty);
+    });
+
+    testWidgets('Cancelled import shows no success message', (tester) async {
+      final cancelled = AppController(
+        repository: repository,
+        fileOperations: fileOps,
+        pickFile: (_) async => null,
+      );
+
+      await tester.pumpWidget(createTestApp(controller: cancelled));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.folder_outlined));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Import Data (CSV)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Data imported successfully'), findsNothing);
+    });
+
     testWidgets('StatsPage displays Hero card and routine metrics when washes exist', (tester) async {
       // Add wash events
       controller.toggleWashDay(DateTime(2026, 7, 2));

@@ -17,11 +17,11 @@ device with optional local CSV/JSON backup through the system share sheet.
 ## Features
 
 - Interactive month calendar with wash-day marking and predicted-date hints
-- Weekly bar charts and monthly counters with animated transitions
+- Weekly, monthly, and all-time counters with animated transitions
 - Adaptive next-wash prediction (EWMA interval + trend + weekday affinity)
 - Light/dark/system themes with four seed presets and Android dynamic color
 - Adaptive navigation: bottom bar on phones, side rail on large screens
-- CSV/JSON import, export, and full data wipe from the drawer
+- CSV/JSON import, export, and full data wipe from the data sheet
 
 ## Tech stack
 
@@ -35,7 +35,7 @@ device with optional local CSV/JSON backup through the system share sheet.
 | Sharing / files | `share_plus`, `file_picker` |
 | Motion | `flutter_animate` (≤500 ms, ease-out curves) |
 | Android build | AGP 9.1.0, Kotlin 2.4.0, Gradle 9.3.1, NDK (Flutter default), Java 17 |
-| Tests | `flutter_test` (51 tests) |
+| Tests | `flutter_test` (96 tests) |
 
 ## Repository layout
 
@@ -62,7 +62,7 @@ flutter build apk --debug   # debug APK
 ```bash
 cd HairWashTracker
 flutter analyze             # must report no issues
-flutter test                # 51 tests, must all pass
+flutter test                # 96 tests, must all pass
 ```
 
 Continuous integration (`.github/workflows/`):

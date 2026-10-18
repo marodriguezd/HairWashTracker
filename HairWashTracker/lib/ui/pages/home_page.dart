@@ -4,7 +4,7 @@ import 'package:hair_wash_tracker/providers/app_controller.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/data_management_sheet.dart';
 import '../widgets/monthly_washes_widget.dart';
-import '../widgets/neumorphic_container.dart';
+import '../widgets/tonal_card.dart';
 import '../../utils/haptics.dart';
 import 'settings_page.dart';
 import 'stats_page.dart';
@@ -131,7 +131,6 @@ class _AdaptiveBody extends StatelessWidget {
   Widget build(BuildContext context) {
     if (index == 1) return const StatsPage(embed: true);
     if (index == 2) return const SettingsPage(embed: true);
-    context.watch<AppController>();
     final scheme = Theme.of(context).colorScheme;
     final gradientColors = [
       scheme.surface,
@@ -149,10 +148,10 @@ class _AdaptiveBody extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 840),
-            child: SingleChildScrollView(
+            child: const SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   SizedBox(height: 16),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
@@ -179,14 +178,15 @@ class _CalendarGestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onHorizontalDragEnd: (DragEndDetails details) {
+        final velocity = details.primaryVelocity ?? 0;
         Haptics.lightHaptic();
-        if (details.primaryVelocity! > 0) {
+        if (velocity > 0) {
           context.read<AppController>().previousMonth();
-        } else if (details.primaryVelocity! < 0) {
+        } else if (velocity < 0) {
           context.read<AppController>().nextMonth();
         }
       },
-      child: const NeumorphicContainer(
+      child: const TonalCard(
         child: CalendarWidget(),
       ),
     );
