@@ -126,3 +126,6 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 # Release artifacts live in GitHub Releases, not in git
 *.apk
+
+# Screenshot written by .github/scripts/release-smoke.sh
+smoke.png

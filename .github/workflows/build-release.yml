@@ -136,41 +136,9 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # The action runs this with /bin/sh, where `set -o pipefail` fails.
-          script: |
-            set -eu
-            APK=$(ls release/*.apk)
-            adb install -r "$APK"
-            adb logcat -c
-            adb shell am start -W -n "$APP_ID/.MainActivity"
-            sleep 15
-
-            PID=$(adb shell pidof "$APP_ID" | tr -d '\r')
-            if [ -z "$PID" ]; then
-              echo "::error::The app process died after launch."
-              adb logcat -d | tail -200
-              exit 1
-            fi
-
-            if ! adb shell dumpsys activity activities \
-              | grep -E "topResumedActivity|mResumedActivity" \
-              | grep -q hairwashtracker; then
-              echo "::error::The app is not the resumed activity."
-              exit 1
-            fi
-
-            adb exec-out screencap -p > smoke.png
-
-            # shared_preferences failures are swallowed by the UI layer and only
-            # logged, so the process staying alive is not proof the app works.
-            APP_LOG=$(adb logcat -d --pid="$PID")
-            if echo "$APP_LOG" | grep -qE "Error loading persisted state|NoSuchMethodError"; then
-              echo "::error::Persistence failed at startup; the build would lose user data."
-              echo "$APP_LOG"
-              exit 1
-            fi
-
-            echo "Smoke test passed: process $PID running, no persistence errors."
+          # The action runs this line through /bin/sh, so the checks live in a
+          # bash script where variables and options persist.
+          script: bash .github/scripts/release-smoke.sh "$(ls release/*.apk)"
 
       - name: Upload smoke screenshot
         if: always()
