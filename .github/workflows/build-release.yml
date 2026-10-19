@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-      - 'wash-tracker-*'
   workflow_dispatch:
 
 permissions:
@@ -100,5 +99,33 @@ jobs:
           files: |
             HairWashTracker/build/app/outputs/flutter-apk/app-release.apk
             HairWashTracker/app-release.apk.sha256
-          name: Hair Wash Tracker (${{ github.ref_name }})
-          generate_release_notes: true
+          name: Hair Wash Tracker ${{ github.ref_name }}
+          body: |
+            First stable release of Hair Wash Tracker, a local-first app for
+            logging and planning hair washes. All data stays on the device: no
+            account, no cloud, no network calls.
+
+            Highlights:
+
+            - Calendar logging: tap a day to add or remove a wash; one entry per
+              day, persisted immediately.
+            - Adaptive prediction: an EWMA model with trend and weekday affinity
+              estimates the next wash and marks predicted dates on the calendar.
+            - Statistics: week and month counts, average and median intervals,
+              cadence, trend and confidence.
+            - Data portability: CSV export and import with ISO dates
+              (yyyy-MM-dd) plus JSON backups, shared through the system sheet.
+            - Material 3 interface: tonal surfaces, four seed accents, system
+              dynamic color on Android 12+, light/dark/auto themes, and adaptive
+              navigation for phones and large screens.
+            - Six UI languages: English, Spanish, German, French, Italian and
+              Simplified Chinese, including Material widgets and calendar
+              dates.
+            - Android 16 (API 36) target, edge-to-edge rendering and predictive
+              back.
+
+            This release also fixes missing Material localization delegates and
+            dates that previously remained in English.
+
+            The APK is signed with the project release key; a SHA-256 checksum
+            is attached. Requires Android 7.0 (API 24) or newer.

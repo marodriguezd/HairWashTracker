@@ -1,7 +1,7 @@
 name: hair_wash_tracker
 description: "A new Flutter project."
 publish_to: 'none'
-version: 26.10.13+1
+version: 1.0.0+1
 
 environment:
   # Floors imposed by file_picker 13 / share_plus 13; a lower claim would
@@ -12,10 +12,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.3
-  intl: ^0.19.0
+  intl: ^0.20.0
   table_calendar: ^3.1.2
   file_picker: ^13.1.0
   share_plus: ^13.3.1

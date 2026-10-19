@@ -38,6 +38,9 @@ class CalendarWidget extends StatelessWidget {
           focusedDay: controller.focusedDay,
           eventLoader: controller.getEventsForDay,
           calendarFormat: CalendarFormat.month,
+          // TableCalendar formats its header and weekday labels with intl;
+          // without this it stays in English inside a localized UI.
+          locale: Localizations.localeOf(context).toLanguageTag(),
           startingDayOfWeek: StartingDayOfWeek.monday,
           headerStyle: HeaderStyle(
             formatButtonVisible: false,

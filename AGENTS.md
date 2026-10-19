@@ -37,9 +37,10 @@ import/export via the system share sheet).
     (`embed` mode for the shell, standalone `Scaffold` otherwise).
   - `lib/ui/widgets/` — calendar, month counter, data sheet, dialogs,
     theme and accent pickers.
-  - `test/` — `app_controller_test.dart`,
+  - `test/` — `app_controller_test.dart`, `services_test.dart`,
+    `localization_test.dart`, `theme_test.dart`, `ui_test.dart`,
     `statistics_calculator_test.dart`, `wash_predictive_model_test.dart`
-    (96 tests total).
+    (97 tests total).
   - `android/` — Kotlin DSL Gradle (`app/build.gradle.kts`,
     `settings.gradle.kts`), `MainActivity` (plain `FlutterActivity`;
     edge-to-edge is driven from Dart), manifest with
@@ -63,8 +64,10 @@ import/export via the system share sheet).
   `flutter config --jdk-dir <jdk-21-path>`.
 - Pub dependencies (`HairWashTracker/pubspec.yaml`): `provider`,
   `shared_preferences`, `table_calendar`, `intl`, `file_picker`,
-  `share_plus`, `flutter_animate`, `dynamic_color`, `cupertino_icons`.
-- `pubspec.yaml` `version:` (`26.10.13+1`) is the single source of the
+  `share_plus`, `flutter_animate`, `dynamic_color`, `cupertino_icons`,
+  `flutter_localizations` (SDK; supplies Material/Cupertino localizations
+  for the six UI languages).
+- `pubspec.yaml` `version:` (`1.0.0+1`) is the single source of the
   project version.
 
 ## 4. Behavioral invariants
@@ -130,7 +133,7 @@ Preserve these (tests pin the prediction/statistics side):
 cd HairWashTracker
 flutter pub get
 flutter analyze              # must be clean
-flutter test                 # 96 tests, must pass
+flutter test                 # 97 tests, must pass
 flutter build apk --debug    # before declaring device-visible changes done
 ```
 

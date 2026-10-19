@@ -28,8 +28,12 @@ class StatsPage extends StatelessWidget {
           }
 
           final nextWash = controller.nextRecommendedWashDate;
+          // The prediction date is user-facing, so it follows the active UI
+          // language instead of intl's default English locale.
           final nextWashStr = nextWash != null
-              ? DateFormat('EEE, MMM d').format(nextWash)
+              ? DateFormat.MMMEd(
+                      Localizations.localeOf(context).toLanguageTag())
+                  .format(nextWash)
               : controller.tr('statsKeepLogging');
           final confidenceStr = switch (controller.predictionConfidence) {
             PredictionConfidence.low => controller.tr('confLow'),

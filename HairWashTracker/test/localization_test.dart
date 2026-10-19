@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hair_wash_tracker/l10n/app_localizations.dart';
+import 'package:hair_wash_tracker/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('AppLocalizations', () {
@@ -80,6 +82,21 @@ void main() {
       expect(AppLocalizations.systemDefaultCode('pt'), 'en');
       expect(AppLocalizations.systemDefaultCode('ja'), 'en');
       expect(AppLocalizations.systemDefaultCode(null), 'en');
+    });
+
+    testWidgets('non-English locale has Material localizations', (tester) async {
+      SharedPreferences.setMockInitialValues({'app_language': 'es'});
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // MaterialApp must ship global delegates: without them AppBar and the
+      // navigation shell throw "No MaterialLocalizations found" once the
+      // locale is anything but English.
+      expect(tester.takeException(), isNull);
+      expect(find.text('Calendario'), findsOneWidget);
+      // The calendar formats dates with intl, so it must follow the locale too.
+      expect(find.text('lun'), findsOneWidget);
     });
   });
 }

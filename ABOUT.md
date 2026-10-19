@@ -8,8 +8,8 @@ statistics, and receive adaptive predictions for the next recommended wash.
 There is no account, no cloud, and no network usage: all data lives on the
 device with optional local CSV/JSON backup through the system share sheet.
 
-- **Status:** in development (`main` branch)
-- **Version:** `26.10.13+1` (single source: `HairWashTracker/pubspec.yaml`)
+- **Status:** stable (`main` branch)
+- **Version:** `1.0.0+1` (single source: `HairWashTracker/pubspec.yaml`)
 - **License:** GNU General Public License v3.0 only ([LICENSE](LICENSE))
 - **Languages:** English UI ([README.md](README.md)); Spanish docs
   ([README_ES.md](README_ES.md))
@@ -35,7 +35,7 @@ device with optional local CSV/JSON backup through the system share sheet.
 | Sharing / files | `share_plus`, `file_picker` |
 | Motion | `flutter_animate` (≤500 ms, ease-out curves) |
 | Android build | AGP 9.1.0, Kotlin 2.4.0, Gradle 9.3.1, NDK (Flutter default), Java 17 |
-| Tests | `flutter_test` (96 tests) |
+| Tests | `flutter_test` (97 tests) |
 
 ## Repository layout
 
@@ -62,7 +62,7 @@ flutter build apk --debug   # debug APK
 ```bash
 cd HairWashTracker
 flutter analyze             # must report no issues
-flutter test                # 96 tests, must all pass
+flutter test                # 97 tests, must all pass
 ```
 
 Continuous integration (`.github/workflows/`):

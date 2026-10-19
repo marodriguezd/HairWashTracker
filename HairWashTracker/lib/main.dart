@@ -1,6 +1,7 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:hair_wash_tracker/providers/app_controller.dart';
 import 'package:hair_wash_tracker/services/data_repository.dart';
@@ -57,6 +58,10 @@ class MyApp extends StatelessWidget {
                 theme: light,
                 darkTheme: dark,
                 locale: controller.flutterLocale,
+                // Without these delegates Material widgets (AppBar, dialogs,
+                // tooltips) throw "No MaterialLocalizations found" for any
+                // locale other than English.
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
                 supportedLocales:
                     AppLanguage.supported.map((l) => l.locale).toList(),
                 home: const HomePage(),
