@@ -17,6 +17,11 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.3
+  # 2.5.0 moved this plugin to Pigeon's JNI interop, whose runtime lookups
+  # break once R8 renames the Kotlin coroutine types it resolves by name: every
+  # read and write fails in release builds. Keep the method-channel version
+  # until the upstream R8 rules ship.
+  shared_preferences_android: '>=2.4.28 <2.5.0'
   intl: ^0.20.0
   table_calendar: ^3.1.2
   file_picker: ^13.1.0
