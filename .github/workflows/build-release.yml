@@ -122,6 +122,9 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
       - name: Download APK artifact
         uses: actions/download-artifact@v7
         with:
