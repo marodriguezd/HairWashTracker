@@ -40,17 +40,17 @@ import/export via the system share sheet).
   - `test/` — `app_controller_test.dart`, `services_test.dart`,
     `localization_test.dart`, `theme_test.dart`, `ui_test.dart`,
     `statistics_calculator_test.dart`, `wash_predictive_model_test.dart`
-    (97 tests total).
+    (98 tests total).
   - `android/` — Kotlin DSL Gradle (`app/build.gradle.kts`,
     `settings.gradle.kts`), `MainActivity` (plain `FlutterActivity`;
     edge-to-edge is driven from Dart), manifest with
     `android:enableOnBackInvokedCallback="true"` for predictive back.
   - `assets/` — icons, screenshots.
 - `.github/workflows/` — `test.yml` (`flutter analyze` + `flutter test`),
-  `build-debug.yml` (push/PR on `main`), `build-release.yml` (tags `v*` /
-  `wash-tracker-*` plus manual dispatch; signs with the `KEYSTORE_BASE64`,
-  `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` secrets and fails the build
-  on a debug-signed APK).
+  `build-debug.yml` (push/PR on `main`), `build-release.yml` (tags `v*` plus
+  manual dispatch; signs with the `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`,
+  `KEY_ALIAS`, `KEY_PASSWORD` secrets, fails on a debug-signed APK, and gates
+  the GitHub Release behind an emulator smoke test of the built artifact).
 - `.agents/` — agent-only workspace (git-ignored).
 
 ## 3. Technology stack (verified)
@@ -63,8 +63,10 @@ import/export via the system share sheet).
 - Local JDK override (dev machines only): 
   `flutter config --jdk-dir <jdk-21-path>`.
 - Pub dependencies (`HairWashTracker/pubspec.yaml`): `provider`,
-  `shared_preferences`, `table_calendar`, `intl`, `file_picker`,
-  `share_plus`, `flutter_animate`, `dynamic_color`, `cupertino_icons`,
+  `shared_preferences` (with `shared_preferences_android` pinned below 2.5.0:
+  its Pigeon JNI lookups break under R8 and every preference read/write fails
+  in release builds), `table_calendar`, `intl`, `file_picker`, `share_plus`,
+  `flutter_animate`, `dynamic_color`, `cupertino_icons`,
   `flutter_localizations` (SDK; supplies Material/Cupertino localizations
   for the six UI languages).
 - `pubspec.yaml` `version:` (`1.0.0+1`) is the single source of the
@@ -133,8 +135,9 @@ Preserve these (tests pin the prediction/statistics side):
 cd HairWashTracker
 flutter pub get
 flutter analyze              # must be clean
-flutter test                 # 97 tests, must pass
+flutter test                 # 98 tests, must pass
 flutter build apk --debug    # before declaring device-visible changes done
+flutter build apk --release  # for changes that can differ under R8
 ```
 
 ## 8. Git rules
@@ -156,3 +159,26 @@ flutter build apk --debug    # before declaring device-visible changes done
        (`install -r`, launch, screencaps, no FATAL for the app package)
 - [ ] README/ABOUT updated if behavior, build, or release contracts changed
 - [ ] `git status` shows only intended files; no secrets or generated output
+
+## 10. CI coverage and manual checks
+
+Automated on every push/PR to `main` (`test.yml`, `build-debug.yml`) and on
+every `v*` tag (`build-release.yml`): analyze, 98 tests, debug build, signed
+release build, signature and checksum verification, install and launch of the
+release APK on an API 34 emulator, and a log assertion that persistence did
+not fail at startup. The GitHub Release is only published after that smoke
+job passes.
+
+Deliberately manual, because CI cannot do it:
+
+- Physical-device behaviour: real hardware, dynamic color from the Android 12+
+  wallpaper, haptics, predictive back, share sheet and file picker.
+- Keystore custody: CI can prove the signature of the built APK but cannot
+  read the secret back, and a lost keystore ends update compatibility.
+- Store delivery: no Play Store upload, listing or staged rollout exists yet.
+- Non-Android targets: iOS/macOS/Windows/Linux/web builds are untested; only
+  Android is validated end to end.
+- Device locales: all six UI languages are exercised through the in-app
+  selector by hand; CI covers them through unit and widget tests only.
+- `dart format`: not enforced, because the existing tree is not fully
+  formatted and a gate would force an unrelated repo-wide reformat.

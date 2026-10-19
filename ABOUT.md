@@ -35,7 +35,7 @@ device with optional local CSV/JSON backup through the system share sheet.
 | Sharing / files | `share_plus`, `file_picker` |
 | Motion | `flutter_animate` (≤500 ms, ease-out curves) |
 | Android build | AGP 9.1.0, Kotlin 2.4.0, Gradle 9.3.1, NDK (Flutter default), Java 17 |
-| Tests | `flutter_test` (97 tests) |
+| Tests | `flutter_test` (98 tests) |
 
 ## Repository layout
 
@@ -62,22 +62,29 @@ flutter build apk --debug   # debug APK
 ```bash
 cd HairWashTracker
 flutter analyze             # must report no issues
-flutter test                # 97 tests, must all pass
+flutter test                # 98 tests, must all pass
 ```
 
 Continuous integration (`.github/workflows/`):
 
-- `test.yml` — `flutter analyze --no-fatal-infos` + `flutter test` on
-  push/PR to `main`
+- `test.yml` — `flutter analyze` + `flutter test` on push/PR to `main`
 - `build-debug.yml` — debug APK on push/PR to `main`
-- `build-release.yml` — release APK on `v*` / `wash-tracker-*` tags
-  (tag-driven releases only)
+- `build-release.yml` — on `v*` tags (and manual dispatch): signed release
+  APK, signature and SHA-256 checks, then an emulator smoke test that installs
+  the artifact, launches it and fails if startup persistence errors appear. The
+  GitHub Release is created only after that smoke test passes.
 
 ## Release process
 
 Releases are cut by pushing a version tag; the release workflow builds and
-publishes the APK. Tags and GitHub Releases are immutable and are never
-created, moved, or deleted by automation without an explicit owner request.
+publishes `HairWashTracker-<version>.apk` with a matching `.sha256` file.
+Tags and GitHub Releases are immutable and are never created, moved, or
+deleted by automation without an explicit owner request.
+
+From the repository settings the following cannot be validated by CI: the
+keystore contents (only the resulting signature), physical-device behaviour
+(dynamic color, haptics, share sheet), non-Android targets, and any store
+listing or rollout.
 
 ## Contributing
 
