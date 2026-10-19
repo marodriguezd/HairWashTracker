@@ -80,25 +80,35 @@ jobs:
       - name: Build Release APK
         run: flutter build apk --release
 
+      - name: Name release APK
+        id: apk
+        run: |
+          version=$(sed -n 's/^version: *//p' pubspec.yaml | cut -d+ -f1)
+          name="HairWashTracker-${version}.apk"
+          cp "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/${name}"
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+
       - name: Verify release signature
         run: |
           APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name apksigner | sort -V | tail -1)
-          "$APKSIGNER" verify --print-certs build/app/outputs/flutter-apk/app-release.apk | tee certs.txt
+          "$APKSIGNER" verify --print-certs "build/app/outputs/flutter-apk/${{ steps.apk.outputs.name }}" | tee certs.txt
           if grep -q "CN=Android Debug" certs.txt; then
             echo "::error::Release APK is debug-signed; updates would not be installable."
             exit 1
           fi
 
       - name: Write checksum
-        run: (cd build/app/outputs/flutter-apk && sha256sum app-release.apk) > app-release.apk.sha256
+        run: |
+          cd build/app/outputs/flutter-apk
+          sha256sum "${{ steps.apk.outputs.name }}" > "${{ steps.apk.outputs.name }}.sha256"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
           name: release-apk
           path: |
-            HairWashTracker/build/app/outputs/flutter-apk/app-release.apk
-            HairWashTracker/app-release.apk.sha256
+            HairWashTracker/build/app/outputs/flutter-apk/${{ steps.apk.outputs.name }}
+            HairWashTracker/build/app/outputs/flutter-apk/${{ steps.apk.outputs.name }}.sha256
           retention-days: 90
 
       - name: Create GitHub Release
@@ -106,8 +116,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            HairWashTracker/build/app/outputs/flutter-apk/app-release.apk
-            HairWashTracker/app-release.apk.sha256
+            HairWashTracker/build/app/outputs/flutter-apk/${{ steps.apk.outputs.name }}
+            HairWashTracker/build/app/outputs/flutter-apk/${{ steps.apk.outputs.name }}.sha256
           name: Hair Wash Tracker ${{ github.ref_name }}
           body: |
             First stable release of Hair Wash Tracker, a local-first app for
