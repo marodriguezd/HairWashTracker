@@ -136,8 +136,9 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # The action runs this with /bin/sh, where `set -o pipefail` fails.
           script: |
-            set -euo pipefail
+            set -eu
             APK=$(ls release/*.apk)
             adb install -r "$APK"
             adb logcat -c
