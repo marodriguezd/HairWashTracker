@@ -189,7 +189,7 @@ class AppLocalizations {
   static const Map<String, String> _es = {
     'appTitle': 'Hair Wash Tracker',
     'navCalendar': 'Calendario',
-    'navStats': 'Stats',
+    'navStats': 'Estadísticas',
     'navSettings': 'Ajustes',
     'pageStatistics': 'Estadísticas',
     'tooltipDataMgmt': 'Gestión de datos',
@@ -277,7 +277,7 @@ class AppLocalizations {
   static const Map<String, String> _de = {
     'appTitle': 'Hair Wash Tracker',
     'navCalendar': 'Kalender',
-    'navStats': 'Stats',
+    'navStats': 'Statistiken',
     'navSettings': 'Einstellungen',
     'pageStatistics': 'Statistiken',
     'tooltipDataMgmt': 'Datenverwaltung',
@@ -365,7 +365,7 @@ class AppLocalizations {
   static const Map<String, String> _fr = {
     'appTitle': 'Hair Wash Tracker',
     'navCalendar': 'Calendrier',
-    'navStats': 'Stats',
+    'navStats': 'Statistiques',
     'navSettings': 'Paramètres',
     'pageStatistics': 'Statistiques',
     'tooltipDataMgmt': 'Gestion des données',

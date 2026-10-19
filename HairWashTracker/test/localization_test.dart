@@ -45,6 +45,16 @@ void main() {
           '3 días activos');
     });
 
+    test('navigation labels are translated in every language', () {
+      // A short English label can hide behind stringFor() fallbacks: assert
+      // each tab explicitly so "Stats" cannot leak back into a localised UI.
+      expect(AppLocalizations.stringFor('es', 'navStats'), 'Estadísticas');
+      expect(AppLocalizations.stringFor('de', 'navStats'), 'Statistiken');
+      expect(AppLocalizations.stringFor('fr', 'navStats'), 'Statistiques');
+      expect(AppLocalizations.stringFor('it', 'navStats'), 'Statistiche');
+      expect(AppLocalizations.stringFor('zh', 'navStats'), '统计');
+    });
+
     test('representative values are genuinely translated', () {
       expect(AppLocalizations.stringFor('es', 'navCalendar'), 'Calendario');
       expect(AppLocalizations.stringFor('de', 'navCalendar'), 'Kalender');
