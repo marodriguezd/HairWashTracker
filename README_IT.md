@@ -28,7 +28,7 @@ consigliato. Niente account, niente cloud: i dati restano sul dispositivo.
 - Temi chiaro, scuro e di sistema; quattro preset (Warm Coral, Lavender
   Mist, Sage Mist, Ocean Blue) più colore dinamico Android sui dispositivi supportati
 - Navigazione adattiva (barra inferiore sui telefoni, barra laterale sugli schermi grandi)
-- Persistenza locale; importazione ed esportazione CSV e JSON, condivisione degli export tramite il foglio di condivisione del sistema
+- Persistenza locale; esportazione e ripristino di un backup JSON con versione tramite il foglio di condivisione del sistema (i backup CSV della 1.0.x restano importabili)
 
 ## Statistiche
 

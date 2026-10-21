@@ -31,43 +31,33 @@ class MockDataRepository implements IDataRepository {
   }
 }
 
+/// A repository whose store wipe fails, as a full disk or a plugin error would.
+class ThrowingClearRepository extends MockDataRepository {
+  @override
+  Future<void> clearWashEvents() async =>
+      throw Exception('store wipe failed');
+}
+
 class MockFileOperations implements IFileOperations {
-  String csvContent = "Date\n2026-07-02";
-  String jsonContent = "[]";
+  String exportedContent = '{}';
   List<WashEvent> importedEvents = [WashEvent(date: DateTime(2026, 7, 2))];
-  bool exportCSVCalled = false;
-  bool importCSVCalled = false;
-  bool exportJsonCalled = false;
-  bool importJsonCalled = false;
+  bool importCalled = false;
   bool shareCalled = false;
+  String? sharedFilename;
 
   @override
-  Future<String> exportToCSV(List<WashEvent> events) async {
-    exportCSVCalled = true;
-    return csvContent;
-  }
+  Future<String> exportToJson(List<WashEvent> events) async => exportedContent;
 
   @override
-  Future<List<WashEvent>> importFromCSV(String filePath) async {
-    importCSVCalled = true;
-    return importedEvents;
-  }
-
-  @override
-  Future<String> exportToJson(List<WashEvent> events) async {
-    exportJsonCalled = true;
-    return jsonContent;
-  }
-
-  @override
-  Future<List<WashEvent>> importFromJson(String filePath) async {
-    importJsonCalled = true;
+  Future<List<WashEvent>> importFromBackup(String filePath) async {
+    importCalled = true;
     return importedEvents;
   }
 
   @override
   Future<void> shareFile(String content, String filename) async {
     shareCalled = true;
+    sharedFilename = filename;
   }
 }
 
@@ -140,13 +130,12 @@ void main() {
       expect(mockRepository.clearCalled, isTrue);
     });
 
-    test('exportData and exportDataJson delegate to operations', () async {
+    test('exportData shares a dated .json backup', () async {
       await controller.exportData();
-      expect(mockFileOps.exportCSVCalled, isTrue);
-      expect(mockFileOps.shareCalled, isTrue);
 
-      await controller.exportDataJson();
-      expect(mockFileOps.exportJsonCalled, isTrue);
+      expect(mockFileOps.shareCalled, isTrue);
+      expect(mockFileOps.sharedFilename, startsWith('hair_wash_tracker_backup_'));
+      expect(mockFileOps.sharedFilename, endsWith('.json'));
     });
 
     test('averageInterval, medianInterval and nextRecommendedWashDate expose correct values', () async {
@@ -232,13 +221,27 @@ void main() {
       final cancelled = AppController(
         repository: repository,
         fileOperations: ops,
-        pickFile: (_) async => null,
+        pickFile: () async => null,
       );
       await Future.delayed(Duration.zero);
 
       expect(await cancelled.importData(), isFalse);
-      expect(ops.importCSVCalled, isFalse);
+      expect(ops.importCalled, isFalse);
       expect(cancelled.selectedEvents, isEmpty);
+    });
+
+    test('importData restores a 1.0.x .csv copy', () async {
+      final ops = MockFileOperations();
+      final importing = AppController(
+        repository: MockDataRepository(),
+        fileOperations: ops,
+        pickFile: () async => '/tmp/legacy_backup.csv',
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(await importing.importData(), isTrue);
+      expect(ops.importCalled, isTrue);
+      expect(importing.selectedEvents, hasLength(1));
     });
 
     test('importData imports the picked file and returns true', () async {
@@ -247,12 +250,12 @@ void main() {
       final importing = AppController(
         repository: repository,
         fileOperations: ops,
-        pickFile: (_) async => '/tmp/backup.csv',
+        pickFile: () async => '/tmp/backup.json',
       );
       await Future.delayed(Duration.zero);
 
       expect(await importing.importData(), isTrue);
-      expect(ops.importCSVCalled, isTrue);
+      expect(ops.importCalled, isTrue);
       expect(importing.selectedEvents, hasLength(1));
       expect(importing.totalWashes, 1);
     });
@@ -260,14 +263,35 @@ void main() {
     test('month navigation clamps the day instead of overflowing', () {
       controller.setFocusedDay(DateTime(2026, 1, 31));
       controller.nextMonth();
-      expect(controller.focusedDay, DateTime(2026, 2, 28));
+      expect(controller.focusedDay, DateTime(2026, 2, 28, 12));
 
       controller.nextMonth();
-      expect(controller.focusedDay, DateTime(2026, 3, 28));
+      expect(controller.focusedDay, DateTime(2026, 3, 28, 12));
 
       controller.setFocusedDay(DateTime(2026, 3, 31));
       controller.previousMonth();
-      expect(controller.focusedDay, DateTime(2026, 2, 28));
+      expect(controller.focusedDay, DateTime(2026, 2, 28, 12));
+    });
+
+    test('setFocusedDay keeps the focused day in the local-noon frame', () {
+      controller.setFocusedDay(DateTime.utc(2026, 7, 1));
+
+      expect(controller.focusedDay.isUtc, isFalse);
+      expect(controller.focusedDay, DateTime(2026, 7, 1, 12));
+    });
+
+    test('clearAllData keeps the history when the store wipe fails', () async {
+      final repository = ThrowingClearRepository()
+        ..events = [WashEvent(date: DateTime(2026, 7, 2))];
+      final failing = AppController(
+        repository: repository,
+        fileOperations: mockFileOps,
+      );
+      await Future.delayed(Duration.zero);
+
+      await expectLater(failing.clearAllData(), throwsA(isA<Exception>()));
+      // The UI must not show an empty calendar over data that still exists.
+      expect(failing.isWashDay(DateTime(2026, 7, 2)), isTrue);
     });
 
     test('importData rejects a backup with no usable dates', () async {
@@ -276,7 +300,7 @@ void main() {
       final importing = AppController(
         repository: repository,
         fileOperations: ops,
-        pickFile: (_) async => '/tmp/empty.csv',
+        pickFile: () async => '/tmp/empty.json',
       );
       await Future.delayed(Duration.zero);
       importing.toggleWashDay(DateTime(2026, 7, 2));

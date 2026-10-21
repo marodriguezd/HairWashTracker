@@ -351,5 +351,24 @@ void main() {
       expect(result.nextWashDate.hour, 12);
       expect(result.nextWashDate.minute, 0);
     });
+
+    test('30. A weekday at exactly 30% of washes sets the affinity', () {
+      // 3 of 10 washes on Monday is exactly the documented threshold.
+      final events = [
+        createEvent(DateTime(2026, 1, 5, 12)), // Mon
+        createEvent(DateTime(2026, 1, 6, 12)),
+        createEvent(DateTime(2026, 1, 7, 12)),
+        createEvent(DateTime(2026, 1, 8, 12)),
+        createEvent(DateTime(2026, 1, 9, 12)),
+        createEvent(DateTime(2026, 1, 12, 12)), // Mon
+        createEvent(DateTime(2026, 1, 13, 12)),
+        createEvent(DateTime(2026, 1, 14, 12)),
+        createEvent(DateTime(2026, 1, 15, 12)),
+        createEvent(DateTime(2026, 1, 19, 12)), // Mon
+      ];
+      final result = WashPredictiveModel.predict(events);
+
+      expect(result.preferredWeekday, DateTime.monday);
+    });
   });
 }

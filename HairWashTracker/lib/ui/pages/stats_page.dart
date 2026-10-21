@@ -8,7 +8,11 @@ import '../widgets/empty_state.dart';
 
 class StatsPage extends StatelessWidget {
   final bool embed;
-  const StatsPage({super.key, this.embed = false});
+
+  /// Invoked by the empty state so the shell can switch to the calendar.
+  final VoidCallback? onAddWash;
+
+  const StatsPage({super.key, this.embed = false, this.onAddWash});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +26,7 @@ class StatsPage extends StatelessWidget {
             return Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppTheme.spacingScreen),
-                child: EmptyState.noWashes(context),
+                child: EmptyState.noWashes(context, onAddWash: onAddWash),
               ),
             );
           }
@@ -42,7 +46,8 @@ class StatsPage extends StatelessWidget {
           };
           final confidenceIcon = switch (controller.predictionConfidence) {
             PredictionConfidence.low => Icons.signal_cellular_alt_1_bar_rounded,
-            PredictionConfidence.medium => Icons.signal_cellular_alt_2_bar_rounded,
+            PredictionConfidence.medium =>
+              Icons.signal_cellular_alt_2_bar_rounded,
             PredictionConfidence.high => Icons.signal_cellular_alt_rounded,
           };
           final trendStr = controller.trendSlope > 0.2
@@ -56,165 +61,207 @@ class StatsPage extends StatelessWidget {
                   ? Icons.trending_down_rounded
                   : Icons.trending_flat_rounded;
 
-          return ListView(
-            padding: const EdgeInsets.all(AppTheme.spacingScreen),
-            children: [
-              // Hero card: Next Recommended Wash
-              Card(
-                color: colorScheme.primaryContainer,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusCard + 4),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return Center(
+            child: ConstrainedBox(
+              constraints:
+                  const BoxConstraints(maxWidth: AppTheme.contentMaxWidth),
+              child: ListView(
+                padding: const EdgeInsets.all(AppTheme.spacingScreen),
+                children: [
+                  Card(
+                    color: colorScheme.primaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.radiusLarge),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                controller.tr('statsNextWash'),
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: colorScheme.onPrimaryContainer
+                                      .withValues(alpha: 0.8),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(
+                                      AppTheme.radiusButton),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      confidenceIcon,
+                                      size: 16,
+                                      color: colorScheme.onPrimaryContainer,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      confidenceStr,
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
                           Text(
-                            controller.tr('statsNextWash'),
-                            style: textTheme.labelLarge?.copyWith(
-                              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
-                              fontWeight: FontWeight.w500,
+                            nextWashStr,
+                            style: textTheme.headlineMedium?.copyWith(
+                              color: colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(confidenceIcon, size: 16, color: colorScheme.onPrimaryContainer),
-                                const SizedBox(width: 4),
-                                Text(
-                                  confidenceStr,
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: colorScheme.onPrimaryContainer,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 8),
+                          Text(
+                            controller.tr('statsCalcDesc'),
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onPrimaryContainer
+                                  .withValues(alpha: 0.8),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        nextWashStr,
-                        style: textTheme.headlineMedium?.copyWith(
-                          color: colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    controller.tr('statsCadence'),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.75,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildMetricTile(
+                          context,
+                          title: controller.tr('statsInterval'),
+                          value:
+                              '${controller.adaptiveInterval.toStringAsFixed(1)} d',
+                          icon: Icons.timelapse_rounded,
+                          color: colorScheme.primary,
+                          subtitle: controller.tr('statsEwma'),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        controller.tr('statsCalcDesc'),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildMetricTile(
+                          context,
+                          title: controller.tr('statsTrend'),
+                          value: trendStr,
+                          icon: trendIcon,
+                          color: colorScheme.secondary,
+                          subtitle: controller.tr('statsRecentPace'),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              Text(
-                controller.tr('statsCadence'),
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.75,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildMetricTile(
-                      context,
-                      title: controller.tr('statsInterval'),
-                      value:
-                          '${controller.adaptiveInterval.toStringAsFixed(1)} d',
-                      icon: Icons.timelapse_rounded,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildMetricTile(
+                          context,
+                          title: controller.tr('statsAverage'),
+                          value: _formatInterval(controller.averageInterval,
+                              controller.totalWashes),
+                          icon: Icons.functions_rounded,
+                          color: colorScheme.tertiary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildMetricTile(
+                          context,
+                          title: controller.tr('statsMedian'),
+                          value: _formatInterval(controller.medianInterval,
+                              controller.totalWashes),
+                          icon: Icons.horizontal_rule_rounded,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    controller.tr('statsVolume'),
+                    style: textTheme.labelSmall?.copyWith(
                       color: colorScheme.primary,
-                      subtitle: controller.tr('statsEwma'),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.75,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildMetricTile(
-                      context,
-                      title: controller.tr('statsTrend'),
-                      value: trendStr,
-                      icon: trendIcon,
-                      color: colorScheme.secondary,
-                      subtitle: controller.tr('statsRecentPace'),
+                  const SizedBox(height: 8),
+                  Card(
+                    color: colorScheme.surfaceContainerHigh,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildVolumeColumn(
+                              context,
+                              count: controller.totalWashes,
+                              label: controller.tr('statsAllTime'),
+                            ),
+                          ),
+                          Container(
+                            height: 40,
+                            width: 1,
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.5),
+                          ),
+                          Expanded(
+                            child: _buildVolumeColumn(
+                              context,
+                              count: controller.currentWeekWashes,
+                              label: controller.tr('statsThisWeek'),
+                            ),
+                          ),
+                          Container(
+                            height: 40,
+                            width: 1,
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.5),
+                          ),
+                          Expanded(
+                            child: _buildVolumeColumn(
+                              context,
+                              count: controller.currentMonthWashes,
+                              label: controller.tr('statsThisMonth'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 24),
-              Text(
-                controller.tr('statsVolume'),
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.75,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                color: colorScheme.surfaceContainerHigh,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildVolumeColumn(
-                          context,
-                          count: controller.totalWashes,
-                          label: controller.tr('statsAllTime'),
-                        ),
-                      ),
-                      Container(
-                        height: 40,
-                        width: 1,
-                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                      Expanded(
-                        child: _buildVolumeColumn(
-                          context,
-                          count: controller.currentWeekWashes,
-                          label: controller.tr('statsThisWeek'),
-                        ),
-                      ),
-                      Container(
-                        height: 40,
-                        width: 1,
-                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                      Expanded(
-                        child: _buildVolumeColumn(
-                          context,
-                          count: controller.currentMonthWashes,
-                          label: controller.tr('statsThisMonth'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           );
         },
       ),
@@ -229,11 +276,16 @@ class StatsPage extends StatelessWidget {
     );
   }
 
+  /// A single wash has no interval; rendering `0.0 d` would read as daily
+  /// washing, so the tiles stay blank until a second wash exists.
+  static String _formatInterval(double days, int washCount) =>
+      washCount < 2 ? '—' : '${days.toStringAsFixed(1)} d';
+
   Widget _buildMetricTile(
     BuildContext context, {
     required String title,
     required String value,
-    required String subtitle,
+    String? subtitle,
     required IconData icon,
     required Color color,
   }) {
@@ -271,13 +323,15 @@ class StatsPage extends StatelessWidget {
                 color: colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -311,5 +365,4 @@ class StatsPage extends StatelessWidget {
       ],
     );
   }
-
 }

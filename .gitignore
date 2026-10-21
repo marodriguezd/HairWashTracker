@@ -1,7 +1,10 @@
 # Miscellaneous
 *.class
-*.lock
 *.log
+# The Flutter app's resolved dependency set documents the release build, so it
+# is versioned; other lock files stay local.
+*.lock
+!/HairWashTracker/pubspec.lock
 *.pyc
 *.swp
 .buildlog/

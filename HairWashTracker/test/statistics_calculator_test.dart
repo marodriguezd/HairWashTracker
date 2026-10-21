@@ -114,6 +114,24 @@ void main() {
           [WashEvent(date: DateTime(2026, 7, 2))]), 0.0);
     });
 
+    test('consecutive days stay one day apart when the clock shifts', () {
+      // A DST spring-forward makes this pair 23 hours long and a fall-back 25;
+      // truncating to whole days turned the interval into 0.0 and 1.0.
+      final spring = [
+        WashEvent(date: DateTime(2026, 3, 7)),
+        WashEvent(date: DateTime(2026, 3, 8)),
+      ];
+      expect(StatisticsCalculator.getAverageIntervalDays(spring), 1.0);
+      expect(StatisticsCalculator.getMedianIntervalDays(spring), 1.0);
+
+      final fall = [
+        WashEvent(date: DateTime(2026, 10, 31)),
+        WashEvent(date: DateTime(2026, 11, 1)),
+      ];
+      expect(StatisticsCalculator.getAverageIntervalDays(fall), 1.0);
+      expect(StatisticsCalculator.getMedianIntervalDays(fall), 1.0);
+    });
+
     test('getMedianIntervalDays is robust against outliers', () {
       // Odd number of intervals: [2, 3, 4, 5, 100] → median = 4 (not affected by 100)
       final outlierEvents = [

@@ -12,17 +12,26 @@ void main() {
   group('AppTheme and M3 Design Tokens Tests', () {
     test('Shape tokens conform to M3 specifications', () {
       expect(AppTheme.radiusCard, 12.0);
+      expect(AppTheme.radiusLarge, 16.0);
       expect(AppTheme.radiusButton, 999.0);
       expect(AppTheme.radiusDialog, 28.0);
-      expect(AppTheme.radiusChip, 8.0);
-      expect(AppTheme.radiusSmall, 4.0);
     });
 
     test('8dp spacing system conforms to M3 scale', () {
       expect(AppTheme.spacingScreen, 16.0);
       expect(AppTheme.spacingCard, 16.0);
-      expect(AppTheme.spacingItem, 16.0);
-      expect(AppTheme.spacingTight, 8.0);
+    });
+
+    test('snackbars use the inverse surface and the shared card radius', () {
+      final theme = AppTheme.getTheme(AppPresetTheme.warmCoral, Brightness.light);
+
+      expect(theme.snackBarTheme.backgroundColor, theme.colorScheme.inverseSurface);
+      expect(
+        theme.snackBarTheme.shape,
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        ),
+      );
     });
 
     test('getTheme generates useMaterial3 ThemeData with tonal colorScheme', () {

@@ -176,7 +176,7 @@ class WashPredictiveModel {
       }
     }
     
-    if (maxCount > events.length * 0.3) {
+    if (maxCount >= events.length * 0.3) {
       return maxWeekday;
     }
     

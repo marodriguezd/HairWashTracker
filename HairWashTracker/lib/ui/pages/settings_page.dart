@@ -33,7 +33,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AppController>();
-    final Widget content = ListView(
+    final Widget list = ListView(
       padding: const EdgeInsets.all(AppTheme.spacingScreen),
       children: [
         Text(
@@ -162,7 +162,7 @@ class SettingsPage extends StatelessWidget {
                           ),
                         ),
                         onTap: () {
-                          Haptics.mediumHaptic();
+                          Haptics.selectionHaptic();
                           controller.setThemePreset(preset);
                         },
                       );
@@ -174,6 +174,13 @@ class SettingsPage extends StatelessWidget {
           },
         ),
       ],
+    );
+
+    final Widget content = Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppTheme.contentMaxWidth),
+        child: list,
+      ),
     );
 
     if (embed) return content;

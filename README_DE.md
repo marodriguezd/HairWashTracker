@@ -28,7 +28,7 @@ keine Cloud: Die Daten bleiben auf dem Gerät.
 - Helles, dunkles und System-Design; vier Seed-Presets (Warm Coral, Lavender
   Mist, Sage Mist, Ocean Blue) plus dynamische Android-Farben auf unterstützten Geräten
 - Adaptive Navigation (untere Leiste auf Telefonen, seitliche Leiste auf großen Bildschirmen)
-- Lokale Speicherung; CSV- und JSON-Import/-Export, Exportfreigabe über den System-Teilen-Dialog
+- Lokale Speicherung; versionierte JSON-Sicherung exportieren und wiederherstellen über den System-Teilen-Dialog (CSV-Sicherungen aus 1.0.x lassen sich weiterhin einlesen)
 
 ## Statistiken
 

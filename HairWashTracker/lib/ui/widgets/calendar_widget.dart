@@ -23,18 +23,72 @@ class CalendarWidget extends StatelessWidget {
     );
   }
 
+  /// Renders one day.
+  ///
+  /// The today, selected and ordinary builders differ only in fill, border and
+  /// emphasis, so a single cell keeps the wash/predicted language identical on
+  /// every day of the grid. Per-day semantics cannot be added here:
+  /// `table_calendar` wraps every cell in `Semantics(excludeSemantics: true)`
+  /// with its own date label, so anything set inside a builder is dropped.
+  Widget _dayCell(
+    BuildContext context,
+    DateTime day, {
+    required double size,
+    required Color textColor,
+    Color? background,
+    Color? borderColor,
+    double borderWidth = 2,
+    double overlaySize = 0,
+    double overlayStroke = 1.5,
+    bool bold = false,
+  }) {
+    return Center(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          border: borderColor == null
+              ? null
+              : Border.all(color: borderColor, width: borderWidth),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(
+              '${day.day}',
+              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    color: textColor,
+                    fontWeight: bold ? FontWeight.w700 : null,
+                    letterSpacing: 0.25,
+                  ),
+            ),
+            if (overlaySize > 0)
+              _buildPredictedOverlay(context, overlaySize, overlayStroke),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final dayCellSize = screenWidth < 360 ? 36.0 : 40.0;
+    // A rolling window keeps the calendar usable past a hard-coded year while
+    // staying inside the same local-noon frame as stored events.
+    final now = DateTime.now();
+    final firstDay = DateTime(2015, 1, 1, 12);
+    final lastDay = DateTime(now.year + 5, 12, 31, 12);
 
     return Consumer<AppController>(
       builder: (context, controller, child) {
         return TableCalendar<WashEvent>(
-          firstDay: DateTime.utc(2020, 1, 1),
-          lastDay: DateTime.utc(2030, 12, 31),
+          firstDay: firstDay,
+          lastDay: lastDay,
           focusedDay: controller.focusedDay,
           eventLoader: controller.getEventsForDay,
           calendarFormat: CalendarFormat.month,
@@ -42,6 +96,10 @@ class CalendarWidget extends StatelessWidget {
           // without this it stays in English inside a localized UI.
           locale: Localizations.localeOf(context).toLanguageTag(),
           startingDayOfWeek: StartingDayOfWeek.monday,
+          // Only the month pages move. The default also installs a vertical
+          // swipe recognizer, which swallowed every drag inside the card and
+          // left short (landscape) layouts unable to scroll to the counter.
+          availableGestures: AvailableGestures.horizontalSwipe,
           headerStyle: HeaderStyle(
             formatButtonVisible: false,
             titleCentered: true,
@@ -99,93 +157,41 @@ class CalendarWidget extends StatelessWidget {
               final isWash = controller.isWashDay(day);
               final isPredicted =
                   !isWash && controller.isPredictedWashDay(day);
-              return Center(
-                 child: Container(
-                  width: dayCellSize,
-                  height: dayCellSize,
-                  decoration: BoxDecoration(
-                    color: isWash
-                        ? colorScheme.primary
-                        : colorScheme.primary.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.radiusButton),
-                    border: Border.all(
-                      color: isPredicted
-                          ? colorScheme.tertiary
-                          : colorScheme.primary,
-                      width: isPredicted ? 2.5 : 2,
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Text(
-                        '${day.day}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(
-                              color: isWash
-                                  ? colorScheme.onPrimary
-                                  : colorScheme.primary,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.25,
-                            ),
-                      ),
-                      if (isPredicted)
-                        _buildPredictedOverlay(
-                            context, dayCellSize - 4, 1.2),
-                    ],
-                  ),
-                ),
+              return _dayCell(
+                context,
+                day,
+                size: dayCellSize,
+                background: isWash
+                    ? colorScheme.primary
+                    : colorScheme.primary.withValues(alpha: 0.15),
+                borderColor:
+                    isPredicted ? colorScheme.tertiary : colorScheme.primary,
+                borderWidth: isPredicted ? 2.5 : 2,
+                textColor: isWash ? colorScheme.onPrimary : colorScheme.primary,
+                overlaySize: isPredicted ? dayCellSize - 4 : 0,
+                overlayStroke: 1.2,
+                bold: true,
               );
             },
             defaultBuilder: (context, day, focusedDay) {
               if (controller.isWashDay(day)) {
-                return Center(
-                  child: Container(
-                    width: dayCellSize,
-                    height: dayCellSize,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusButton),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${day.day}',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.25,
-                            ),
-                      ),
-                    ),
-                  ),
+                return _dayCell(
+                  context,
+                  day,
+                  size: dayCellSize,
+                  background: colorScheme.primary,
+                  textColor: colorScheme.onPrimary,
+                  bold: true,
                 );
               }
 
               if (controller.isPredictedWashDay(day)) {
-                return Center(
-                  child: SizedBox(
-                    width: dayCellSize,
-                    height: dayCellSize,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Text(
-                          '${day.day}',
-                          style:
-                              Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                    color: colorScheme.onSurface,
-                                    letterSpacing: 0.25,
-                                  ),
-                        ),
-                        _buildPredictedOverlay(
-                            context, dayCellSize, 1.5),
-                      ],
-                    ),
-                  ),
+                return _dayCell(
+                  context,
+                  day,
+                  size: dayCellSize,
+                  textColor: colorScheme.onSurface,
+                  overlaySize: dayCellSize,
                 );
               }
 
@@ -195,45 +201,22 @@ class CalendarWidget extends StatelessWidget {
               final isWash = controller.isWashDay(day);
               final isPredicted =
                   !isWash && controller.isPredictedWashDay(day);
-              return Center(
-                child: Container(
-                  width: dayCellSize + 4,
-                  height: dayCellSize + 4,
-                  decoration: BoxDecoration(
-                    color: isWash
-                        ? colorScheme.primary
-                        : isDark
-                            ? colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.5)
-                            : colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-                    border: Border.all(
-                      color: isPredicted
-                          ? colorScheme.tertiary
-                          : colorScheme.primary,
-                      width: 2,
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Text(
-                        '${day.day}',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              color: isWash
-                                  ? colorScheme.onPrimary
-                                  : colorScheme.onSurface,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.25,
-                            ),
+              return _dayCell(
+                context,
+                day,
+                size: dayCellSize + 4,
+                background: isWash
+                    ? colorScheme.primary
+                    : colorScheme.surfaceContainerHighest.withValues(
+                        alpha: isDark ? 0.5 : 0.7,
                       ),
-                      if (isPredicted)
-                        _buildPredictedOverlay(
-                            context, dayCellSize, 1.2),
-                    ],
-                  ),
-                ),
+                borderColor:
+                    isPredicted ? colorScheme.tertiary : colorScheme.primary,
+                textColor:
+                    isWash ? colorScheme.onPrimary : colorScheme.onSurface,
+                overlaySize: isPredicted ? dayCellSize : 0,
+                overlayStroke: 1.2,
+                bold: true,
               );
             },
           ),

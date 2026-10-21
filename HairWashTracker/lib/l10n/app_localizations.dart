@@ -23,14 +23,6 @@ enum AppLanguage {
 
   static const List<AppLanguage> supported = AppLanguage.values;
 
-  static AppLanguage? fromCode(String? code) {
-    if (code == null) return null;
-    final normalized = code.trim();
-    for (final lang in values) {
-      if (lang.code == normalized) return lang;
-    }
-    return null;
-  }
 }
 
 class AppLocalizations {
@@ -63,31 +55,14 @@ class AppLocalizations {
     }
   }
 
-  /// Resolves a persisted language value: a blank value (first run) is
-  /// detected from the OS locale, a supported code is kept as-is, and any
-  /// unknown value deterministically falls back to English.
-  static String resolveStored(String? stored, {String? systemLanguage, String? systemScript, String? systemCountry}) {
-    if (stored == null || stored.trim().isEmpty || stored.trim() == 'auto') {
-      return systemDefaultCode(systemLanguage, systemScript, systemCountry);
-    }
-    final trimmed = stored.trim();
-    return supportedCodes.contains(trimmed) ? trimmed : 'en';
-  }
-
   static bool isSupported(String? code) =>
       code != null && supportedCodes.contains(code.trim());
 
   /// Looks up [key] for [code], falling back to English and finally to the
-  /// key itself. [params] substitutes `{name}` placeholders.
-  static String stringFor(String code, String key, [Map<String, String>? params]) {
+  /// key itself.
+  static String stringFor(String code, String key) {
     final normalized = supportedCodes.contains(code) ? code : 'en';
-    var value = _byCode[normalized]?[key] ?? _en[key] ?? key;
-    if (params != null) {
-      params.forEach((name, v) {
-        value = value.replaceAll('{$name}', v);
-      });
-    }
-    return value;
+    return _byCode[normalized]?[key] ?? _en[key] ?? key;
   }
 
   static Set<String> get keys => _en.keys.toSet();
@@ -104,25 +79,20 @@ class AppLocalizations {
     'navSettings': 'Settings',
     'pageStatistics': 'Statistics',
     'tooltipDataMgmt': 'Data management',
-    'drawerTagline': 'Taking care of your hair',
-    'drawerHome': 'Home',
-    'drawerSectionData': 'Data Management',
-    'drawerImport': 'Import Data (CSV)',
-    'drawerExport': 'Export Data (CSV)',
-    'drawerClear': 'Clear Data',
+    'dataImport': 'Import backup (JSON or CSV)',
+    'dataExport': 'Export backup (JSON)',
     'msgImported': 'Data imported successfully',
     'msgExported': 'Data exported successfully',
     'msgCleared': 'All data has been cleared',
     'dataTitle': 'Data Management',
-    'dataExportDesc': 'Share routine history as a CSV spreadsheet',
-    'dataImportDesc': 'Restore routine records from a CSV backup',
+    'dataExportDesc': 'Save the full routine history as a versioned JSON file',
+    'dataImportDesc': 'Restore from a JSON backup; CSV backups from older versions also work',
     'dataClearAll': 'Clear all data',
     'dataClearConfirm': 'Clear data',
     'dataClearDesc': 'Permanently erase all logged washes on device',
     'dataClearTitle': 'Clear all data?',
     'dataClearMsg':
         'This action will permanently erase all logged hair washes. It cannot be undone.',
-    'dataClearMsgShort': 'This action cannot be undone.',
     'dlgDelete': 'Delete',
     'dlgCancel': 'Cancel',
     'setAppearance': 'Appearance',
@@ -152,6 +122,8 @@ class AppLocalizations {
     'statsEwma': 'EWMA cadence',
     'statsTrend': 'Trend',
     'statsRecentPace': 'Recent pace',
+    'statsAverage': 'Average',
+    'statsMedian': 'Median',
     'trendUp': 'Increasing',
     'trendDown': 'Decreasing',
     'trendFlat': 'Stable',
@@ -159,31 +131,11 @@ class AppLocalizations {
     'statsAllTime': 'All time',
     'statsThisWeek': 'This week',
     'statsThisMonth': 'This month',
-    'statsWeekTitle': 'This Week',
-    'statsWeeklyOverview': 'Weekly Overview',
-    'statsDaysActive': '{n} days active',
-    'statsWashes': '{n} washes',
     'monthTitle': 'Washes This Month',
     'emptyNoWashes': 'No Washes Yet',
     'emptyNoWashesMsg':
         'Start tracking your hair wash routine to see your progress here.',
     'emptyAddFirst': 'Add First Wash',
-    'emptyNoData': 'No Data Available',
-    'emptyNoDataMsg': 'There are no washes recorded for this time period.',
-    'emptyNoStats': 'No Statistics Yet',
-    'emptyNoStatsMsg':
-        'Track your hair washes for at least a week to see insightful statistics about your routine.',
-    'emptyStartTracking': 'Start Tracking',
-    'featTrack': 'Track wash frequency',
-    'featCharts': 'View progress charts',
-    'featOptimize': 'Optimize your routine',
-    'wdMon': 'Mon',
-    'wdTue': 'Tue',
-    'wdWed': 'Wed',
-    'wdThu': 'Thu',
-    'wdFri': 'Fri',
-    'wdSat': 'Sat',
-    'wdSun': 'Sun',
   };
 
   static const Map<String, String> _es = {
@@ -193,25 +145,20 @@ class AppLocalizations {
     'navSettings': 'Ajustes',
     'pageStatistics': 'Estadísticas',
     'tooltipDataMgmt': 'Gestión de datos',
-    'drawerTagline': 'Cuidando tu cabello',
-    'drawerHome': 'Inicio',
-    'drawerSectionData': 'Gestión de datos',
-    'drawerImport': 'Importar datos (CSV)',
-    'drawerExport': 'Exportar datos (CSV)',
-    'drawerClear': 'Borrar datos',
+    'dataImport': 'Importar copia (JSON o CSV)',
+    'dataExport': 'Exportar copia (JSON)',
     'msgImported': 'Datos importados correctamente',
     'msgExported': 'Datos exportados correctamente',
     'msgCleared': 'Todos los datos se han borrado',
     'dataTitle': 'Gestión de datos',
-    'dataExportDesc': 'Comparte el historial como hoja de cálculo CSV',
-    'dataImportDesc': 'Restaura los registros desde una copia CSV',
+    'dataExportDesc': 'Guarda todo el historial como archivo JSON con versión',
+    'dataImportDesc': 'Restaura desde una copia JSON; también sirven los CSV de versiones anteriores',
     'dataClearAll': 'Borrar todos los datos',
     'dataClearConfirm': 'Borrar datos',
     'dataClearDesc': 'Borra permanentemente todos los lavados del dispositivo',
     'dataClearTitle': '¿Borrar todos los datos?',
     'dataClearMsg':
         'Esta acción borrará permanentemente todos los lavados registrados. No se puede deshacer.',
-    'dataClearMsgShort': 'Esta acción no se puede deshacer.',
     'dlgDelete': 'Eliminar',
     'dlgCancel': 'Cancelar',
     'setAppearance': 'Apariencia',
@@ -240,6 +187,8 @@ class AppLocalizations {
     'statsEwma': 'Cadencia EWMA',
     'statsTrend': 'Tendencia',
     'statsRecentPace': 'Ritmo reciente',
+    'statsAverage': 'Media',
+    'statsMedian': 'Mediana',
     'trendUp': 'En aumento',
     'trendDown': 'En descenso',
     'trendFlat': 'Estable',
@@ -247,31 +196,11 @@ class AppLocalizations {
     'statsAllTime': 'Siempre',
     'statsThisWeek': 'Esta semana',
     'statsThisMonth': 'Este mes',
-    'statsWeekTitle': 'Esta semana',
-    'statsWeeklyOverview': 'Resumen semanal',
-    'statsDaysActive': '{n} días activos',
-    'statsWashes': '{n} lavados',
     'monthTitle': 'Lavados este mes',
     'emptyNoWashes': 'Aún sin lavados',
     'emptyNoWashesMsg':
         'Empieza a registrar tus lavados para ver tu progreso aquí.',
     'emptyAddFirst': 'Añadir primer lavado',
-    'emptyNoData': 'Sin datos disponibles',
-    'emptyNoDataMsg': 'No hay lavados registrados en este periodo.',
-    'emptyNoStats': 'Aún sin estadísticas',
-    'emptyNoStatsMsg':
-        'Registra tus lavados al menos una semana para ver estadísticas de tu rutina.',
-    'emptyStartTracking': 'Empezar',
-    'featTrack': 'Registra la frecuencia de lavado',
-    'featCharts': 'Ver gráficos de progreso',
-    'featOptimize': 'Optimiza tu rutina',
-    'wdMon': 'lun',
-    'wdTue': 'mar',
-    'wdWed': 'mié',
-    'wdThu': 'jue',
-    'wdFri': 'vie',
-    'wdSat': 'sáb',
-    'wdSun': 'dom',
   };
 
   static const Map<String, String> _de = {
@@ -281,25 +210,20 @@ class AppLocalizations {
     'navSettings': 'Einstellungen',
     'pageStatistics': 'Statistiken',
     'tooltipDataMgmt': 'Datenverwaltung',
-    'drawerTagline': 'Für gepflegtes Haar',
-    'drawerHome': 'Start',
-    'drawerSectionData': 'Datenverwaltung',
-    'drawerImport': 'Daten importieren (CSV)',
-    'drawerExport': 'Daten exportieren (CSV)',
-    'drawerClear': 'Daten löschen',
+    'dataImport': 'Sicherung importieren (JSON oder CSV)',
+    'dataExport': 'Sicherung exportieren (JSON)',
     'msgImported': 'Daten erfolgreich importiert',
     'msgExported': 'Daten erfolgreich exportiert',
     'msgCleared': 'Alle Daten wurden gelöscht',
     'dataTitle': 'Datenverwaltung',
-    'dataExportDesc': 'Verlauf als CSV-Tabelle teilen',
-    'dataImportDesc': 'Datensätze aus einer CSV-Sicherung wiederherstellen',
+    'dataExportDesc': 'Den gesamten Verlauf als versionierte JSON-Datei speichern',
+    'dataImportDesc': 'Aus einer JSON-Sicherung wiederherstellen; CSV aus älteren Versionen funktioniert auch',
     'dataClearAll': 'Alle Daten löschen',
     'dataClearConfirm': 'Daten löschen',
     'dataClearDesc': 'Alle protokollierten Wäschen endgültig löschen',
     'dataClearTitle': 'Alle Daten löschen?',
     'dataClearMsg':
         'Diese Aktion löscht alle protokollierten Haarwäschen endgültig. Sie kann nicht rückgängig gemacht werden.',
-    'dataClearMsgShort': 'Diese Aktion kann nicht rückgängig gemacht werden.',
     'dlgDelete': 'Löschen',
     'dlgCancel': 'Abbrechen',
     'setAppearance': 'Darstellung',
@@ -328,6 +252,8 @@ class AppLocalizations {
     'statsEwma': 'EWMA-Rhythmus',
     'statsTrend': 'Trend',
     'statsRecentPace': 'Aktuelles Tempo',
+    'statsAverage': 'Durchschnitt',
+    'statsMedian': 'Median',
     'trendUp': 'Steigend',
     'trendDown': 'Fallend',
     'trendFlat': 'Stabil',
@@ -335,31 +261,11 @@ class AppLocalizations {
     'statsAllTime': 'Gesamt',
     'statsThisWeek': 'Diese Woche',
     'statsThisMonth': 'Dieser Monat',
-    'statsWeekTitle': 'Diese Woche',
-    'statsWeeklyOverview': 'Wochenübersicht',
-    'statsDaysActive': '{n} aktive Tage',
-    'statsWashes': '{n} Wäschen',
     'monthTitle': 'Wäschen diesen Monat',
     'emptyNoWashes': 'Noch keine Wäschen',
     'emptyNoWashesMsg':
         'Protokolliere deine Haarwäschen, um deinen Fortschritt hier zu sehen.',
     'emptyAddFirst': 'Erste Wäsche eintragen',
-    'emptyNoData': 'Keine Daten verfügbar',
-    'emptyNoDataMsg': 'Für diesen Zeitraum sind keine Wäschen protokolliert.',
-    'emptyNoStats': 'Noch keine Statistiken',
-    'emptyNoStatsMsg':
-        'Protokolliere deine Wäschen mindestens eine Woche, um aussagekräftige Statistiken zu sehen.',
-    'emptyStartTracking': 'Jetzt starten',
-    'featTrack': 'Waschhäufigkeit protokollieren',
-    'featCharts': 'Fortschrittsdiagramme ansehen',
-    'featOptimize': 'Routine optimieren',
-    'wdMon': 'Mo',
-    'wdTue': 'Di',
-    'wdWed': 'Mi',
-    'wdThu': 'Do',
-    'wdFri': 'Fr',
-    'wdSat': 'Sa',
-    'wdSun': 'So',
   };
 
   static const Map<String, String> _fr = {
@@ -369,25 +275,20 @@ class AppLocalizations {
     'navSettings': 'Paramètres',
     'pageStatistics': 'Statistiques',
     'tooltipDataMgmt': 'Gestion des données',
-    'drawerTagline': 'Prendre soin de vos cheveux',
-    'drawerHome': 'Accueil',
-    'drawerSectionData': 'Gestion des données',
-    'drawerImport': 'Importer des données (CSV)',
-    'drawerExport': 'Exporter des données (CSV)',
-    'drawerClear': 'Effacer les données',
+    'dataImport': 'Importer une sauvegarde (JSON ou CSV)',
+    'dataExport': 'Exporter la sauvegarde (JSON)',
     'msgImported': 'Données importées avec succès',
     'msgExported': 'Données exportées avec succès',
     'msgCleared': 'Toutes les données ont été effacées',
     'dataTitle': 'Gestion des données',
-    'dataExportDesc': 'Partager l’historique sous forme de feuille CSV',
-    'dataImportDesc': 'Restaurer les relevés depuis une sauvegarde CSV',
+    'dataExportDesc': 'Enregistre tout l’historique dans un fichier JSON versionné',
+    'dataImportDesc': 'Restaurer depuis une sauvegarde JSON ; les CSV des versions précédentes fonctionnent aussi',
     'dataClearAll': 'Tout effacer',
     'dataClearConfirm': 'Effacer les données',
     'dataClearDesc': 'Effacer définitivement tous les lavages enregistrés',
     'dataClearTitle': 'Tout effacer ?',
     'dataClearMsg':
         'Cette action effacera définitivement toutes les dates enregistrées. Elle est irréversible.',
-    'dataClearMsgShort': 'Cette action est irréversible.',
     'dlgDelete': 'Supprimer',
     'dlgCancel': 'Annuler',
     'setAppearance': 'Apparence',
@@ -416,6 +317,8 @@ class AppLocalizations {
     'statsEwma': 'Cadence EWMA',
     'statsTrend': 'Tendance',
     'statsRecentPace': 'Rythme récent',
+    'statsAverage': 'Moyenne',
+    'statsMedian': 'Médiane',
     'trendUp': 'En hausse',
     'trendDown': 'En baisse',
     'trendFlat': 'Stable',
@@ -423,31 +326,11 @@ class AppLocalizations {
     'statsAllTime': 'Total',
     'statsThisWeek': 'Cette semaine',
     'statsThisMonth': 'Ce mois-ci',
-    'statsWeekTitle': 'Cette semaine',
-    'statsWeeklyOverview': 'Aperçu hebdomadaire',
-    'statsDaysActive': '{n} jours actifs',
-    'statsWashes': '{n} lavages',
     'monthTitle': 'Lavages ce mois-ci',
     'emptyNoWashes': 'Aucun lavage pour l’instant',
     'emptyNoWashesMsg':
         'Commencez à suivre vos lavages pour voir vos progrès ici.',
     'emptyAddFirst': 'Ajouter le premier lavage',
-    'emptyNoData': 'Aucune donnée disponible',
-    'emptyNoDataMsg': 'Aucun lavage enregistré pour cette période.',
-    'emptyNoStats': 'Pas encore de statistiques',
-    'emptyNoStatsMsg':
-        'Suivez vos lavages pendant au moins une semaine pour voir des statistiques pertinentes.',
-    'emptyStartTracking': 'Commencer',
-    'featTrack': 'Suivre la fréquence des lavages',
-    'featCharts': 'Voir les graphiques de progression',
-    'featOptimize': 'Optimiser votre routine',
-    'wdMon': 'lun',
-    'wdTue': 'mar',
-    'wdWed': 'mer',
-    'wdThu': 'jeu',
-    'wdFri': 'ven',
-    'wdSat': 'sam',
-    'wdSun': 'dim',
   };
 
   static const Map<String, String> _it = {
@@ -457,25 +340,20 @@ class AppLocalizations {
     'navSettings': 'Impostazioni',
     'pageStatistics': 'Statistiche',
     'tooltipDataMgmt': 'Gestione dati',
-    'drawerTagline': 'Prendersi cura dei capelli',
-    'drawerHome': 'Home',
-    'drawerSectionData': 'Gestione dati',
-    'drawerImport': 'Importa dati (CSV)',
-    'drawerExport': 'Esporta dati (CSV)',
-    'drawerClear': 'Cancella dati',
+    'dataImport': 'Importa backup (JSON o CSV)',
+    'dataExport': 'Esporta backup (JSON)',
     'msgImported': 'Dati importati correttamente',
     'msgExported': 'Dati esportati correttamente',
     'msgCleared': 'Tutti i dati sono stati cancellati',
     'dataTitle': 'Gestione dati',
-    'dataExportDesc': 'Condividi lo storico come foglio CSV',
-    'dataImportDesc': 'Ripristina i dati da un backup CSV',
+    'dataExportDesc': 'Salva tutto lo storico come file JSON con versione',
+    'dataImportDesc': 'Ripristina da un backup JSON; funzionano anche i CSV delle versioni precedenti',
     'dataClearAll': 'Cancella tutti i dati',
     'dataClearConfirm': 'Cancella dati',
     'dataClearDesc': 'Cancella definitivamente tutti i lavaggi registrati',
     'dataClearTitle': 'Cancellare tutti i dati?',
     'dataClearMsg':
         'Questa azione cancellerà definitivamente tutti i lavaggi registrati. Non può essere annullata.',
-    'dataClearMsgShort': 'Questa azione non può essere annullata.',
     'dlgDelete': 'Elimina',
     'dlgCancel': 'Annulla',
     'setAppearance': 'Aspetto',
@@ -504,6 +382,8 @@ class AppLocalizations {
     'statsEwma': 'Cadenza EWMA',
     'statsTrend': 'Tendenza',
     'statsRecentPace': 'Ritmo recente',
+    'statsAverage': 'Media',
+    'statsMedian': 'Mediana',
     'trendUp': 'In aumento',
     'trendDown': 'In diminuzione',
     'trendFlat': 'Stabile',
@@ -511,31 +391,11 @@ class AppLocalizations {
     'statsAllTime': 'Sempre',
     'statsThisWeek': 'Questa settimana',
     'statsThisMonth': 'Questo mese',
-    'statsWeekTitle': 'Questa settimana',
-    'statsWeeklyOverview': 'Panoramica settimanale',
-    'statsDaysActive': '{n} giorni attivi',
-    'statsWashes': '{n} lavaggi',
     'monthTitle': 'Lavaggi questo mese',
     'emptyNoWashes': 'Nessun lavaggio ancora',
     'emptyNoWashesMsg':
         'Inizia a registrare i lavaggi per vedere i tuoi progressi qui.',
     'emptyAddFirst': 'Aggiungi il primo lavaggio',
-    'emptyNoData': 'Nessun dato disponibile',
-    'emptyNoDataMsg': 'Non ci sono lavaggi registrati per questo periodo.',
-    'emptyNoStats': 'Ancora nessuna statistica',
-    'emptyNoStatsMsg':
-        'Registra i lavaggi per almeno una settimana per vedere statistiche significative.',
-    'emptyStartTracking': 'Inizia',
-    'featTrack': 'Monitora la frequenza dei lavaggi',
-    'featCharts': 'Vedi i grafici di progresso',
-    'featOptimize': 'Ottimizza la tua routine',
-    'wdMon': 'lun',
-    'wdTue': 'mar',
-    'wdWed': 'mer',
-    'wdThu': 'gio',
-    'wdFri': 'ven',
-    'wdSat': 'sab',
-    'wdSun': 'dom',
   };
 
   static const Map<String, String> _zh = {
@@ -545,24 +405,19 @@ class AppLocalizations {
     'navSettings': '设置',
     'pageStatistics': '统计',
     'tooltipDataMgmt': '数据管理',
-    'drawerTagline': '呵护你的秀发',
-    'drawerHome': '首页',
-    'drawerSectionData': '数据管理',
-    'drawerImport': '导入数据 (CSV)',
-    'drawerExport': '导出数据 (CSV)',
-    'drawerClear': '清除数据',
+    'dataImport': '导入备份（JSON 或 CSV）',
+    'dataExport': '导出备份（JSON）',
     'msgImported': '数据导入成功',
     'msgExported': '数据导出成功',
     'msgCleared': '所有数据已清除',
     'dataTitle': '数据管理',
-    'dataExportDesc': '将护理记录分享为 CSV 表格',
-    'dataImportDesc': '从 CSV 备份恢复护理记录',
+    'dataExportDesc': '将全部记录保存为带版本号的 JSON 文件',
+    'dataImportDesc': '从 JSON 备份恢复；旧版本的 CSV 备份同样可用',
     'dataClearAll': '清除所有数据',
     'dataClearConfirm': '清除数据',
     'dataClearDesc': '永久删除设备上所有已记录的洗发',
     'dataClearTitle': '清除所有数据？',
     'dataClearMsg': '此操作将永久删除所有已记录的洗发数据，且无法撤销。',
-    'dataClearMsgShort': '此操作无法撤销。',
     'dlgDelete': '删除',
     'dlgCancel': '取消',
     'setAppearance': '外观',
@@ -590,6 +445,8 @@ class AppLocalizations {
     'statsEwma': 'EWMA 节奏',
     'statsTrend': '趋势',
     'statsRecentPace': '近期频率',
+    'statsAverage': '平均',
+    'statsMedian': '中位数',
     'trendUp': '上升',
     'trendDown': '下降',
     'trendFlat': '稳定',
@@ -597,29 +454,10 @@ class AppLocalizations {
     'statsAllTime': '累计',
     'statsThisWeek': '本周',
     'statsThisMonth': '本月',
-    'statsWeekTitle': '本周',
-    'statsWeeklyOverview': '每周概览',
-    'statsDaysActive': '活跃 {n} 天',
-    'statsWashes': '{n} 次',
     'monthTitle': '本月洗发次数',
     'emptyNoWashes': '还没有洗发记录',
     'emptyNoWashesMsg': '开始记录洗发，进度将显示在这里。',
     'emptyAddFirst': '添加首次记录',
-    'emptyNoData': '暂无数据',
-    'emptyNoDataMsg': '该时间段内没有洗发记录。',
-    'emptyNoStats': '暂无统计',
-    'emptyNoStatsMsg': '至少记录一周洗发，即可查看有意义的统计。',
-    'emptyStartTracking': '开始记录',
-    'featTrack': '跟踪洗发频率',
-    'featCharts': '查看进度图表',
-    'featOptimize': '优化护理习惯',
-    'wdMon': '一',
-    'wdTue': '二',
-    'wdWed': '三',
-    'wdThu': '四',
-    'wdFri': '五',
-    'wdSat': '六',
-    'wdSun': '日',
   };
 
   static const Map<String, Map<String, String>> _byCode = {

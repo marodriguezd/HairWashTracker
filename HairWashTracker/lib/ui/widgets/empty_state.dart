@@ -17,15 +17,14 @@ String _lt(BuildContext context, String key, String fallback) {
 
 /// Placeholder shown when the statistics have nothing to summarize yet.
 ///
-/// Optional title, message, icon, and action keep the same primitive usable
-/// for both "no washes at all" and "no data in this range".
+/// One primitive covers the only empty state the app renders: no washes at all,
+/// with an optional action that takes the user to the calendar.
 class EmptyState extends StatelessWidget {
   final String? title;
   final String? message;
   final IconData? icon;
   final String? actionLabel;
   final VoidCallback? onAction;
-  final Widget? customWidget;
 
   const EmptyState({
     super.key,
@@ -34,10 +33,9 @@ class EmptyState extends StatelessWidget {
     this.icon,
     this.actionLabel,
     this.onAction,
-    this.customWidget,
   });
 
-  /// Creates an empty state for no wash data
+  /// Creates the empty state for a history without any wash.
   factory EmptyState.noWashes(
     BuildContext context, {
     VoidCallback? onAddWash,
@@ -53,23 +51,9 @@ class EmptyState extends StatelessWidget {
     );
   }
 
-  /// Creates an empty state for no data in a date range
-  factory EmptyState.noDataInRange(
-    BuildContext context, {
-    VoidCallback? onAction,
-  }) {
-    return EmptyState(
-      title: _lt(context, 'emptyNoData', 'No Data Available'),
-      message: _lt(context, 'emptyNoDataMsg',
-          'There are no washes recorded for this time period.'),
-      icon: Icons.calendar_today_outlined,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveIcon = icon ?? Icons.inbox_outlined;
 
     return Center(
@@ -78,11 +62,7 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _SoftIllustration(
-              icon: effectiveIcon,
-              color: Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-            ),
+            _SoftIllustration(icon: effectiveIcon),
             const SizedBox(height: 32),
             if (title != null)
               Text(
@@ -104,7 +84,6 @@ class EmptyState extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             const SizedBox(height: 32),
-            if (customWidget != null) customWidget!,
             if (actionLabel != null && onAction != null)
               TonalCard(
                 padding: const EdgeInsets.symmetric(
@@ -147,14 +126,8 @@ class EmptyState extends StatelessWidget {
 
 class _SoftIllustration extends StatelessWidget {
   final IconData icon;
-  final Color color;
-  final bool isDark;
 
-  const _SoftIllustration({
-    required this.icon,
-    required this.color,
-    required this.isDark,
-  });
+  const _SoftIllustration({required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +136,6 @@ class _SoftIllustration extends StatelessWidget {
     return TonalCard(
       borderRadius: 70,
       padding: const EdgeInsets.all(28),
-      color: isDark
-          ? colorScheme.surfaceContainerHighest
-          : colorScheme.surface,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -181,4 +151,3 @@ class _SoftIllustration extends StatelessWidget {
     );
   }
 }
-

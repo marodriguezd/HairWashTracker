@@ -5,9 +5,12 @@ import '../widgets/calendar_widget.dart';
 import '../widgets/data_management_sheet.dart';
 import '../widgets/monthly_washes_widget.dart';
 import '../widgets/tonal_card.dart';
+import '../../utils/app_theme.dart';
 import '../../utils/haptics.dart';
 import 'settings_page.dart';
 import 'stats_page.dart';
+
+typedef _NavTab = ({IconData icon, IconData selectedIcon, String label});
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,10 +28,35 @@ class _HomePageState extends State<HomePage> {
         _ => controller.tr('navSettings'),
       };
 
+  /// Single source for the bottom bar and the rail, so a new destination cannot
+  /// drift between the two layouts.
+  List<_NavTab> _tabs(AppController controller) => [
+        (
+          icon: Icons.calendar_month_outlined,
+          selectedIcon: Icons.calendar_month,
+          label: controller.tr('navCalendar'),
+        ),
+        (
+          icon: Icons.bar_chart_outlined,
+          selectedIcon: Icons.bar_chart,
+          label: controller.tr('navStats'),
+        ),
+        (
+          icon: Icons.settings_outlined,
+          selectedIcon: Icons.settings,
+          label: controller.tr('navSettings'),
+        ),
+      ];
+
+  void _select(int index) {
+    Haptics.selectionHaptic();
+    setState(() => _index = index);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final controller = context.watch<AppController>();
+    final tabs = _tabs(controller);
     final appBar = AppBar(
       title: Text(_titleForIndex(controller, _index)),
       actions: [
@@ -43,13 +71,7 @@ class _HomePageState extends State<HomePage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMedium = constraints.maxWidth >= 600;
-        final body = _AdaptiveBody(
-          index: _index,
-          onSelect: (i) {
-            Haptics.selectionHaptic();
-            setState(() => _index = i);
-          },
-        );
+        final body = _AdaptiveBody(index: _index, onSelect: _select);
 
         if (isMedium) {
           return Scaffold(
@@ -58,27 +80,15 @@ class _HomePageState extends State<HomePage> {
               children: [
                 NavigationRail(
                   selectedIndex: _index,
-                  onDestinationSelected: (i) {
-                    Haptics.selectionHaptic();
-                    setState(() => _index = i);
-                  },
+                  onDestinationSelected: _select,
                   labelType: NavigationRailLabelType.all,
                   destinations: [
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.calendar_month_outlined),
-                      selectedIcon: const Icon(Icons.calendar_month),
-                      label: Text(controller.tr('navCalendar')),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.bar_chart_outlined),
-                      selectedIcon: const Icon(Icons.bar_chart),
-                      label: Text(controller.tr('navStats')),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.settings_outlined),
-                      selectedIcon: const Icon(Icons.settings),
-                      label: Text(controller.tr('navSettings')),
-                    ),
+                    for (final tab in tabs)
+                      NavigationRailDestination(
+                        icon: Icon(tab.icon),
+                        selectedIcon: Icon(tab.selectedIcon),
+                        label: Text(tab.label),
+                      ),
                   ],
                 ),
                 const VerticalDivider(width: 1),
@@ -93,27 +103,14 @@ class _HomePageState extends State<HomePage> {
           body: body,
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,
-            backgroundColor: scheme.surfaceContainer,
-            onDestinationSelected: (i) {
-              Haptics.selectionHaptic();
-              setState(() => _index = i);
-            },
+            onDestinationSelected: _select,
             destinations: [
-              NavigationDestination(
-                icon: const Icon(Icons.calendar_month_outlined),
-                selectedIcon: const Icon(Icons.calendar_month),
-                label: controller.tr('navCalendar'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.bar_chart_outlined),
-                selectedIcon: const Icon(Icons.bar_chart),
-                label: controller.tr('navStats'),
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.settings_outlined),
-                selectedIcon: const Icon(Icons.settings),
-                label: controller.tr('navSettings'),
-              ),
+              for (final tab in tabs)
+                NavigationDestination(
+                  icon: Icon(tab.icon),
+                  selectedIcon: Icon(tab.selectedIcon),
+                  label: tab.label,
+                ),
             ],
           ),
         );
@@ -129,7 +126,9 @@ class _AdaptiveBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (index == 1) return const StatsPage(embed: true);
+    if (index == 1) {
+      return StatsPage(embed: true, onAddWash: () => onSelect(0));
+    }
     if (index == 2) return const SettingsPage(embed: true);
     final scheme = Theme.of(context).colorScheme;
     final gradientColors = [
@@ -147,7 +146,8 @@ class _AdaptiveBody extends StatelessWidget {
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 840),
+            constraints:
+                const BoxConstraints(maxWidth: AppTheme.contentMaxWidth),
             child: const SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -155,7 +155,10 @@ class _AdaptiveBody extends StatelessWidget {
                   SizedBox(height: 16),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: _CalendarGestureDetector(),
+                    // Swiping is owned by the calendar's own page view; an
+                    // outer drag detector steals the gesture and silently
+                    // drops slow drags.
+                    child: TonalCard(child: CalendarWidget()),
                   ),
                   Padding(
                     padding: EdgeInsets.all(16),
@@ -166,28 +169,6 @@ class _AdaptiveBody extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _CalendarGestureDetector extends StatelessWidget {
-  const _CalendarGestureDetector();
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragEnd: (DragEndDetails details) {
-        final velocity = details.primaryVelocity ?? 0;
-        Haptics.lightHaptic();
-        if (velocity > 0) {
-          context.read<AppController>().previousMonth();
-        } else if (velocity < 0) {
-          context.read<AppController>().nextMonth();
-        }
-      },
-      child: const TonalCard(
-        child: CalendarWidget(),
       ),
     );
   }

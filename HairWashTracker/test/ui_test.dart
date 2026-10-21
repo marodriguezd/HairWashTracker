@@ -8,6 +8,7 @@ import 'package:hair_wash_tracker/ui/pages/home_page.dart';
 import 'package:hair_wash_tracker/ui/pages/stats_page.dart';
 import 'package:hair_wash_tracker/ui/widgets/confirmation_dialog.dart';
 import 'package:hair_wash_tracker/ui/widgets/data_management_sheet.dart';
+import 'package:hair_wash_tracker/ui/widgets/calendar_widget.dart';
 import 'package:hair_wash_tracker/ui/widgets/empty_state.dart';
 import 'package:hair_wash_tracker/ui/widgets/monthly_washes_widget.dart';
 import 'package:provider/provider.dart';
@@ -37,19 +38,13 @@ class FakeFileOperations implements IFileOperations {
   bool shareCalled = false;
 
   @override
-  Future<String> exportToCSV(List<WashEvent> events) async {
+  Future<String> exportToJson(List<WashEvent> events) async {
     exportCalled = true;
-    return "Date\n2026-10-13";
+    return '{"format":"hair-wash-tracker","version":1,"events":[]}';
   }
 
   @override
-  Future<List<WashEvent>> importFromCSV(String filePath) async => [];
-
-  @override
-  Future<String> exportToJson(List<WashEvent> events) async => "[]";
-
-  @override
-  Future<List<WashEvent>> importFromJson(String filePath) async => [];
+  Future<List<WashEvent>> importFromBackup(String filePath) async => [];
 
   @override
   Future<void> shareFile(String content, String filename) async {
@@ -144,8 +139,8 @@ void main() {
 
       expect(find.byType(DataManagementSheet), findsOneWidget);
       expect(find.text('Data Management'), findsOneWidget);
-      expect(find.text('Export Data (CSV)'), findsOneWidget);
-      expect(find.text('Import Data (CSV)'), findsOneWidget);
+      expect(find.text('Export backup (JSON)'), findsOneWidget);
+      expect(find.text('Import backup (JSON or CSV)'), findsOneWidget);
       expect(find.text('Clear all data'), findsOneWidget);
     });
 
@@ -166,13 +161,18 @@ void main() {
 
       expect(find.text('All data has been cleared'), findsOneWidget);
       expect(controller.selectedEvents, isEmpty);
+      // The shared helper leaves the surface to the theme instead of
+      // repainting it per call site.
+      final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+      expect(snackBar.backgroundColor, isNull);
+      expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
     });
 
     testWidgets('Cancelled import shows no success message', (tester) async {
       final cancelled = AppController(
         repository: repository,
         fileOperations: fileOps,
-        pickFile: (_) async => null,
+        pickFile: () async => null,
       );
 
       await tester.pumpWidget(createTestApp(controller: cancelled));
@@ -180,7 +180,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.folder_outlined));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Import Data (CSV)'));
+      await tester.tap(find.text('Import backup (JSON or CSV)'));
       await tester.pumpAndSettle();
 
       expect(find.text('Data imported successfully'), findsNothing);
@@ -204,6 +204,53 @@ void main() {
       expect(find.text('All time'), findsOneWidget);
       expect(find.text('This week'), findsOneWidget);
       expect(find.text('This month'), findsOneWidget);
+      // Average and median are part of the documented statistics contract.
+      expect(find.text('Average'), findsOneWidget);
+      expect(find.text('Median'), findsOneWidget);
+      expect(find.text('3.0 d'), findsWidgets);
+    });
+
+    testWidgets('Add First Wash in the stats empty state opens the calendar',
+        (tester) async {
+      await tester.pumpWidget(createTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.bar_chart_outlined));
+      await tester.pumpAndSettle();
+      expect(find.text('Add First Wash'), findsOneWidget);
+
+      await tester.tap(find.text('Add First Wash'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CalendarWidget), findsOneWidget);
+      expect(find.text('Washes This Month'), findsOneWidget);
+    });
+
+    testWidgets('Calendar swipe advances exactly one month', (tester) async {
+      controller.setFocusedDay(DateTime(2026, 6, 15));
+      await tester.pumpWidget(createTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      // The calendar owns the horizontal gesture; a wrapper used to swallow it.
+      await tester.drag(find.byType(CalendarWidget), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+
+      expect(controller.focusedDay.month, 7);
+      expect(controller.focusedDay.isUtc, isFalse);
+      expect(controller.focusedDay.hour, 12);
+    });
+
+    testWidgets('Calendar fling advances one month and keeps a local focused day',
+        (tester) async {
+      controller.setFocusedDay(DateTime(2026, 6, 15));
+      await tester.pumpWidget(createTestApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.fling(find.byType(CalendarWidget), const Offset(-300, 0), 900);
+      await tester.pumpAndSettle();
+
+      expect(controller.focusedDay.month, 7);
+      expect(controller.focusedDay.isUtc, isFalse);
     });
 
     testWidgets('ConfirmationDialog calls onConfirm when confirmed', (tester) async {

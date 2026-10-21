@@ -14,8 +14,7 @@ import '../models/prediction_result.dart';
 /// Resolves the user's picked backup file, or `null` when the picker was
 /// dismissed. Injectable so the cancelled-import path stays testable without
 /// driving the native picker.
-typedef FilePickerCallback = Future<String?> Function(
-    List<String> allowedExtensions);
+typedef FilePickerCallback = Future<String?> Function();
 
 class AppController extends ChangeNotifier {
   final IDataRepository _repository;
@@ -74,8 +73,7 @@ class AppController extends ChangeNotifier {
   Locale get flutterLocale => Locale(effectiveLanguageCode);
 
   /// Localized string lookup for the effective UI language.
-  String tr(String key, [Map<String, String>? params]) =>
-      AppLocalizations.stringFor(effectiveLanguageCode, key, params);
+  String tr(String key) => AppLocalizations.stringFor(effectiveLanguageCode, key);
 
   Future<void> setLanguageCode(String code) async {
     _languageCode = _normalizeLanguage(code);
@@ -145,32 +143,51 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Keeps the focused day in the same local-noon frame as every stored event:
+  /// the calendar's page callback hands back UTC instants, which would leak a
+  /// midnight instant into month counts and later date arithmetic.
   void setFocusedDay(DateTime day) {
-    _focusedDay = day;
+    _focusedDay = DateTime(day.year, day.month, day.day, 12);
     notifyListeners();
   }
 
-  void setThemeMode(AppThemeMode mode) {
+  Future<void> setThemeMode(AppThemeMode mode) async {
     _themeMode = mode;
-    ThemePreference.setThemeMode(mode);
-    notifyListeners();
+    try {
+      await ThemePreference.setThemeMode(mode);
+    } catch (e) {
+      debugPrint('Error saving theme mode: $e');
+    }
+    if (!_disposed) notifyListeners();
   }
 
-  void setThemePreset(AppPresetTheme preset) {
+  Future<void> setThemePreset(AppPresetTheme preset) async {
     _themePreset = preset;
-    ThemePreference.setThemePreset(preset);
     // Picking a seed accent opts out of system dynamic color.
     if (_useDynamicColor) {
       _useDynamicColor = false;
-      ThemePreference.setUseDynamicColor(false);
+      try {
+        await ThemePreference.setUseDynamicColor(false);
+      } catch (e) {
+        debugPrint('Error saving dynamic color: $e');
+      }
     }
-    notifyListeners();
+    try {
+      await ThemePreference.setThemePreset(preset);
+    } catch (e) {
+      debugPrint('Error saving theme preset: $e');
+    }
+    if (!_disposed) notifyListeners();
   }
 
-  void setUseDynamicColor(bool value) {
+  Future<void> setUseDynamicColor(bool value) async {
     _useDynamicColor = value;
-    ThemePreference.setUseDynamicColor(value);
-    notifyListeners();
+    try {
+      await ThemePreference.setUseDynamicColor(value);
+    } catch (e) {
+      debugPrint('Error saving dynamic color: $e');
+    }
+    if (!_disposed) notifyListeners();
   }
 
   void previousMonth() => _shiftFocusedMonth(-1);
@@ -186,7 +203,7 @@ class AppController extends ChangeNotifier {
         DateTime(firstOfTarget.year, firstOfTarget.month + 1, 0).day;
     final day =
         _focusedDay.day > daysInTarget ? daysInTarget : _focusedDay.day;
-    _focusedDay = DateTime(firstOfTarget.year, firstOfTarget.month, day);
+    _focusedDay = DateTime(firstOfTarget.year, firstOfTarget.month, day, 12);
     notifyListeners();
   }
 
@@ -246,67 +263,37 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  /// Writes the versioned JSON backup and hands it to the share sheet.
+  ///
+  /// The caller renders any failure, so it is not wrapped again here.
   Future<void> exportData() async {
-    try {
-      final csvContent = await _fileOperations.exportToCSV(_selectedEvents);
-      final filename =
-          'hair_wash_data_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.csv';
-      await _fileOperations.shareFile(csvContent, filename);
-    } catch (e) {
-      throw Exception('Error exporting data: $e');
-    }
+    final content = await _fileOperations.exportToJson(_selectedEvents);
+    final filename =
+        'hair_wash_tracker_backup_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.json';
+    await _fileOperations.shareFile(content, filename);
   }
 
-  /// Returns `false` when the user dismissed the picker, so callers can avoid
-  /// reporting a successful import that never happened.
+  /// Restores a backup and returns `false` when the picker was dismissed, so
+  /// callers can avoid reporting a successful import that never happened.
+  ///
+  /// Every file type is selectable on purpose. Android providers report CSV as
+  /// `text/csv`, `text/comma-separated-values` or plain `text/plain` depending
+  /// on how the file arrived, so an extension filter would hide a 1.0.x backup
+  /// from the very users who need it; the content sniffing in the service is
+  /// what actually decides whether a file is a backup.
   Future<bool> importData() async {
     if (_disposed) return false;
-    try {
-      final path = await _pickBackupFile(const ['csv']);
-      if (path == null || _disposed) return false;
+    final path = await _pickBackupFile();
+    if (path == null || _disposed) return false;
 
-      final events = await _fileOperations.importFromCSV(path);
-      if (_disposed) return false;
-      _rejectEmptyImport(events);
-      _setEvents(events);
-      await _saveEvents();
-      if (_disposed) return false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      throw Exception('Error importing data: $e');
-    }
-  }
-
-  Future<void> exportDataJson() async {
-    try {
-      final jsonContent = await _fileOperations.exportToJson(_selectedEvents);
-      final filename =
-          'hair_wash_data_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.json';
-      await _fileOperations.shareFile(jsonContent, filename);
-    } catch (e) {
-      throw Exception('Error exporting JSON data: $e');
-    }
-  }
-
-  /// Returns `false` when the user dismissed the picker (see [importData]).
-  Future<bool> importDataJson() async {
+    final events = await _fileOperations.importFromBackup(path);
     if (_disposed) return false;
-    try {
-      final path = await _pickBackupFile(const ['json']);
-      if (path == null || _disposed) return false;
-
-      final events = await _fileOperations.importFromJson(path);
-      if (_disposed) return false;
-      _rejectEmptyImport(events);
-      _setEvents(events);
-      await _saveEvents();
-      if (_disposed) return false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      throw Exception('Error importing JSON data: $e');
-    }
+    _rejectEmptyImport(events);
+    _setEvents(events);
+    await _saveEvents();
+    if (_disposed) return false;
+    notifyListeners();
+    return true;
   }
 
   /// A backup with no usable dates is a failed restore, not an instruction to
@@ -317,25 +304,20 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  Future<String?> _pickBackupFile(List<String> allowedExtensions) async {
+  Future<String?> _pickBackupFile() async {
     final picker = _pickFile;
-    if (picker != null) return picker(allowedExtensions);
-    final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: allowedExtensions,
-    );
+    if (picker != null) return picker();
+    final file = await FilePicker.pickFile(type: FileType.any);
     return file?.path;
   }
 
+  /// Wipes the store before the in-memory list: if the wipe fails the user keeps
+  /// a calendar that still matches the data on disk instead of an empty shell.
   Future<void> clearAllData() async {
-    try {
-      _setEvents(const []);
-      await _repository.clearWashEvents();
-      if (_disposed) return;
-      notifyListeners();
-    } catch (e) {
-      throw Exception('Error clearing data: $e');
-    }
+    await _repository.clearWashEvents();
+    _setEvents(const []);
+    if (_disposed) return;
+    notifyListeners();
   }
 
   @override

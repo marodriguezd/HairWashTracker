@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/app_controller.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/haptics.dart';
+import 'app_snack_bar.dart';
 import 'confirmation_dialog.dart';
 
 /// Modal bottom sheet for local data backup, restore, and wipe operations.
@@ -47,13 +48,13 @@ class DataManagementSheet extends StatelessWidget {
             const SizedBox(height: 8),
             ListTile(
               leading: Icon(Icons.file_download_outlined, color: colorScheme.primary),
-              title: Text(strings.tr('drawerExport')),
+              title: Text(strings.tr('dataExport')),
               subtitle: Text(strings.tr('dataExportDesc')),
               onTap: () => _handleExport(context),
             ),
             ListTile(
               leading: Icon(Icons.file_upload_outlined, color: colorScheme.primary),
-              title: Text(strings.tr('drawerImport')),
+              title: Text(strings.tr('dataImport')),
               subtitle: Text(strings.tr('dataImportDesc')),
               onTap: () => _handleImport(context),
             ),
@@ -76,45 +77,42 @@ class DataManagementSheet extends StatelessWidget {
     );
   }
 
-  void _handleImport(BuildContext context) async {
+  Future<void> _handleImport(BuildContext context) async {
     final controller = context.read<AppController>();
     // The sheet closes immediately, so its context is unmounted before the
-    // async work finishes; messenger and colors must be captured first or the
+    // async work finishes; messenger must be captured first or the
     // confirmation snackbar would be silently dropped.
     final messenger = ScaffoldMessenger.of(context);
-    final scheme = Theme.of(context).colorScheme;
     Navigator.pop(context);
     try {
       final imported = await controller.importData();
       // Dismissing the picker is not an import: report nothing.
       if (!imported) return;
       Haptics.successHaptic();
-      _showSnackBar(messenger, scheme, controller.tr('msgImported'), isError: false);
+      showAppSnackBar(messenger, controller.tr('msgImported'));
     } catch (e) {
       Haptics.errorHaptic();
-      _showSnackBar(messenger, scheme, 'Error importing data: $e', isError: true);
+      showAppSnackBar(messenger, 'Error importing data: $e', isError: true);
     }
   }
 
-  void _handleExport(BuildContext context) async {
+  Future<void> _handleExport(BuildContext context) async {
     final controller = context.read<AppController>();
     final messenger = ScaffoldMessenger.of(context);
-    final scheme = Theme.of(context).colorScheme;
     Navigator.pop(context);
     try {
       await controller.exportData();
       Haptics.successHaptic();
-      _showSnackBar(messenger, scheme, controller.tr('msgExported'), isError: false);
+      showAppSnackBar(messenger, controller.tr('msgExported'));
     } catch (e) {
       Haptics.errorHaptic();
-      _showSnackBar(messenger, scheme, 'Error exporting data: $e', isError: true);
+      showAppSnackBar(messenger, 'Error exporting data: $e', isError: true);
     }
   }
 
   void _handleClearData(BuildContext context) {
     final controller = context.read<AppController>();
     final messenger = ScaffoldMessenger.of(context);
-    final scheme = Theme.of(context).colorScheme;
     final navigatorContext = Navigator.of(context).context;
     Navigator.pop(context);
     showDialog<void>(
@@ -127,30 +125,12 @@ class DataManagementSheet extends StatelessWidget {
           try {
             await controller.clearAllData();
             Haptics.heavyHaptic();
-            _showSnackBar(messenger, scheme, controller.tr('msgCleared'), isError: false);
+            showAppSnackBar(messenger, controller.tr('msgCleared'));
           } catch (e) {
             Haptics.errorHaptic();
-            _showSnackBar(messenger, scheme, 'Error clearing data: $e', isError: true);
+            showAppSnackBar(messenger, 'Error clearing data: $e', isError: true);
           }
         },
-      ),
-    );
-  }
-
-  void _showSnackBar(
-    ScaffoldMessengerState messenger,
-    ColorScheme scheme,
-    String message, {
-    required bool isError,
-  }) {
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        ),
-        backgroundColor: isError ? scheme.error : scheme.primary,
       ),
     );
   }

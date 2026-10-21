@@ -9,13 +9,15 @@ lives in `.agents/` (git-ignored, never committed).
 Hair Wash Tracker is a local-first Flutter application to track a hair-wash
 routine: tap calendar days to log washes, review weekly/monthly statistics,
 and receive adaptive next-wash predictions. No account, no cloud, no network
-calls; all data stays on the device (`SharedPreferences` + local CSV/JSON
-import/export via the system share sheet).
+calls; all data stays on the device (`SharedPreferences` + a versioned JSON
+backup in and out through the system share sheet, with CSV still accepted on
+import so a 1.0.x copy can be restored).
 
 ## 2. Repository structure
 
-- `README.md` (English), `README_ES.md` (Spanish, kept intentionally) —
-  product docs, versioned in place.
+- `README.md` (English), `README_ES.md` (Spanish, kept intentionally) plus
+  `README_DE.md`, `README_FR.md`, `README_IT.md`, `README_ZH.md` — product docs
+  for the six UI languages, versioned in place.
 - `ABOUT.md` — industry-standard project overview.
 - `LICENSE` — GNU GPL v3.0 only, full text.
 - `HairWashTracker/` — the Flutter project itself:
@@ -24,23 +26,27 @@ import/export via the system share sheet).
   - `lib/providers/app_controller.dart` — single `ChangeNotifier`:
     event state, theme mode/preset, month navigation, import/export/clear.
   - `lib/services/` — `data_repository.dart` (`SharedPreferences` JSON
-    store), `file_operations_service.dart` (CSV/JSON import/export +
-    `share_plus` temp-file sharing).
+    store), `file_operations_service.dart` (versioned JSON backup export,
+    content-sniffed JSON/CSV import, `share_plus` temp-file sharing).
   - `lib/models/` — `wash_event.dart` (dates normalized to local noon,
     equality by `isSameDay`), `prediction_result.dart`,
     `theme_preference.dart` (`SharedPreferences` keys `theme_mode`,
-    `theme_preset`).
+    `theme_preset`, `use_dynamic_color`), `language_preference.dart`
+    (`app_language`, `'auto'` follows the OS locale).
+  - `lib/l10n/app_localizations.dart` — the single six-language string
+    catalogue (`en`, `es`, `de`, `fr`, `it`, `zh`) with an English fallback.
   - `lib/utils/` — `wash_predictive_model.dart` (EWMA), 
     `statistics_calculator.dart`, `app_theme.dart` (M3 tokens),
     `haptics.dart`.
   - `lib/ui/pages/` — `home_page.dart` (adaptive shell), `stats_page.dart`
-    (`embed` mode for the shell, standalone `Scaffold` otherwise).
+    (`embed` mode for the shell, standalone `Scaffold` otherwise),
+    `settings_page.dart` (language, theme mode, accent).
   - `lib/ui/widgets/` — calendar, month counter, data sheet, dialogs,
-    theme and accent pickers.
+    theme and accent pickers, shared snackbar helper, `TonalCard`.
   - `test/` — `app_controller_test.dart`, `services_test.dart`,
     `localization_test.dart`, `theme_test.dart`, `ui_test.dart`,
     `statistics_calculator_test.dart`, `wash_predictive_model_test.dart`
-    (98 tests total).
+    (111 tests total).
   - `android/` — Kotlin DSL Gradle (`app/build.gradle.kts`,
     `settings.gradle.kts`), `MainActivity` (plain `FlutterActivity`;
     edge-to-edge is driven from Dart), manifest with
@@ -65,11 +71,11 @@ import/export via the system share sheet).
 - Pub dependencies (`HairWashTracker/pubspec.yaml`): `provider`,
   `shared_preferences` (with `shared_preferences_android` pinned below 2.5.0:
   its Pigeon JNI lookups break under R8 and every preference read/write fails
-  in release builds), `table_calendar`, `intl`, `file_picker`, `share_plus`,
-  `flutter_animate`, `dynamic_color`, `cupertino_icons`,
-  `flutter_localizations` (SDK; supplies Material/Cupertino localizations
-  for the six UI languages).
-- `pubspec.yaml` `version:` (`1.0.0+1`) is the single source of the
+  in release builds),  `table_calendar`, `intl`, `file_picker`, `share_plus`,
+  `dynamic_color`, `flutter_localizations` (SDK; supplies Material/Cupertino
+  localizations for the six UI languages). `pubspec.lock` is versioned: it is
+  what makes a release build reproducible, including the pin below.
+- `pubspec.yaml` `version:` (`1.0.1+2`) is the single source of the
   project version.
 
 ## 4. Behavioral invariants
@@ -84,10 +90,16 @@ Preserve these (tests pin the prediction/statistics side):
   events); interval clamped to 1–90 days; at most 12 predicted dates
   within 90 days after the last wash.
 - Statistics: week counts run Monday–Sunday; month counts match the
-  focused month; average/median return `0.0` with fewer than 2 events.
-- Import/export: CSV has a single `Date` header with `yyyy-MM-dd` rows;
-  dates parse to local noon to avoid DST shifts; import replaces the
-  current event list; `clearAllData` wipes store + state.
+  focused month; average/median return `0.0` with fewer than 2 events and
+  count calendar days (UTC civil-date arithmetic), so a DST shift cannot turn
+  a one-day interval into zero.
+- Import/export: export writes a versioned JSON envelope (`format`,
+  `version`, `exportedAt`, `events`); import dispatches on content, so the
+  envelope, the 1.0.x bare JSON list and the 1.0.x `Date`/`yyyy-MM-dd` CSV
+  all restore; dates normalize to local noon; files whose `format` marker is
+  missing or whose `version` is newer than this build are refused; an import
+  that yields no dates fails instead of erasing history; importing replaces
+  the current event list; `clearAllData` wipes store + state.
 - Theme: `useMaterial3: true` always; `ColorScheme.fromSeed` per preset,
   overridden by system dynamic color on Android 12+ when available;
   `ThemeMode.system/light/dark` + 4 seed presets persisted.
@@ -135,7 +147,7 @@ Preserve these (tests pin the prediction/statistics side):
 cd HairWashTracker
 flutter pub get
 flutter analyze              # must be clean
-flutter test                 # 98 tests, must pass
+flutter test                 # 111 tests, must pass
 flutter build apk --debug    # before declaring device-visible changes done
 flutter build apk --release  # for changes that can differ under R8
 ```
@@ -163,7 +175,7 @@ flutter build apk --release  # for changes that can differ under R8
 ## 10. CI coverage and manual checks
 
 Automated on every push/PR to `main` (`test.yml`, `build-debug.yml`) and on
-every `v*` tag (`build-release.yml`): analyze, 98 tests, debug build, signed
+every `v*` tag (`build-release.yml`): analyze, 111 tests, debug build, signed
 release build, signature and checksum verification, install and launch of the
 release APK on an API 34 emulator, and a log assertion that persistence did
 not fail at startup. The GitHub Release is only published after that smoke

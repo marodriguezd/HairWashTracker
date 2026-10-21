@@ -27,5 +27,5 @@ class WashEvent {
   }
 
   @override
-  int get hashCode => date.hashCode;
+  int get hashCode => dayKey;
 }

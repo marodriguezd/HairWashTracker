@@ -8,18 +8,18 @@ import '../models/theme_preference.dart';
 /// Only the seed colors live here, because each preset needs a stable,
 /// theme-independent swatch for the settings picker.
 class AppTheme {
-  /// MD3 shape tokens (spec): xs 4, small 8, medium 12, large 16, xl 28, full pill
+  /// MD3 shape tokens (spec): medium 12, large 16, xl 28, full pill
   static const double radiusCard = 12.0;
+  static const double radiusLarge = 16.0;
   static const double radiusButton = 999.0;
-  static const double radiusSmall = 4.0;
-  static const double radiusChip = 8.0;
   static const double radiusDialog = 28.0;
 
   /// MD3 8dp spacing scale
   static const double spacingScreen = 16.0;
   static const double spacingCard = 16.0;
-  static const double spacingItem = 16.0;
-  static const double spacingTight = 8.0;
+
+  /// Content width cap on large screens: one column never exceeds this.
+  static const double contentMaxWidth = 840.0;
 
   /// The M3 type scale is brightness-independent: on-surface colors come from
   /// the [ColorScheme], so one definition serves both themes.
@@ -162,7 +162,8 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: scheme.surfaceContainer,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(radiusDialog)),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -178,7 +179,7 @@ class AppTheme {
         contentTextStyle: TextStyle(color: scheme.onInverseSurface),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(radiusCard),
         ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: scheme.primary),

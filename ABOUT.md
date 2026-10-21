@@ -6,22 +6,24 @@ Hair Wash Tracker is a local-first mobile application for tracking a hair-wash
 routine. Users tap calendar days to log washes, review weekly and monthly
 statistics, and receive adaptive predictions for the next recommended wash.
 There is no account, no cloud, and no network usage: all data lives on the
-device with optional local CSV/JSON backup through the system share sheet.
+device with an optional versioned JSON backup through the system share sheet
+(legacy CSV copies still import).
 
 - **Status:** stable (`main` branch)
-- **Version:** `1.0.0+1` (single source: `HairWashTracker/pubspec.yaml`)
+- **Version:** `1.0.1+2` (single source: `HairWashTracker/pubspec.yaml`)
 - **License:** GNU General Public License v3.0 only ([LICENSE](LICENSE))
-- **Languages:** English UI ([README.md](README.md)); Spanish docs
-  ([README_ES.md](README_ES.md))
+- **Languages:** six UI languages — English, Spanish, German, French, Italian
+  and Simplified Chinese — with matching docs (`README*.md`)
 
 ## Features
 
 - Interactive month calendar with wash-day marking and predicted-date hints
-- Weekly, monthly, and all-time counters with animated transitions
+- Weekly, monthly, and all-time counters plus average and median intervals
 - Adaptive next-wash prediction (EWMA interval + trend + weekday affinity)
 - Light/dark/system themes with four seed presets and Android dynamic color
 - Adaptive navigation: bottom bar on phones, side rail on large screens
-- CSV/JSON import, export, and full data wipe from the data sheet
+- Versioned JSON backup export, JSON or legacy-CSV restore, and full data wipe
+  from the data sheet
 
 ## Tech stack
 
@@ -33,14 +35,13 @@ device with optional local CSV/JSON backup through the system share sheet.
 | Storage | `shared_preferences` (JSON event store) |
 | Calendar | `table_calendar` |
 | Sharing / files | `share_plus`, `file_picker` |
-| Motion | `flutter_animate` (≤500 ms, ease-out curves) |
 | Android build | AGP 9.1.0, Kotlin 2.4.0, Gradle 9.3.1, NDK (Flutter default), Java 17 |
-| Tests | `flutter_test` (98 tests) |
+| Tests | `flutter_test` (111 tests) |
 
 ## Repository layout
 
 ```text
-README.md / README_ES.md   Product documentation (EN / ES)
+README*.md                 Product documentation (EN, ES, DE, FR, IT, ZH)
 ABOUT.md                   This overview
 AGENTS.md                  Agent working contract
 LICENSE                    GPL-3.0-only, full text
@@ -62,7 +63,7 @@ flutter build apk --debug   # debug APK
 ```bash
 cd HairWashTracker
 flutter analyze             # must report no issues
-flutter test                # 98 tests, must all pass
+flutter test                # 111 tests, must all pass
 ```
 
 Continuous integration (`.github/workflows/`):

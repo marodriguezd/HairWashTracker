@@ -32,17 +32,15 @@ void main() {
       }
     });
 
-    test('{n} placeholders survive in parameterized strings', () {
+    test('no language leaves an unfilled placeholder in a rendered string', () {
+      // Nothing in the UI substitutes parameters any more, so a brace in a
+      // value would reach the user verbatim.
       for (final code in AppLocalizations.supportedCodes) {
-        expect(AppLocalizations.stringFor(code, 'statsDaysActive'),
-            contains('{n}'),
-            reason: code);
-        expect(AppLocalizations.stringFor(code, 'statsWashes'), contains('{n}'),
-            reason: code);
+        for (final key in AppLocalizations.keys) {
+          expect(AppLocalizations.stringFor(code, key), isNot(contains('{')),
+              reason: '$code:$key');
+        }
       }
-      expect(
-          AppLocalizations.stringFor('es', 'statsDaysActive', {'n': '3'}),
-          '3 días activos');
     });
 
     test('navigation labels are translated in every language', () {
@@ -68,15 +66,6 @@ void main() {
     test('unknown language falls back to English', () {
       expect(AppLocalizations.stringFor('pt', 'navCalendar'), 'Calendar');
       expect(AppLocalizations.stringFor('xx', 'dlgCancel'), 'Cancel');
-    });
-
-    test('resolveStored keeps supported codes and detects first run', () {
-      expect(AppLocalizations.resolveStored('de', systemLanguage: 'fr'), 'de');
-      expect(AppLocalizations.resolveStored('fr', systemLanguage: 'en'), 'fr');
-      expect(AppLocalizations.resolveStored('pt', systemLanguage: 'en'), 'en');
-      expect(AppLocalizations.resolveStored('', systemLanguage: 'it'), 'it');
-      expect(AppLocalizations.resolveStored('auto', systemLanguage: 'es'), 'es');
-      expect(AppLocalizations.resolveStored(null, systemLanguage: 'fr'), 'fr');
     });
 
     test('systemDefaultCode maps OS locales, Traditional Chinese to English',

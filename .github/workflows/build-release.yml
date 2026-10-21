@@ -178,31 +178,35 @@ jobs:
             release/*.sha256
           name: Hair Wash Tracker ${{ github.ref_name }}
           body: |
-            First stable release of Hair Wash Tracker, a local-first app for
-            logging and planning hair washes. All data stays on the device: no
-            account, no cloud, no network calls.
+            Patch release that makes the JSON backup the canonical copy while
+            keeping every existing install and every backup written by 1.0.0
+            usable. Updating in place keeps the local history; there is no
+            migration step.
 
-            Highlights:
+            Backup and restore:
 
-            - Calendar logging: tap a day to add or remove a wash; one entry per
-              day, persisted immediately.
-            - Adaptive prediction: an EWMA model with trend and weekday affinity
-              estimates the next wash and marks predicted dates on the calendar.
-            - Statistics: week and month counts, average and median intervals,
-              cadence, trend and confidence.
-            - Data portability: CSV export and import with ISO dates
-              (yyyy-MM-dd) plus JSON backups, shared through the system sheet.
-            - Material 3 interface: tonal surfaces, four seed accents, system
-              dynamic color on Android 12+, light/dark/auto themes, and adaptive
-              navigation for phones and large screens.
-            - Six UI languages: English, Spanish, German, French, Italian and
-              Simplified Chinese, including Material widgets and calendar
-              dates.
-            - Android 16 (API 36) target, edge-to-edge rendering and predictive
-              back.
+            - Exports are now a single versioned JSON file (`format`, `version`,
+              `exportedAt`, `events`, ISO-8601 dates) shared through the system
+              sheet.
+            - Import detects the format from the content, so the new JSON file,
+              the `Date`/`yyyy-MM-dd` CSV export of 1.0.0 and its bare JSON list
+              all restore, even if the file was renamed on the way.
+            - A selected file is refused with a visible error instead of
+              replacing the history when it yields no dates, carries no backup
+              marker, or declares a schema newer than this build.
+            - The data sheet names the format on both actions and lets the
+              import picker show every file type, because Android reports CSV
+              under inconsistent MIME types.
 
-            This release also fixes missing Material localization delegates and
-            dates that previously remained in English.
+            Fixes:
+
+            - Average and median intervals no longer collapse to 0.0 around a
+              daylight-saving change; intervals are counted as calendar days.
+            - Weekday affinity now triggers at the documented 30% instead of
+              requiring more than 30%.
+            - The calendar no longer swallows vertical drags on short windows,
+              so the monthly counter stays reachable in landscape.
+            - Statistics gain an empty state with a shortcut to the calendar.
 
             The APK is signed with the project release key; a SHA-256 checksum
             is attached. Requires Android 7.0 (API 24) or newer.

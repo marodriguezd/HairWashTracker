@@ -1,15 +1,17 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/wash_event.dart';
 
+/// Backup file handling.
+///
+/// JSON is the canonical backup format. Import additionally accepts the two
+/// formats written by 1.0.x (a bare JSON list and a single-column CSV) so a
+/// user upgrading from that version can still restore an existing copy.
 abstract class IFileOperations {
-  Future<String> exportToCSV(List<WashEvent> events);
-  Future<List<WashEvent>> importFromCSV(String filePath);
   Future<String> exportToJson(List<WashEvent> events);
-  Future<List<WashEvent>> importFromJson(String filePath);
+  Future<List<WashEvent>> importFromBackup(String filePath);
   Future<void> shareFile(String content, String filename);
 }
 
@@ -19,84 +21,118 @@ typedef FileShareCallback = Future<void> Function(
     List<XFile> files, String text);
 
 class FileOperationsService implements IFileOperations {
+  /// Current backup schema. Import accepts every version up to this one.
+  static const int backupVersion = 1;
+
+  /// Marker that lets import reject unrelated JSON without guessing.
+  static const String formatId = 'hair-wash-tracker';
+
   final FileShareCallback? _share;
 
   FileOperationsService({FileShareCallback? share}) : _share = share;
 
   @override
-  Future<String> exportToCSV(List<WashEvent> events) async {
-    final buffer = StringBuffer();
-    buffer.writeln('Date');
-
-    for (final event in events) {
-      buffer.writeln(DateFormat('yyyy-MM-dd').format(event.date));
-    }
-
-    return buffer.toString();
-  }
-
-  @override
-  Future<List<WashEvent>> importFromCSV(String filePath) async {
-    try {
-      final file = File(filePath);
-      final content = await file.readAsString();
-      final lines = content.split(RegExp(r'\r?\n'));
-
-      final events = <WashEvent>[];
-      for (final rawLine in lines) {
-        final line = rawLine.trim();
-        if (line.isEmpty) continue;
-
-        // A header or malformed row is skipped by content rather than by
-        // position, so headerless exports do not lose their first date.
-        final parsed = DateTime.tryParse(line);
-        if (parsed == null) {
-          debugPrint('Skipping non-date CSV row: $line');
-          continue;
-        }
-        // Noon anchor keeps the calendar day stable across DST boundaries.
-        events.add(WashEvent(
-          date: DateTime(parsed.year, parsed.month, parsed.day, 12, 0, 0),
-        ));
-      }
-
-      return events;
-    } catch (e) {
-      debugPrint('Error reading CSV file: $e');
-      throw Exception('Error importing CSV: $e');
-    }
-  }
-
-  @override
   Future<String> exportToJson(List<WashEvent> events) async {
-    final jsonList = events.map((e) => e.toJson()).toList();
-    return jsonEncode(jsonList);
+    final payload = <String, dynamic>{
+      'format': formatId,
+      'version': backupVersion,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'events': events.map((event) => event.toJson()).toList(),
+    };
+    return const JsonEncoder.withIndent('  ').convert(payload);
   }
 
+  /// Reads a backup in any supported shape.
+  ///
+  /// Dispatch is by content, not by extension, because renamed files are
+  /// common once a backup travels through chat apps or storage providers.
   @override
-  Future<List<WashEvent>> importFromJson(String filePath) async {
+  Future<List<WashEvent>> importFromBackup(String filePath) async {
+    final String content;
     try {
-      final file = File(filePath);
-      final content = await file.readAsString();
-      final decoded = jsonDecode(content);
-      if (decoded is! List) {
-        throw const FormatException('JSON backup must contain a list');
-      }
-      // A single unreadable entry should not block restoring the rest.
-      final events = <WashEvent>[];
-      for (final row in decoded) {
-        if (row is! Map) continue;
-        try {
-          events.add(WashEvent.fromJson(Map<String, dynamic>.from(row)));
-        } catch (e) {
-          debugPrint('Skipping invalid JSON row: $e');
-        }
-      }
-      return events;
+      content = await File(filePath).readAsString();
     } catch (e) {
-      debugPrint('Error reading JSON file: $e');
-      throw Exception('Error importing JSON: $e');
+      debugPrint('Error reading backup file: $e');
+      throw Exception('Error importing backup: $e');
     }
+
+    // A byte-order mark survives some editors and would otherwise hide the
+    // first character from the format sniffing below.
+    final trimmed = content.replaceFirst('\uFEFF', '').trim();
+    if (trimmed.isEmpty) {
+      throw const FormatException('The backup file is empty');
+    }
+    if (trimmed.startsWith('{')) return _importEnvelope(trimmed);
+    if (trimmed.startsWith('[')) return _importEvents(jsonDecode(trimmed));
+    return _importCsv(content);
+  }
+
+  /// Versioned envelope: `{format, version, exportedAt, events}`.
+  List<WashEvent> _importEnvelope(String raw) {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) {
+      throw const FormatException('Backup envelope must be a JSON object');
+    }
+
+    // The marker is mandatory: a JSON object with a plausible shape is not
+    // proof that it came from this app, and replacing the history from an
+    // unrelated file is not recoverable.
+    if (decoded['format'] != formatId) {
+      throw const FormatException('File is not a Hair Wash Tracker backup');
+    }
+
+    final version = decoded['version'];
+    if (version is! int) {
+      throw const FormatException('Backup envelope has no version');
+    }
+    // A newer schema may carry fields this build would silently drop; refusing
+    // it is safer than restoring a partial history.
+    if (version > backupVersion) {
+      throw FormatException(
+          'Backup version $version is newer than the supported $backupVersion');
+    }
+
+    final events = decoded['events'];
+    if (events is! List) {
+      throw const FormatException('Backup envelope has no events list');
+    }
+    return _importEvents(events);
+  }
+
+  /// One unreadable entry must not block restoring the rest.
+  List<WashEvent> _importEvents(List<dynamic> rows) {
+    final events = <WashEvent>[];
+    for (final row in rows) {
+      if (row is! Map) continue;
+      try {
+        events.add(WashEvent.fromJson(Map<String, dynamic>.from(row)));
+      } catch (e) {
+        debugPrint('Skipping invalid backup row: $e');
+      }
+    }
+    return events;
+  }
+
+  /// 1.0.x CSV: a `Date` header followed by `yyyy-MM-dd` rows.
+  List<WashEvent> _importCsv(String content) {
+    final events = <WashEvent>[];
+    for (final rawLine in content.split(RegExp(r'\r?\n'))) {
+      final line = rawLine.trim();
+      if (line.isEmpty) continue;
+
+      // A header or malformed row is skipped by content rather than by
+      // position, so headerless exports do not lose their first date.
+      final parsed = DateTime.tryParse(line);
+      if (parsed == null) {
+        debugPrint('Skipping non-date CSV row: $line');
+        continue;
+      }
+      // Noon anchor keeps the calendar day stable across DST boundaries.
+      events.add(WashEvent(
+        date: DateTime(parsed.year, parsed.month, parsed.day, 12, 0, 0),
+      ));
+    }
+    return events;
   }
 
   @override
