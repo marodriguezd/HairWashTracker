@@ -23,8 +23,8 @@ import so a 1.0.x copy can be restored).
 - `HairWashTracker/` — the Flutter project itself:
   - `lib/main.dart` — entry point (`SystemUiMode.edgeToEdge`,
     `DynamicColorBuilder` + `ChangeNotifierProvider(AppController)`).
-  - `lib/providers/app_controller.dart` — single `ChangeNotifier`:
-    event state, theme mode/preset, month navigation, import/export/clear.
+  - `lib/providers/app_controller.dart` — single `ChangeNotifier`: event
+    state, theme mode/preset, language, month navigation, import/export/clear.
   - `lib/services/` — `data_repository.dart` (`SharedPreferences` JSON
     store), `file_operations_service.dart` (versioned JSON backup export,
     content-sniffed JSON/CSV import, `share_plus` temp-file sharing).
@@ -41,8 +41,9 @@ import so a 1.0.x copy can be restored).
   - `lib/ui/pages/` — `home_page.dart` (adaptive shell), `stats_page.dart`
     (`embed` mode for the shell, standalone `Scaffold` otherwise),
     `settings_page.dart` (language, theme mode, accent).
-  - `lib/ui/widgets/` — calendar, month counter, data sheet, dialogs,
-    theme and accent pickers, shared snackbar helper, `TonalCard`.
+  - `lib/ui/widgets/` — calendar, month counter, data sheet, confirmation
+    dialog, empty state, theme-mode switch, shared snackbar helper,
+    `TonalCard`. The accent tiles live inline in `settings_page.dart`.
   - `test/` — `app_controller_test.dart`, `services_test.dart`,
     `localization_test.dart`, `theme_test.dart`, `ui_test.dart`,
     `statistics_calculator_test.dart`, `wash_predictive_model_test.dart`
